@@ -141,3 +141,11 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Vite build output (also covered by dist above)
+dist-ssr
+*.local
+
+# Editor directories
+.idea
+.DS_Store

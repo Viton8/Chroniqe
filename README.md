@@ -7,23 +7,21 @@
 
 **Your personal chronology for everything you track.**
 
-Chroniqe is a universal tracking platform for movies, series, games, books, and custom lists. Build a personal timeline of what you've watched, played, read, and plan to experience next.
-
-## About
-
-Chroniqe helps you organize media and hobbies in one place. Instead of scattered spreadsheets or multiple apps, you get a single dashboard for lists, ratings, notes, and statuses — your own chronology of experiences over time.
+Chroniqe is a flexible list platform: custom fields, sharing, transfers between lists, ratings from any number of people, charts, and a calm mobile-first UI.
 
 ## Features
 
-- **Authentication** — Register, log in, and manage your account (Supabase Auth)
-- **Lists** — Create and organize tracking lists (movies, games, books, custom)
-- **Items** — Add entries with title, description, and event dates
-- **Ratings** — Score items on a 1–10 scale
-- **Notes** — Attach personal notes to any item
-- **Statuses** — Track progress: Planned, In Progress, Completed, Dropped
-- **Dashboard** — Overview of recent activity and list summaries
-
-> MVP features are being built incrementally. See [ROADMAP.md](ROADMAP.md) for current progress.
+- **Accounts** — registration, login, password reset, profiles
+- **Custom lists** — any number of fields (text, numbers, dates, images, files, ratings, nested lists, …) with constraints
+- **Visibility** — private, invite-only, friends, public
+- **Editing** — owner, selected people, friends, or anyone via change proposals
+- **Check-off + automations** — strike items and run actions (set date, move to another list, undo)
+- **Transfers** — e.g. watchlist → watched / won’t watch; shopping → bought / later
+- **Views** — table, cards, board, gallery, timeline, compact rows
+- **Charts** — timeline, stem/scatter, bar, line, pie, KPIs; templates saved on the list
+- **Comments, friends, subscriptions, notifications**
+- **Import / export** — JSON and CSV
+- **Uploads** — type, size, and content checks (SVG/HTML/executables rejected)
 
 ## Tech Stack
 
@@ -32,16 +30,15 @@ Chroniqe helps you organize media and hobbies in one place. Instead of scattered
 | Frontend | React, TypeScript, Vite |
 | Routing | React Router |
 | Styling | Tailwind CSS |
-| Backend | Supabase (Auth + PostgreSQL) |
-| Hosting | GitHub Pages |
+| Backend | Supabase (Auth, PostgreSQL, Storage, Edge Functions) |
+| Hosting | GitHub Pages (`base: /Chroniqe/`) |
 
 ## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) 20 or later
-- npm (included with Node.js)
-- A [Supabase](https://supabase.com/) project (for backend features in later phases)
+- Node.js 20+
+- A [Supabase](https://supabase.com/) project
 
 ### Installation
 
@@ -49,22 +46,20 @@ Chroniqe helps you organize media and hobbies in one place. Instead of scattered
 git clone https://github.com/Viton8/Chroniqe.git
 cd Chroniqe
 npm install
-```
-
-### Environment Variables
-
-Copy the example file and fill in your Supabase credentials:
-
-```bash
 cp .env.example .env
 ```
 
 | Variable | Description |
 |----------|-------------|
-| `VITE_SUPABASE_URL` | Your Supabase project URL |
-| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous (public) API key |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Anon or publishable key |
 
-See the [Supabase documentation](https://supabase.com/docs/guides/getting-started/quickstarts/reactjs) for how to obtain these values.
+Apply SQL from `supabase/migrations/` in the Supabase SQL editor (or CLI). Deploy `supabase/functions/validate-file`.
+
+In **Authentication → URL configuration** add:
+
+- `http://localhost:5173/Chroniqe/**`
+- your GitHub Pages origin, e.g. `https://viton8.github.io/Chroniqe/**`
 
 ### Development
 
@@ -72,60 +67,30 @@ See the [Supabase documentation](https://supabase.com/docs/guides/getting-starte
 npm run dev
 ```
 
-Open [http://localhost:5173/Chroniqe/](http://localhost:5173/Chroniqe/) in your browser.
-
-### Other Scripts
+Open [http://localhost:5173/Chroniqe/](http://localhost:5173/Chroniqe/).
 
 | Command | Description |
 |---------|-------------|
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Preview the production build locally |
-| `npm run lint` | Run ESLint |
-| `npm run format` | Format code with Prettier |
+| `npm run build` | Type-check and production build |
+| `npm run preview` | Preview the production build |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
 
 ## Project Structure
 
 ```
 src/
-├── assets/          # Static images and icons
-├── components/
-│   ├── layout/      # Navbar, Sidebar, AppLayout
-│   └── ui/          # Shared UI components
-├── context/         # React context providers (Auth, etc.)
-├── hooks/           # Custom React hooks
-├── pages/           # Route-level page components
-├── services/        # Supabase client and API wrappers
-├── App.tsx          # Route definitions
-└── main.tsx         # Application entry point
+├── components/      # layout, UI, fields, list views, charts
+├── context/         # Auth, toasts
+├── lib/             # templates, validation, export, automations
+├── pages/
+├── services/        # Supabase client and API
+└── types/
+supabase/
+├── migrations/
+└── functions/validate-file/
 ```
-
-## Roadmap
-
-Development follows a phased plan from prototype to stable release:
-
-- **v0.1** — Repository, docs, and layout shell
-- **v0.2** — Authentication
-- **v0.3** — List management
-- **v0.4** — Dashboard statistics
-- **v0.5** — TMDB movie metadata
-- **v1.0** — Stable release
-
-Full details: [ROADMAP.md](ROADMAP.md)
-
-## Deployment
-
-The app is configured for [GitHub Pages](https://pages.github.com/) with `base: '/Chroniqe/'` in `vite.config.ts`.
-
-1. Build: `npm run build`
-2. Deploy the `dist/` folder to GitHub Pages
-3. Configure your Supabase project URL in production environment variables
-
-CI/CD deployment workflow will be added in Phase 11. Until then, builds can be deployed manually.
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
-## Author
-
-**Maxim** — [GitHub](https://github.com/Viton8)
+[MIT](LICENSE) — **Maxim** ([GitHub](https://github.com/Viton8))

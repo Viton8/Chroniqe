@@ -1,27 +1,11 @@
 # Supabase
 
-Database migrations and Supabase configuration for Chroniqe.
-
-## Status
-
-Migrations will be added in **Phase 3** (Supabase Integration + Schema).
-
-## Planned Structure
+Remote project: apply the SQL in `migrations/` (or the equivalent already applied via the dashboard). Then deploy:
 
 ```
-supabase/
-├── migrations/
-│   └── 001_initial_schema.sql   # profiles, lists, items + RLS
-└── README.md
+supabase/functions/validate-file
 ```
 
-## Schema Overview
+Buckets `avatars` and `list-files` are created in the migration, with MIME and size limits plus storage RLS.
 
-See [docs/ARCHITECTURE.md](../docs/ARCHITECTURE.md) for the full schema reference.
-
-## Setup (Phase 3)
-
-1. Create a project at [supabase.com](https://supabase.com/)
-2. Copy project URL and anon key to `.env`
-3. Run migrations via Supabase CLI or SQL editor
-4. Verify RLS policies before connecting the frontend
+Auth redirect URLs must include the Vite base path `/Chroniqe/`.

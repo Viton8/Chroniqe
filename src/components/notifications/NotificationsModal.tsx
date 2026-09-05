@@ -42,6 +42,51 @@ export function NotificationsFeed({
   )
 }
 
+function NotificationsBody({ userId, onNavigate }: { userId: string; onNavigate: () => void }) {
+  const { t } = usePrefs()
+  const [rows, setRows] = useState<AppNotification[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    void fetchNotifications(userId)
+      .then((data) => {
+        if (active) setRows(data)
+      })
+      .finally(() => {
+        if (active) setLoading(false)
+      })
+    return () => {
+      active = false
+    }
+  }, [userId])
+
+  return (
+    <>
+      {rows.some((n) => !n.read_at) ? (
+        <div className="mb-3 flex justify-end">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() =>
+              void markNotificationsRead(userId).then(() =>
+                setRows((prev) => prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() }))),
+              )
+            }
+          >
+            {t('notes.readAll')}
+          </Button>
+        </div>
+      ) : null}
+      {loading ? (
+        <p className="py-6 text-sm text-muted">{t('common.loading')}</p>
+      ) : (
+        <NotificationsFeed rows={rows.slice(0, PREVIEW)} onNavigate={onNavigate} />
+      )}
+    </>
+  )
+}
+
 function panelStyle(anchor: DOMRect): CSSProperties {
   const width = Math.min(380, window.innerWidth - 16)
   const gap = 8
@@ -68,8 +113,6 @@ export default function NotificationsModal({
   const { user } = useAuth()
   const { t } = usePrefs()
   const navigate = useNavigate()
-  const [rows, setRows] = useState<AppNotification[]>([])
-  const [loading, setLoading] = useState(false)
   const [style, setStyle] = useState<CSSProperties>({})
 
   useLayoutEffect(() => {
@@ -83,22 +126,6 @@ export default function NotificationsModal({
       window.removeEventListener('scroll', place, true)
     }
   }, [open, anchorEl])
-
-  useEffect(() => {
-    if (!open || !user) return
-    let active = true
-    setLoading(true)
-    void fetchNotifications(user.id)
-      .then((data) => {
-        if (active) setRows(data)
-      })
-      .finally(() => {
-        if (active) setLoading(false)
-      })
-    return () => {
-      active = false
-    }
-  }, [open, user])
 
   useEffect(() => {
     if (!open) return
@@ -131,26 +158,7 @@ export default function NotificationsModal({
           </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {user && rows.some((n) => !n.read_at) ? (
-            <div className="mb-3 flex justify-end">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() =>
-                  void markNotificationsRead(user.id).then(() =>
-                    setRows((prev) => prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() }))),
-                  )
-                }
-              >
-                {t('notes.readAll')}
-              </Button>
-            </div>
-          ) : null}
-          {loading ? (
-            <p className="py-6 text-sm text-muted">{t('common.loading')}</p>
-          ) : (
-            <NotificationsFeed rows={rows.slice(0, PREVIEW)} onNavigate={onClose} />
-          )}
+          {user ? <NotificationsBody key={user.id} userId={user.id} onNavigate={onClose} /> : null}
         </div>
         <Button
           variant="soft"

@@ -4,10 +4,9 @@ import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import { useToast } from '../context/ToastContext'
 import { createChart, createList, updateList } from '../services/api'
-import { TEMPLATES, TEMPLATE_PACKS, cloneTemplate } from '../lib/templates'
-import type { ListSettings, TransferAction } from '../types/domain'
+import { TEMPLATES, TEMPLATE_PACKS, applyPackSettings, cloneTemplate } from '../lib/templates'
 import Button from '../components/ui/Button'
-import { todayIso } from '../lib/cn'
+import Hint from '../components/ui/Hint'
 
 export default function NewListPage() {
   const { user } = useAuth()
@@ -76,27 +75,8 @@ export default function NewListPage() {
           })
         }
       }
-      for (const transfer of pack.transfers ?? []) {
-        const fromId = created[transfer.fromKey]
-        const toId = created[transfer.toKey]
-        if (!fromId || !toId) continue
-        const fromSpec = pack.lists.find((l) => l.key === transfer.fromKey)
-        const action: TransferAction = {
-          id: crypto.randomUUID(),
-          label: transfer.label,
-          targetListId: toId,
-          fieldMap: transfer.fieldMap,
-          deleteSource: true,
-          setFields:
-            transfer.toKey.includes('watched') || transfer.toKey === 'bought'
-              ? { watched_at: todayIso(), bought_at: todayIso(), decided_at: todayIso() }
-              : {},
-        }
-        const settings: ListSettings = {
-          ...(fromSpec?.settings ?? {}),
-          transferActions: [...(fromSpec?.settings?.transferActions ?? []), action],
-        }
-        await updateList(fromId, { settings })
+      for (const row of applyPackSettings(pack, created)) {
+        await updateList(row.listId, { settings: row.settings })
       }
       const first = created[pack.lists[0].key]
       navigate(`/lists/${first}`)
@@ -131,6 +111,9 @@ export default function NewListPage() {
               {p.icon} {t(`tpl.pack_${p.key}.title`)}
             </h3>
             <p className="mt-1 text-sm text-muted">{t(`tpl.pack_${p.key}.description`)}</p>
+            <div className="mt-3">
+              <Hint compact title={t(`tpl.pack_${p.key}.hint`)} example={t(`tpl.pack_${p.key}.example`)} />
+            </div>
             <Button className="mt-4" disabled={busy} onClick={() => void makePack(p.key)}>
               {t('newList.makePack')}
             </Button>
@@ -146,6 +129,9 @@ export default function NewListPage() {
               {tpl.icon} {t(`tpl.${tpl.key}.title`)}
             </h3>
             <p className="mt-1 text-sm text-muted">{t(`tpl.${tpl.key}.description`)}</p>
+            <div className="mt-3">
+              <Hint compact title={t(`tpl.${tpl.key}.hint`)} example={t(`tpl.${tpl.key}.example`)} />
+            </div>
             <Button className="mt-3" size="sm" disabled={busy} onClick={() => void makeOne(tpl.key)}>
               {t('newList.makeOne')}
             </Button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
@@ -7,6 +7,8 @@ import type { ListRow } from '../types/domain'
 import Button from '../components/ui/Button'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import { Input } from '../components/ui/Input'
+import FavoriteButton from '../components/lists/FavoriteButton'
+import { readFavorites } from '../lib/favorites'
 
 export default function ListsPage() {
   const { user } = useAuth()
@@ -16,6 +18,7 @@ export default function ListsPage() {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(true)
+  const [favIds, setFavIds] = useState(() => readFavorites())
 
   useEffect(() => {
     if (!user) return
@@ -26,6 +29,12 @@ export default function ListsPage() {
       setCounts(await countItems([...a, ...b].map((l) => l.id)))
     })().finally(() => setLoading(false))
   }, [user])
+
+  const favorites = useMemo(() => new Set(favIds), [favIds])
+  const pinned = useMemo(
+    () => [...mine, ...shared].filter((list) => favorites.has(list.id)),
+    [mine, shared, favorites],
+  )
 
   if (loading) return <Spinner />
 
@@ -41,8 +50,14 @@ export default function ListsPage() {
         </Link>
       </div>
       <Input className="mt-4 max-w-sm" placeholder={t('lists.find')} value={q} onChange={(e) => setQ(e.target.value)} />
-      <Section title={t('lists.mine')} rows={filter(mine)} counts={counts} />
-      <Section title={t('lists.shared')} rows={filter(shared)} counts={counts} />
+      <Section
+        title={t('lists.pinned')}
+        rows={filter(pinned)}
+        counts={counts}
+        onFav={() => setFavIds(readFavorites())}
+      />
+      <Section title={t('lists.mine')} rows={filter(mine)} counts={counts} onFav={() => setFavIds(readFavorites())} />
+      <Section title={t('lists.shared')} rows={filter(shared)} counts={counts} onFav={() => setFavIds(readFavorites())} />
       {!mine.length && !shared.length ? (
         <div className="mt-6">
           <EmptyState icon="✨" title={t('lists.emptyTitle')} text={t('lists.emptyText')} />
@@ -61,10 +76,12 @@ function Section({
   title,
   rows,
   counts,
+  onFav,
 }: {
   title: string
   rows: ListRow[]
   counts: Record<string, number>
+  onFav: () => void
 }) {
   const { t } = usePrefs()
   if (!rows.length) return null
@@ -73,7 +90,7 @@ function Section({
       <h2 className="text-sm font-medium text-muted">{title}</h2>
       <ul className="mt-2 grid gap-3 sm:grid-cols-2">
         {rows.map((l) => (
-          <li key={l.id}>
+          <li key={`${title}-${l.id}`}>
             <Link
               to={`/lists/${l.id}`}
               className="flex items-start justify-between rounded-2xl border border-line bg-paper p-4 shadow-lift"
@@ -86,6 +103,7 @@ function Section({
                   {counts[l.id] ?? 0} {t('common.records')} · {t(`visibility.${l.visibility}`)}
                 </p>
               </div>
+              <FavoriteButton id={l.id} onChange={onFav} />
             </Link>
           </li>
         ))}

@@ -49,6 +49,26 @@ export default function LandingPage() {
         </div>
         <img src={hero} alt="" className="mx-auto w-full max-w-sm rounded-[2rem] bg-ink p-8" />
       </main>
+      <section className="mx-auto max-w-5xl px-4 pb-16">
+        <h2 className="font-serif text-2xl">{t('landing.featTitle')}</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {(
+            [
+              ['featFilters', 'featFiltersText'],
+              ['featViews', 'featViewsText'],
+              ['featBulk', 'featBulkText'],
+              ['featInsights', 'featInsightsText'],
+              ['featEditor', 'featEditorText'],
+              ['featShare', 'featShareText'],
+            ] as const
+          ).map(([title, text]) => (
+            <article key={title} className="rounded-2xl border border-line bg-paper p-4 shadow-lift">
+              <h3 className="font-medium">{t(`landing.${title}`)}</h3>
+              <p className="mt-1 text-sm text-muted">{t(`landing.${text}`)}</p>
+            </article>
+          ))}
+        </div>
+      </section>
     </div>
   )
 }

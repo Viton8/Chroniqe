@@ -25,7 +25,7 @@ import type {
   AutomationAction,
   AutomationTrigger,
 } from '../types/domain'
-import { assertSafeFile } from '../lib/validation'
+import { assertSafeFile, fileMime } from '../lib/validation'
 import { uid } from '../lib/cn'
 import { msg } from '../lib/i18n'
 
@@ -321,14 +321,60 @@ export async function fetchComments(itemId: string): Promise<ItemComment[]> {
   return (data ?? []) as ItemComment[]
 }
 
+export async function fetchCommentsForItems(itemIds: string[]): Promise<ItemComment[]> {
+  if (!itemIds.length) return []
+  const out: ItemComment[] = []
+  const chunk = 100
+  for (let i = 0; i < itemIds.length; i += chunk) {
+    const ids = itemIds.slice(i, i + chunk)
+    const { data, error } = await supabase
+      .from('item_comments')
+      .select('*, profile:profiles!user_id(*)')
+      .in('item_id', ids)
+      .order('created_at', { ascending: true })
+    throwIf(error)
+    out.push(...((data ?? []) as ItemComment[]))
+  }
+  return out
+}
+
 export async function addComment(input: {
   item_id: string
   user_id: string
   body: string
+  color?: string
+  show_author?: boolean
+  show_time?: boolean
 }): Promise<ItemComment> {
   const { data, error } = await supabase
     .from('item_comments')
-    .insert(input)
+    .insert({
+      item_id: input.item_id,
+      user_id: input.user_id,
+      body: input.body,
+      color: input.color ?? 'violet',
+      show_author: input.show_author ?? true,
+      show_time: input.show_time ?? true,
+    })
+    .select('*, profile:profiles!user_id(*)')
+    .single()
+  throwIf(error)
+  return data as ItemComment
+}
+
+export async function updateComment(
+  id: string,
+  patch: {
+    body?: string
+    color?: string
+    show_author?: boolean
+    show_time?: boolean
+  },
+): Promise<ItemComment> {
+  const { data, error } = await supabase
+    .from('item_comments')
+    .update(patch)
+    .eq('id', id)
     .select('*, profile:profiles!user_id(*)')
     .single()
   throwIf(error)
@@ -625,6 +671,7 @@ export async function uploadListFile(input: {
   imagesOnly?: boolean
   maxMb?: number
 }): Promise<{ bucket: string; path: string; mime: string; name: string }> {
+  const mime = fileMime(input.file)
   const err = assertSafeFile(input.file, {
     imagesOnly: input.imagesOnly,
     maxMb: input.maxMb,
@@ -634,36 +681,28 @@ export async function uploadListFile(input: {
   const ext = input.file.name.split('.').pop()?.toLowerCase() ?? 'bin'
   const path = `${input.userId}/${input.listId}/${uid()}.${ext}`
   const { error } = await supabase.storage.from('list-files').upload(path, input.file, {
-    contentType: input.file.type,
+    contentType: mime,
     upsert: false,
   })
   throwIf(error)
 
-  const { data: sessionData } = await supabase.auth.getSession()
-  const token = sessionData.session?.access_token
-  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/validate-file`
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify({
+  const { error: scanError, data: scan } = await supabase.functions.invoke('validate-file', {
+    body: {
       bucket: 'list-files',
       path,
-      mime: input.file.type,
+      mime,
       size: input.file.size,
       listId: input.listId,
       originalName: input.file.name,
-    }),
+    },
   })
-  if (!res.ok) {
+  if (scanError || !scan?.ok) {
     await supabase.storage.from('list-files').remove([path])
-    const body = (await res.json().catch(() => ({}))) as { reason?: string }
-    throw new Error(body.reason === 'magic' ? msg('fields.scanFail') : msg('fields.scanReject'))
+    const reason = typeof scan?.reason === 'string' ? scan.reason : ''
+    throw new Error(reason === 'magic' ? msg('fields.scanFail') : msg('fields.scanReject'))
   }
 
-  return { bucket: 'list-files', path, mime: input.file.type, name: input.file.name }
+  return { bucket: 'list-files', path, mime, name: input.file.name }
 }
 
 export async function uploadAvatar(userId: string, file: File): Promise<string> {

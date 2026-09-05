@@ -197,11 +197,17 @@ export interface ItemRating {
   profile?: Profile
 }
 
+export const NOTE_COLOR_IDS = ['violet', 'rose', 'amber', 'teal', 'sky', 'emerald', 'slate'] as const
+export type NoteColorId = (typeof NOTE_COLOR_IDS)[number]
+
 export interface ItemComment {
   id: string
   item_id: string
   user_id: string
   body: string
+  color?: NoteColorId | string
+  show_author?: boolean
+  show_time?: boolean
   created_at: string
   updated_at: string
   profile?: Profile

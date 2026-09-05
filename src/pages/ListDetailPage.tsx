@@ -14,7 +14,6 @@ import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import { useToast } from '../context/ToastContext'
 import {
-  addComment,
   createChart,
   createItem,
   createInvite,
@@ -26,7 +25,7 @@ import {
   fetchActivity,
   fetchAutomations,
   fetchCharts,
-  fetchComments,
+  fetchCommentsForItems,
   fetchItems,
   fetchList,
   fetchMembers,
@@ -58,6 +57,7 @@ import type {
   ListRow,
   Profile,
   TransferAction,
+  ViewConfig,
   ViewMode,
 } from '../types/domain'
 import Button from '../components/ui/Button'
@@ -97,6 +97,7 @@ function ListWorkspace({ id }: { id: string }) {
 
   const [list, setList] = useState<ListRow | null>(null)
   const [items, setItems] = useState<ItemRow[]>([])
+  const [itemNotes, setItemNotes] = useState<ItemComment[]>([])
   const [ratings, setRatings] = useState<ItemRating[]>([])
   const [perms, setPerms] = useState<ListPermissions | null>(null)
   const [members, setMembers] = useState<ListMember[]>([])
@@ -131,7 +132,9 @@ function ListWorkspace({ id }: { id: string }) {
     setCharts(ch)
     setAutomations(au)
     setActivity(act)
-    setRatings(await fetchRatings(its.map((i) => i.id)))
+    const ids = its.map((i) => i.id)
+    setRatings(await fetchRatings(ids))
+    setItemNotes(await fetchCommentsForItems(ids))
     if (p.owner) {
       setMembers(await fetchMembers(id))
       setProposals(await fetchProposals(id))
@@ -165,7 +168,10 @@ function ListWorkspace({ id }: { id: string }) {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${id}` },
         () => {
-          void fetchItems(id).then(setItems)
+          void fetchItems(id).then(async (its) => {
+            setItems(its)
+            setItemNotes(await fetchCommentsForItems(its.map((i) => i.id)))
+          })
         },
       )
       .subscribe()
@@ -187,6 +193,14 @@ function ListWorkspace({ id }: { id: string }) {
     return next
   }, [items, query, hideChecked, sort, schema.titleFieldId, locale])
 
+  const notesByItem = useMemo(() => {
+    const map: Record<string, ItemComment[]> = {}
+    for (const note of itemNotes) {
+      ;(map[note.item_id] ??= []).push(note)
+    }
+    return map
+  }, [itemNotes])
+
   if (loading) return <Spinner />
   if (!list) {
     return <EmptyState icon="?" title={t('list.notFoundTitle')} text={t('list.notFoundText')} />
@@ -196,8 +210,8 @@ function ListWorkspace({ id }: { id: string }) {
   const canEdit = Boolean(perms?.edit)
   const canPropose = Boolean(perms?.propose)
 
-  const saveView = async (mode: ViewMode) => {
-    const next = { ...view, mode }
+  const saveView = async (patch: Partial<ViewConfig>) => {
+    const next = { ...view, ...patch }
     setList({ ...list, view_config: next })
     if (perms?.owner) await updateList(list.id, { view_config: next })
   }
@@ -306,7 +320,24 @@ function ListWorkspace({ id }: { id: string }) {
       {tab === 'items' ? (
         <>
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <ViewSwitcher mode={view.mode} onChange={(m) => void saveView(m)} />
+            <ViewSwitcher mode={view.mode} onChange={(m) => void saveView({ mode: m })} />
+            {view.mode === 'timeline' ? (
+              <select
+                className="rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+                value={view.dateFieldId ?? ''}
+                aria-label={t('charts.dateField')}
+                onChange={(e) => void saveView({ dateFieldId: e.target.value || undefined })}
+              >
+                <option value="">—</option>
+                {schema.fields
+                  .filter((f) => f.type === 'date' || f.type === 'datetime')
+                  .map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+              </select>
+            ) : null}
             <Input
               className="sm:max-w-xs"
               placeholder={t('list.searchItems')}
@@ -351,8 +382,15 @@ function ListWorkspace({ id }: { id: string }) {
               ratings={ratings}
               view={view}
               enableCheck={list.settings?.enableCheck}
+              notesByItem={notesByItem}
+              userId={user?.id}
+              canAddNote={Boolean(user)}
+              canManageNotes={Boolean(perms?.owner)}
               onOpen={setOpenItem}
               onToggle={onToggle}
+              onNoteCreated={(row) => setItemNotes((prev) => [...prev, row])}
+              onNoteUpdated={(row) => setItemNotes((prev) => prev.map((n) => (n.id === row.id ? row : n)))}
+              onNoteDeleted={(noteId) => setItemNotes((prev) => prev.filter((n) => n.id !== noteId))}
             />
           )}
         </>
@@ -465,21 +503,8 @@ function ItemModal({
     () => item?.values ?? emptyValues(schema),
   )
   const [errors, setErrors] = useState<string[]>([])
-  const [comments, setComments] = useState<ItemComment[]>([])
-  const [comment, setComment] = useState('')
   const write = canEdit || canPropose
   const { t } = usePrefs()
-
-  useEffect(() => {
-    if (!item) return
-    let cancelled = false
-    void fetchComments(item.id).then((rows) => {
-      if (!cancelled) setComments(rows)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [item])
 
   const save = async () => {
     const errs = validateItem(schema, values)
@@ -547,20 +572,6 @@ function ItemModal({
         </div>
       ) : null}
 
-      {item ? (
-        <Comments
-          comments={comments}
-          value={comment}
-          onChange={setComment}
-          onSend={async () => {
-            if (!userId || !comment.trim()) return
-            const row = await addComment({ item_id: item.id, user_id: userId, body: comment.trim() })
-            setComments((p) => [...p, row])
-            setComment('')
-          }}
-        />
-      ) : null}
-
       <div className="mt-5 flex justify-between gap-2">
         {item && canEdit ? (
           <Button
@@ -590,40 +601,6 @@ function ItemModal({
   )
 }
 
-function Comments({
-  comments,
-  value,
-  onChange,
-  onSend,
-}: {
-  comments: ItemComment[]
-  value: string
-  onChange: (v: string) => void
-  onSend: () => void
-}) {
-  const { t } = usePrefs()
-  return (
-    <div className="mt-6 border-t border-line pt-4">
-      <h3 className="mb-2 text-sm font-medium">{t('list.comments')}</h3>
-      <ul className="mb-3 space-y-2">
-        {comments.map((c) => (
-          <li key={c.id} className="text-sm">
-            <span className="font-medium">{c.profile?.username ?? t('list.someone')}</span>
-            <span className="mx-1 text-muted">· {formatDateTime(c.created_at)}</span>
-            <p>{c.body}</p>
-          </li>
-        ))}
-      </ul>
-      <div className="flex gap-2">
-        <Input value={value} onChange={(e) => onChange(e.target.value)} placeholder={t('list.write')} />
-        <Button variant="soft" onClick={onSend}>
-          {t('common.send')}
-        </Button>
-      </div>
-    </div>
-  )
-}
-
 function ChartsTab({
   list,
   items,
@@ -642,56 +619,150 @@ function ChartsTab({
   onDelete: (id: string) => Promise<void>
 }) {
   const { t } = usePrefs()
+  const { toast } = useToast()
+  const fields = list.schema.fields
+  const dateFields = fields.filter((f) => f.type === 'date' || f.type === 'datetime')
+  const valueFields = fields.filter((f) =>
+    ['number', 'integer', 'rating', 'multi_rating'].includes(f.type),
+  )
+  const groupFields = fields.filter((f) =>
+    ['select', 'multiselect', 'tags', 'boolean', 'checkbox', 'text'].includes(f.type),
+  )
   const [name, setName] = useState(t('charts.newChart'))
   const [type, setType] = useState<ChartType>('timeline')
-  const dateFieldId = list.schema.dateFieldId ?? list.schema.fields.find((f) => f.type === 'date')?.id
-  const valueFieldId = list.schema.fields.find((f) => f.type === 'multi_rating' || f.type === 'number' || f.type === 'rating')?.id
+  const [dateFieldId, setDateFieldId] = useState(dateFields[0]?.id ?? '')
+  const [valueFieldId, setValueFieldId] = useState(valueFields[0]?.id ?? '')
+  const [groupFieldId, setGroupFieldId] = useState(groupFields[0]?.id ?? '')
+  const [aggregation, setAggregation] = useState<NonNullable<ListChart['config']['aggregation']>>('count')
+  const usesDate = type !== 'pie' && type !== 'kpi'
+  const usesValue = type !== 'pie' && (type === 'kpi' || aggregation !== 'count')
+  const usesGroup = type === 'pie'
+  const selectClass = 'w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm'
 
   return (
     <div className="space-y-6">
       <Hint title={t('charts.hint')} example={t('charts.hintEx')} />
-      {charts.map((c) => (
-        <section key={c.id} className="rounded-3xl border border-line bg-paper p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-serif text-xl">{c.name}</h3>
-            {canEdit ? (
-              <Button variant="ghost" size="sm" onClick={() => void onDelete(c.id)}>
-                {t('common.delete')}
-              </Button>
-            ) : null}
-          </div>
-          <ChartView type={c.chart_type} config={c.config} schema={list.schema} items={items} ratings={ratings} />
-        </section>
-      ))}
+      {charts.map((c) => {
+        const dateName = fields.find((f) => f.id === c.config.dateFieldId)?.name
+        const valueName = fields.find((f) => f.id === c.config.valueFieldId)?.name
+        const groupName = fields.find((f) => f.id === c.config.groupFieldId)?.name
+        return (
+          <section key={c.id} className="rounded-3xl border border-line bg-paper p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h3 className="font-serif text-xl">{c.name}</h3>
+                <p className="mt-0.5 text-xs text-muted">
+                  {[
+                    t(`charts.types.${c.chart_type}`),
+                    dateName,
+                    valueName,
+                    groupName,
+                    c.config.aggregation ? t(`charts.agg.${c.config.aggregation}`) : null,
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </p>
+              </div>
+              {canEdit ? (
+                <Button variant="ghost" size="sm" onClick={() => void onDelete(c.id)}>
+                  {t('common.delete')}
+                </Button>
+              ) : null}
+            </div>
+            <ChartView type={c.chart_type} config={c.config} schema={list.schema} items={items} ratings={ratings} />
+          </section>
+        )
+      })}
       {canEdit ? (
         <div className="rounded-3xl border border-dashed border-line p-4">
           <p className="mb-3 text-sm font-medium">{t('charts.saveTpl')}</p>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-            <select
-              className="rounded-xl border border-line bg-paper px-3 py-2 text-sm"
-              value={type}
-              onChange={(e) => setType(e.target.value as ChartType)}
-            >
-              {CHART_TYPE_LIST.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-            <Button
-              onClick={() =>
-                void onCreate({
-                  list_id: list.id,
-                  name,
-                  chart_type: type,
-                  config: { dateFieldId, valueFieldId, aggregation: type === 'timeline' ? 'count' : 'avg' },
-                })
-              }
-            >
-              {t('common.save')}
-            </Button>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FieldWrap label={t('schema.name')}>
+              <Input value={name} onChange={(e) => setName(e.target.value)} />
+            </FieldWrap>
+            <FieldWrap label={t('schema.type')}>
+              <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as ChartType)}>
+                {CHART_TYPE_LIST.map((code) => (
+                  <option key={code} value={code}>
+                    {t(`charts.types.${code}`)}
+                  </option>
+                ))}
+              </select>
+            </FieldWrap>
+            {usesDate ? (
+              <FieldWrap label={t('charts.dateField')}>
+                <select className={selectClass} value={dateFieldId} onChange={(e) => setDateFieldId(e.target.value)}>
+                  <option value="">—</option>
+                  {dateFields.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </FieldWrap>
+            ) : null}
+            {usesDate ? (
+              <FieldWrap label={t('charts.aggregation')}>
+                <select
+                  className={selectClass}
+                  value={aggregation}
+                  onChange={(e) => setAggregation(e.target.value as typeof aggregation)}
+                >
+                  {(['count', 'avg', 'sum', 'min', 'max'] as const).map((code) => (
+                    <option key={code} value={code}>
+                      {t(`charts.agg.${code}`)}
+                    </option>
+                  ))}
+                </select>
+              </FieldWrap>
+            ) : null}
+            {usesValue ? (
+              <FieldWrap label={t('charts.valueField')}>
+                <select className={selectClass} value={valueFieldId} onChange={(e) => setValueFieldId(e.target.value)}>
+                  <option value="">—</option>
+                  {valueFields.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </FieldWrap>
+            ) : null}
+            {usesGroup ? (
+              <FieldWrap label={t('charts.groupField')}>
+                <select className={selectClass} value={groupFieldId} onChange={(e) => setGroupFieldId(e.target.value)}>
+                  <option value="">—</option>
+                  {groupFields.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.name}
+                    </option>
+                  ))}
+                </select>
+              </FieldWrap>
+            ) : null}
           </div>
+          <Button
+            className="mt-4"
+            onClick={() => {
+              if (usesDate && !dateFieldId) {
+                toast(t('charts.needDate'), 'err')
+                return
+              }
+              void onCreate({
+                list_id: list.id,
+                name,
+                chart_type: type,
+                config: {
+                  dateFieldId: usesDate ? dateFieldId : undefined,
+                  valueFieldId: usesValue ? valueFieldId || undefined : undefined,
+                  groupFieldId: usesGroup ? groupFieldId || undefined : undefined,
+                  aggregation: usesDate ? aggregation : undefined,
+                },
+              })
+            }}
+          >
+            {t('common.save')}
+          </Button>
         </div>
       ) : null}
     </div>

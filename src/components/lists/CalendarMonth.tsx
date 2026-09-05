@@ -97,6 +97,8 @@ export default function CalendarMonth({
           <ChevronRight size={16} />
         </Button>
       </div>
+      <div className="-mx-1 overflow-x-auto px-1">
+        <div className="min-w-[36rem] space-y-1">
       <div className="grid grid-cols-7 gap-1 text-center text-[11px] uppercase tracking-wide text-muted">
         {weekdayLabels.map((name, index) => (
           <div key={index}>{name}</div>
@@ -163,6 +165,8 @@ export default function CalendarMonth({
           )
         })}
       </div>
+      </div>
+      </div>
       {undated.length ? (
         <div>
           <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted">
@@ -179,7 +183,10 @@ export default function CalendarMonth({
                   event.dataTransfer.setData(ITEM_MIME, item.id)
                   event.dataTransfer.effectAllowed = 'move'
                 }}
-                onClick={() => onOpen(item)}
+                onClick={() => {
+                  if (selectMode && onToggleSelect) onToggleSelect(item)
+                  else onOpen(item)
+                }}
               >
                 {titleFromValues(item.values, schema.titleFieldId)}
               </button>

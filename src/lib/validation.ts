@@ -83,6 +83,27 @@ export function validateField(
     }
     case 'sublist': {
       if (!Array.isArray(value)) return msg('fields.nested')
+      const sub = cfg.subfields ?? []
+      for (const [index, row] of value.entries()) {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) {
+          return msg('fields.nested')
+        }
+        const record = row as Record<string, unknown>
+        for (const subfield of sub) {
+          const nested = validateField(
+            {
+              id: subfield.id,
+              key: subfield.key,
+              name: subfield.name,
+              type: subfield.type,
+              required: subfield.required,
+              config: subfield.config,
+            },
+            record[subfield.id],
+          )
+          if (nested) return msg('fields.nestedRow', { n: index + 1, error: nested })
+        }
+      }
       break
     }
     default:

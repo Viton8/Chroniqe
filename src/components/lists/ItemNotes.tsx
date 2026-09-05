@@ -392,7 +392,7 @@ export default function ItemNotesMarker({
           className={cn(
             'inline-flex h-7 w-7 items-center justify-center rounded-lg text-muted hover:bg-ink/5 hover:text-ink',
             notes.length
-              ? 'opacity-0 focus-visible:opacity-100 group-hover:opacity-100 group-focus-within:opacity-100'
+              ? 'opacity-100 [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:focus-visible:opacity-100 [@media(hover:hover)]:group-hover:opacity-100 [@media(hover:hover)]:group-focus-within:opacity-100'
               : 'opacity-70 group-hover:opacity-100',
           )}
           aria-label={t('itemNotes.add')}
@@ -673,16 +673,20 @@ export function ItemNotesPanel({
           submitLabel={t('itemNotes.add')}
           onClose={() => setAdding(false)}
           onSave={async (draft) => {
-            const row = await addComment({
-              item_id: item.id,
-              user_id: userId,
-              body: draft.body,
-              color: draft.color,
-              show_author: draft.showAuthor,
-              show_time: draft.showTime,
-            })
-            onCreated(row)
-            setAdding(false)
+            try {
+              const row = await addComment({
+                item_id: item.id,
+                user_id: userId,
+                body: draft.body,
+                color: draft.color,
+                show_author: draft.showAuthor,
+                show_time: draft.showTime,
+              })
+              onCreated(row)
+              setAdding(false)
+            } catch (error) {
+              toast(error instanceof Error ? error.message : t('common.error'), 'err')
+            }
           }}
         />
       ) : null}
@@ -693,14 +697,18 @@ export function ItemNotesPanel({
           initial={editing}
           onClose={() => setEditing(null)}
           onSave={async (draft) => {
-            const row = await updateComment(editing.id, {
-              body: draft.body,
-              color: draft.color,
-              show_author: draft.showAuthor,
-              show_time: draft.showTime,
-            })
-            onUpdated(row)
-            setEditing(null)
+            try {
+              const row = await updateComment(editing.id, {
+                body: draft.body,
+                color: draft.color,
+                show_author: draft.showAuthor,
+                show_time: draft.showTime,
+              })
+              onUpdated(row)
+              setEditing(null)
+            } catch (error) {
+              toast(error instanceof Error ? error.message : t('common.error'), 'err')
+            }
           }}
         />
       ) : null}

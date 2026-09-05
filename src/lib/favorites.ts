@@ -26,5 +26,6 @@ export function toggleFavorite(id: string): boolean {
   const current = readFavorites()
   const next = current.includes(id) ? current.filter((value) => value !== id) : [id, ...current]
   writeFavorites(next)
+  window.dispatchEvent(new Event('chroniqe-favorites'))
   return next.includes(id)
 }

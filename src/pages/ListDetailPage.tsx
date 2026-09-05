@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Bell,
   BellOff,
@@ -10,6 +10,7 @@ import {
   Download,
   Keyboard,
   Link2,
+  MoreHorizontal,
   Plus,
   Settings2,
   SlidersHorizontal,
@@ -38,7 +39,6 @@ import {
   fetchRatings,
   isSubscribed,
   listPermissions,
-  moveItem,
   removeMember,
   reviewProposal,
   searchProfiles,
@@ -79,7 +79,7 @@ import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
 import { emptyValues, isEmptyValue, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
-import { toggleChecked } from '../lib/automations'
+import { applyFieldEquals, toggleChecked, transferItem } from '../lib/automations'
 import { asDatetimeInputValue, formatDateTime, titleFromValues } from '../lib/cn'
 import { useCommand } from '../context/CommandContext'
 import { CHART_TYPES as CHART_TYPE_LIST } from '../types/domain'
@@ -121,6 +121,7 @@ function ListWorkspace({ id }: { id: string }) {
   const { t, locale } = usePrefs()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const { open: paletteOpen, setWorkspace } = useCommand()
   const storedWorkspace = readWorkspace(id)
 
@@ -154,9 +155,11 @@ function ListWorkspace({ id }: { id: string }) {
   const [focusIndex, setFocusIndex] = useState(-1)
   const [helpOpen, setHelpOpen] = useState(false)
   const [shareOpen, setShareOpen] = useState(false)
+  const [moreOpen, setMoreOpen] = useState(false)
+  const moreRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
-  const reload = async () => {
+  const reload = async (openFromUrl = false) => {
     if (!id) return
     const row = await fetchList(id)
     setList(row)
@@ -173,6 +176,13 @@ function ListWorkspace({ id }: { id: string }) {
     setCharts(ch)
     setAutomations(au)
     setActivity(act)
+    if (openFromUrl) {
+      const want = searchParams.get('item')
+      if (want) {
+        const match = its.find((item) => item.id === want)
+        if (match) setOpenItem(match)
+      }
+    }
     const ids = its.map((i) => i.id)
     setRatings(await fetchRatings(ids))
     setItemNotes(await fetchCommentsForItems(ids))
@@ -188,7 +198,7 @@ function ListWorkspace({ id }: { id: string }) {
   /* eslint-disable react-hooks/set-state-in-effect -- load list by id */
   useEffect(() => {
     let cancelled = false
-    void reload()
+    void reload(true)
       .catch((e) => {
         if (!cancelled) toast(e instanceof Error ? e.message : t('common.error'), 'err')
       })
@@ -199,7 +209,7 @@ function ListWorkspace({ id }: { id: string }) {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id])
+  }, [id, user?.id])
   /* eslint-enable react-hooks/set-state-in-effect */
 
   useEffect(() => {
@@ -211,7 +221,9 @@ function ListWorkspace({ id }: { id: string }) {
         () => {
           void fetchItems(id).then(async (its) => {
             setItems(its)
-            setItemNotes(await fetchCommentsForItems(its.map((i) => i.id)))
+            const ids = its.map((i) => i.id)
+            setItemNotes(await fetchCommentsForItems(ids))
+            setRatings(await fetchRatings(ids))
           })
         },
       )
@@ -220,6 +232,22 @@ function ListWorkspace({ id }: { id: string }) {
       void supabase.removeChannel(channel)
     }
   }, [id])
+
+  useEffect(() => {
+    setOpenItem((current) => {
+      if (!current) return current
+      return items.find((row) => row.id === current.id) ?? null
+    })
+  }, [items])
+
+  useEffect(() => {
+    if (!moreOpen) return
+    const onPointer = (event: PointerEvent) => {
+      if (!moreRef.current?.contains(event.target as Node)) setMoreOpen(false)
+    }
+    document.addEventListener('pointerdown', onPointer)
+    return () => document.removeEventListener('pointerdown', onPointer)
+  }, [moreOpen])
 
   const schema = useMemo(() => list?.schema ?? { fields: [] }, [list?.schema])
   const filtered = useMemo(() => {
@@ -371,6 +399,7 @@ function ListWorkspace({ id }: { id: string }) {
 
   const switchView = (id: string) => {
     setActiveViewId(id)
+    writeWorkspace(list.id, { viewId: id, hideChecked })
     if (perms?.owner) {
       void saveViews({ ...resolved, activeViewId: id })
     }
@@ -418,6 +447,9 @@ function ListWorkspace({ id }: { id: string }) {
           values: { ...row.values },
           position: row.position || Date.now() / 1000 + index * 0.001,
           created_by: user.id,
+          is_checked: row.is_checked,
+          checked_at: row.checked_at,
+          check_snapshot: row.check_snapshot,
         }),
       ),
     )
@@ -439,8 +471,15 @@ function ListWorkspace({ id }: { id: string }) {
 
   const onMoveGroup = async (item: ItemRow, value: string) => {
     if (!user || !canEdit || !groupFieldId) return
+    const field = schema.fields.find((row) => row.id === groupFieldId)
+    let next: unknown = value || null
+    if (field && (field.type === 'boolean' || field.type === 'checkbox')) {
+      next = value === 'true'
+    } else if (field && (field.type === 'tags' || field.type === 'multiselect')) {
+      next = value ? [value] : []
+    }
     const updated = await updateItem(item.id, {
-      values: { ...item.values, [groupFieldId]: value || null },
+      values: { ...item.values, [groupFieldId]: next },
       updated_by: user.id,
     })
     setItems((prevItems) => prevItems.map((row) => (row.id === updated.id ? updated : row)))
@@ -449,15 +488,15 @@ function ListWorkspace({ id }: { id: string }) {
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wide text-muted">
             {list.icon} {t(`visibility.${list.visibility}`)}
             {list.visibility === 'link' || list.visibility === 'public' ? ` · ${t(`share.access.${listLinkAccess(list)}`)}` : ''}
             {' · '}
             {t(`editMode.${list.edit_mode}`)}
           </p>
-          <div className="flex items-center gap-2">
-            <h1 className="font-serif text-3xl">{list.title}</h1>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            <h1 className="min-w-0 break-words font-serif text-3xl">{list.title}</h1>
             {user ? <FavoriteButton id={list.id} /> : null}
           </div>
           {list.description ? <p className="mt-1 max-w-xl text-sm text-muted">{list.description}</p> : null}
@@ -475,50 +514,7 @@ function ListWorkspace({ id }: { id: string }) {
             </div>
           ) : null}
         </div>
-        <div className="flex flex-wrap gap-2">
-          {user ? (
-            <Button
-              variant="soft"
-              size="sm"
-              onClick={async () => {
-                await setSubscribed(list.id, user.id, !sub)
-                setSub(!sub)
-              }}
-            >
-              {sub ? <BellOff size={14} /> : <Bell size={14} />}
-              {sub ? t('list.following') : t('list.follow')}
-            </Button>
-          ) : null}
-          <Button
-            variant="soft"
-            size="sm"
-            onClick={() => {
-              if (perms?.owner) {
-                setShareOpen(true)
-                return
-              }
-              void navigator.clipboard.writeText(listShareUrl(list.id)).then(() => toast(t('common.copied')))
-            }}
-          >
-            <Link2 size={14} /> {t('common.share')}
-          </Button>
-          {user ? (
-            <Button
-              variant="soft"
-              size="sm"
-              onClick={async () => {
-                try {
-                  const copy = await duplicateList(list.id, user.id, t('list.copyOf', { title: list.title }))
-                  toast(t('list.duplicated'))
-                  navigate(`/lists/${copy.id}`)
-                } catch {
-                  toast(t('list.duplicateFail'), 'err')
-                }
-              }}
-            >
-              <Copy size={14} /> {t('common.duplicate')}
-            </Button>
-          ) : null}
+        <div className="flex flex-wrap justify-end gap-2">
           {perms?.owner ? (
             <Button variant="soft" size="sm" onClick={() => setSettingsOpen(true)}>
               <Settings2 size={14} /> {t('list.configure')}
@@ -529,9 +525,84 @@ function ListWorkspace({ id }: { id: string }) {
               <Plus size={14} /> {t('list.entry')}
             </Button>
           ) : null}
-          <Button variant="ghost" size="sm" onClick={() => setHelpOpen(true)} aria-label={t('shortcuts.title')}>
-            <Keyboard size={14} />
-          </Button>
+          <div className="relative" ref={moreRef}>
+            <Button
+              variant="soft"
+              size="sm"
+              className="sm:hidden"
+              aria-expanded={moreOpen}
+              aria-haspopup="menu"
+              onClick={() => setMoreOpen((open) => !open)}
+            >
+              <MoreHorizontal size={14} /> {t('list.moreActions')}
+            </Button>
+            <div
+              className={`flex flex-wrap gap-2 ${
+                moreOpen
+                  ? 'absolute right-0 top-full z-20 mt-1 w-52 flex-col rounded-2xl border border-line bg-paper p-2 shadow-lift'
+                  : 'hidden'
+              } sm:relative sm:flex sm:w-auto sm:flex-row sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none`}
+            >
+              {user ? (
+                <Button
+                  variant="soft"
+                  size="sm"
+                  onClick={async () => {
+                    await setSubscribed(list.id, user.id, !sub)
+                    setSub(!sub)
+                    setMoreOpen(false)
+                  }}
+                >
+                  {sub ? <BellOff size={14} /> : <Bell size={14} />}
+                  {sub ? t('list.following') : t('list.follow')}
+                </Button>
+              ) : null}
+              <Button
+                variant="soft"
+                size="sm"
+                onClick={() => {
+                  setMoreOpen(false)
+                  if (perms?.owner) {
+                    setShareOpen(true)
+                    return
+                  }
+                  void navigator.clipboard.writeText(listShareUrl(list.id)).then(() => toast(t('common.copied')))
+                }}
+              >
+                <Link2 size={14} /> {t('common.share')}
+              </Button>
+              {user ? (
+                <Button
+                  variant="soft"
+                  size="sm"
+                  onClick={async () => {
+                    setMoreOpen(false)
+                    try {
+                      const copy = await duplicateList(list.id, user.id, t('list.copyOf', { title: list.title }))
+                      toast(t('list.duplicated'))
+                      navigate(`/lists/${copy.id}`)
+                    } catch {
+                      toast(t('list.duplicateFail'), 'err')
+                    }
+                  }}
+                >
+                  <Copy size={14} /> {t('common.duplicate')}
+                </Button>
+              ) : null}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setMoreOpen(false)
+                  setHelpOpen(true)
+                }}
+                aria-label={t('shortcuts.title')}
+              >
+                <Keyboard size={14} />
+                <span className="sm:hidden">{t('shortcuts.title')}</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -678,6 +749,9 @@ function ListWorkspace({ id }: { id: string }) {
                           values: { ...item.values },
                           position: base + index * 0.001,
                           created_by: user.id,
+                          is_checked: item.is_checked,
+                          checked_at: item.checked_at,
+                          check_snapshot: item.check_snapshot,
                         }),
                       ),
                     )
@@ -772,7 +846,14 @@ function ListWorkspace({ id }: { id: string }) {
               }}
               onCreateInGroup={(value) => {
                 if (!groupFieldId) return
-                startCreate({ [groupFieldId]: value })
+                const field = schema.fields.find((row) => row.id === groupFieldId)
+                let next: unknown = value
+                if (field && (field.type === 'boolean' || field.type === 'checkbox')) {
+                  next = value === 'true'
+                } else if (field && (field.type === 'tags' || field.type === 'multiselect')) {
+                  next = value ? [value] : []
+                }
+                startCreate({ [groupFieldId]: next })
               }}
             />
           )}
@@ -823,12 +904,32 @@ function ListWorkspace({ id }: { id: string }) {
           onNoteUpdated={(row) => setItemNotes((prev) => prev.map((note) => (note.id === row.id ? row : note)))}
           onNoteDeleted={(noteId) => setItemNotes((prev) => prev.filter((note) => note.id !== noteId))}
           onNavigate={setOpenItem}
+          onRatingChange={(row) =>
+            setRatings((prev) => {
+              const idx = prev.findIndex(
+                (r) => r.item_id === row.item_id && r.field_id === row.field_id && r.user_id === row.user_id,
+              )
+              if (idx >= 0) return prev.map((r, i) => (i === idx ? { ...r, ...row } : r))
+              return [...prev, row]
+            })
+          }
+          automations={automations}
           onClose={() => {
             setCreating(false)
             setOpenItem(null)
             setDraftValues(null)
+            if (searchParams.has('item')) {
+              const next = new URLSearchParams(searchParams)
+              next.delete('item')
+              setSearchParams(next, { replace: true })
+            }
           }}
           onSaved={async () => {
+            if (searchParams.has('item')) {
+              const next = new URLSearchParams(searchParams)
+              next.delete('item')
+              setSearchParams(next, { replace: true })
+            }
             await reload()
             setCreating(false)
             setOpenItem(null)
@@ -925,9 +1026,11 @@ function ItemModal({
   onNoteUpdated,
   onNoteDeleted,
   onNavigate,
+  onRatingChange,
   onClose,
   onSaved,
   onPropose,
+  automations,
 }: {
   item: ItemRow | null
   list: ListRow
@@ -944,15 +1047,28 @@ function ItemModal({
   onNoteUpdated: (row: ItemComment) => void
   onNoteDeleted: (id: string) => void
   onNavigate: (item: ItemRow) => void
+  onRatingChange?: (row: ItemRating) => void
   onClose: () => void
   onSaved: () => Promise<void>
   onPropose: (payload: Record<string, unknown>) => Promise<void>
+  automations: ListAutomation[]
 }) {
   const schema = list.schema
   const [values, setValues] = useState<Record<string, unknown>>(
     () => item?.values ?? initialValues ?? emptyValues(schema),
   )
   const [errors, setErrors] = useState<string[]>([])
+  const valuesBaseline = useRef(item?.values)
+
+  useEffect(() => {
+    if (!item) return
+    const baseline = valuesBaseline.current
+    const dirty = baseline != null && JSON.stringify(values) !== JSON.stringify(baseline)
+    if (dirty) return
+    valuesBaseline.current = item.values
+    setValues(item.values)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from live item when the user has not edited
+  }, [item])
   const write = canEdit || canPropose
   const { t } = usePrefs()
   const { toast } = useToast()
@@ -972,9 +1088,25 @@ function ItemModal({
       if (!userId) return
       if (item) {
         await updateItem(item.id, { values, updated_by: userId })
+        await applyFieldEquals({
+          item,
+          previous: item.values,
+          next: values,
+          userId,
+          fields: schema.fields,
+          automations,
+        })
       } else {
         const pos = Date.now() / 1000
-        await createItem({ list_id: list.id, values, position: pos, created_by: userId })
+        const created = await createItem({ list_id: list.id, values, position: pos, created_by: userId })
+        await applyFieldEquals({
+          item: created,
+          previous: undefined,
+          next: values,
+          userId,
+          fields: schema.fields,
+          automations,
+        })
       }
       await onSaved()
     } catch (error) {
@@ -1015,6 +1147,7 @@ function ItemModal({
             userId={userId}
             itemId={item?.id}
             ratings={ratings}
+            onRatingChange={onRatingChange}
             onChange={(v) => setValues((prev) => ({ ...prev, [field.id]: v }))}
           />
         ))}
@@ -1046,13 +1179,21 @@ function ItemModal({
               variant="soft"
               size="sm"
               onClick={async () => {
-                await moveItem({
-                  itemId: item.id,
-                  targetListId: a.targetListId,
-                  fieldMap: a.fieldMap,
-                  deleteSource: a.deleteSource ?? true,
-                })
-                await onSaved()
+                if (!userId) return
+                try {
+                  const target = await fetchList(a.targetListId)
+                  await transferItem({
+                    item,
+                    action: a,
+                    userId,
+                    fields: schema.fields,
+                    targetFields: target?.schema.fields ?? [],
+                    automations,
+                  })
+                  await onSaved()
+                } catch (error) {
+                  toast(error instanceof Error ? error.message : t('common.error'), 'err')
+                }
               }}
             >
               {a.label}
@@ -1079,7 +1220,12 @@ function ItemModal({
                       values: snapshot.values,
                       position: snapshot.position,
                       created_by: userId,
-                    }).catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
+                      is_checked: snapshot.is_checked,
+                      checked_at: snapshot.checked_at,
+                      check_snapshot: snapshot.check_snapshot,
+                    })
+                      .then(() => onSaved())
+                      .catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
                   },
                 })
               }}
@@ -1267,6 +1413,14 @@ function ChartsTab({
                 toast(t('charts.needDate'), 'err')
                 return
               }
+              if (usesValue && !valueFieldId) {
+                toast(t('charts.needValue'), 'err')
+                return
+              }
+              if (usesGroup && !groupFieldId) {
+                toast(t('charts.needGroup'), 'err')
+                return
+              }
               void onCreate({
                 list_id: list.id,
                 name,
@@ -1353,7 +1507,7 @@ function SettingsModal({
           <button
             key={id}
             type="button"
-            className={`rounded-full px-3 py-1 text-sm ${panel === id ? 'bg-ink text-paper' : 'bg-black/5'}`}
+            className={`rounded-full px-3 py-1 text-sm ${panel === id ? 'bg-ink text-paper' : 'bg-ink/5'}`}
             onClick={() => setPanel(id)}
           >
             {label}
@@ -1468,7 +1622,7 @@ function SettingsModal({
       ) : null}
 
       {panel === 'io' ? (
-        <ImportExport list={list} />
+        <ImportExport list={list} onReload={onReload} />
       ) : null}
     </Modal>
   )
@@ -1630,9 +1784,9 @@ function SharePanel({
       <h3 className="text-sm font-medium">{t('settingsModal.members')}</h3>
       <ul className="space-y-2 text-sm">
         {members.map((m) => (
-          <li key={m.user_id} className="flex items-center justify-between">
-            @{m.profile?.username ?? m.user_id}
-            <span className="flex gap-2">
+          <li key={m.user_id} className="flex flex-wrap items-center justify-between gap-2">
+            <span className="min-w-0 truncate">@{m.profile?.username ?? m.user_id}</span>
+            <span className="flex flex-wrap gap-2">
               <Select
                 className="px-2 py-1"
                 value={m.role}
@@ -1677,10 +1831,11 @@ function SharePanel({
   )
 }
 
-function ImportExport({ list }: { list: ListRow }) {
+function ImportExport({ list, onReload }: { list: ListRow; onReload: () => Promise<void> }) {
   const { user } = useAuth()
   const { toast } = useToast()
   const { t } = usePrefs()
+  const [applySchema, setApplySchema] = useState(true)
   return (
     <div className="space-y-4">
       <Hint title={t('settingsModal.ioHint')} example={t('settingsModal.ioEx')} />
@@ -1689,7 +1844,19 @@ function ImportExport({ list }: { list: ListRow }) {
           variant="soft"
           onClick={async () => {
             const items = await fetchItems(list.id)
-            downloadText(`${list.title}.json`, itemsToJson({ title: list.title, schema: list.schema }, items), 'application/json')
+            downloadText(
+              `${list.title}.json`,
+              itemsToJson(
+                {
+                  title: list.title,
+                  schema: list.schema,
+                  settings: list.settings,
+                  view_config: list.view_config,
+                },
+                items,
+              ),
+              'application/json',
+            )
           }}
         >
           <Download size={14} /> JSON
@@ -1704,6 +1871,10 @@ function ImportExport({ list }: { list: ListRow }) {
           <Download size={14} /> CSV
         </Button>
       </div>
+      <label className="flex items-center gap-2 text-sm">
+        <input type="checkbox" checked={applySchema} onChange={(e) => setApplySchema(e.target.checked)} />
+        {t('settingsModal.importSchema')}
+      </label>
       <FieldWrap label={t('settingsModal.jsonCsv')}>
         <input
           type="file"
@@ -1716,31 +1887,41 @@ function ImportExport({ list }: { list: ListRow }) {
             try {
               if (file.name.endsWith('.json')) {
                 const parsed = parseImportJson(text)
-                for (const row of parsed.items) {
+                if (applySchema && parsed.schema) {
+                  await updateList(list.id, {
+                    schema: parsed.schema,
+                    settings: parsed.settings ?? list.settings,
+                    view_config: parsed.view_config ?? list.view_config,
+                  })
+                }
+                const base = Date.now() / 1000
+                for (const [index, row] of parsed.items.entries()) {
                   await createItem({
                     list_id: list.id,
                     values: row.values,
-                    position: Date.now() / 1000,
+                    position: row.position ?? base + index * 0.001,
                     created_by: user.id,
+                    is_checked: row.is_checked,
+                    checked_at: row.is_checked ? new Date().toISOString() : null,
                   })
                 }
               } else {
                 const rows = parseCsv(text)
-                const mapping: Record<number, string> = {}
-                list.schema.fields.forEach((f, i) => {
-                  mapping[i + 1] = f.id
-                })
-                const items = mapCsvToItems(rows, list.schema.fields, mapping)
-                for (const row of items) {
+                const items = mapCsvToItems(rows, list.schema.fields)
+                const base = Date.now() / 1000
+                for (const [index, row] of items.entries()) {
                   await createItem({
                     list_id: list.id,
                     values: row.values,
-                    position: Date.now() / 1000,
+                    position: base + index * 0.001,
                     created_by: user.id,
+                    is_checked: row.is_checked,
+                    checked_at: row.is_checked ? new Date().toISOString() : null,
                   })
                 }
               }
               toast(t('settingsModal.imported'))
+              await onReload()
             } catch (err) {
               toast(err instanceof Error ? err.message : t('settingsModal.importFail'), 'err')
             }

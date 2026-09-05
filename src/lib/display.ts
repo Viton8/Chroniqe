@@ -1,5 +1,6 @@
 import type { FieldDef, FieldViewStyle, ItemRating, ListSchema, NumberDisplay } from '../types/domain'
 import { formatDate, formatDateTime } from './cn'
+import { subfieldAsDef } from './fields'
 import { evalFormula } from './formula'
 import { msg } from './i18n'
 
@@ -93,6 +94,40 @@ export function displayValue(
     return `${avg.toFixed(1)} (${all.length})`
   }
   if (value == null || value === '') return '—'
+  if (field.type === 'relation' || field.type === 'user') {
+    if (Array.isArray(value)) {
+      const labels = value
+        .map((row) => {
+          if (typeof row === 'object' && row && ('title' in row || 'name' in row)) {
+            return String((row as { title?: string; name?: string }).title ?? (row as { name?: string }).name ?? '')
+          }
+          return String(row ?? '')
+        })
+        .filter(Boolean)
+      return labels.join(', ') || '—'
+    }
+    if (typeof value === 'object' && value) {
+      const row = value as { title?: string; name?: string }
+      return row.title || row.name || '—'
+    }
+  }
+  if (field.type === 'sublist' && Array.isArray(value)) {
+    const sub = field.config?.subfields ?? []
+    const lines = value
+      .map((row) => {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) return ''
+        const record = row as Record<string, unknown>
+        return sub
+          .map((subfield) => {
+            const text = displayValue(subfieldAsDef(subfield), record[subfield.id], ratings, itemId)
+            return text === '—' ? '' : text
+          })
+          .filter(Boolean)
+          .join(' · ')
+      })
+      .filter(Boolean)
+    return lines.join('; ') || '—'
+  }
   if (Array.isArray(value)) return value.map(String).join(', ')
   if (typeof value === 'object' && value && 'name' in value) {
     return String((value as { name?: string }).name)

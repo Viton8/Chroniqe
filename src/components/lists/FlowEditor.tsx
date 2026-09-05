@@ -163,21 +163,90 @@ export default function FlowEditor({
             <FieldWrap label={t('flow.trigger')}>
               <select
                 className={selectClass}
-                value={rule.trigger.type === 'unchecked' ? 'unchecked' : 'checked'}
-                onChange={(e) =>
+                value={rule.trigger.type}
+                onChange={(e) => {
+                  const type = e.target.value
+                  setRules((prev) =>
+                    prev.map((row) => {
+                      if (row.id !== rule.id) return row
+                      if (type === 'button') {
+                        return {
+                          ...row,
+                          trigger: {
+                            type: 'button',
+                            actionId: (list.settings?.transferActions ?? [])[0]?.id ?? '',
+                          },
+                        }
+                      }
+                      if (type === 'field_equals') {
+                        return {
+                          ...row,
+                          trigger: { type: 'field_equals', fieldId: fields[0]?.id ?? '', value: '' },
+                        }
+                      }
+                      return { ...row, trigger: { type: type as 'checked' | 'unchecked' } }
+                    }),
+                  )
+                }}
+              >
+                <option value="checked">{t('flow.checked')}</option>
+                <option value="unchecked">{t('flow.unchecked')}</option>
+                <option value="button" disabled={!(list.settings?.transferActions ?? []).length}>
+                  {t('flow.button')}
+                </option>
+                <option value="field_equals">{t('flow.fieldEquals')}</option>
+              </select>
+            </FieldWrap>
+            {rule.trigger.type === 'button' ? (
+              <FieldWrap label={t('flow.pickButton')}>
+                <select
+                  className={selectClass}
+                  value={rule.trigger.actionId}
+                  onChange={(e) =>
+                    setRules((prev) =>
+                      prev.map((row) =>
+                        row.id === rule.id
+                          ? { ...row, trigger: { type: 'button', actionId: e.target.value } }
+                          : row,
+                      ),
+                    )
+                  }
+                >
+                  {(list.settings?.transferActions ?? []).map((action) => (
+                    <option key={action.id} value={action.id}>
+                      {action.label}
+                    </option>
+                  ))}
+                </select>
+              </FieldWrap>
+            ) : null}
+            {rule.trigger.type === 'field_equals' ? (
+              <FieldEqualsTrigger
+                listId={list.id}
+                userId={userId}
+                fields={fields}
+                fieldId={rule.trigger.fieldId}
+                value={rule.trigger.value}
+                onFieldId={(fieldId) =>
                   setRules((prev) =>
                     prev.map((row) =>
-                      row.id === rule.id
-                        ? { ...row, trigger: { type: e.target.value as 'checked' | 'unchecked' } }
+                      row.id === rule.id && row.trigger.type === 'field_equals'
+                        ? { ...row, trigger: { ...row.trigger, fieldId } }
                         : row,
                     ),
                   )
                 }
-              >
-                <option value="checked">{t('flow.checked')}</option>
-                <option value="unchecked">{t('flow.unchecked')}</option>
-              </select>
-            </FieldWrap>
+                onValue={(value) =>
+                  setRules((prev) =>
+                    prev.map((row) =>
+                      row.id === rule.id && row.trigger.type === 'field_equals'
+                        ? { ...row, trigger: { ...row.trigger, value } }
+                        : row,
+                    ),
+                  )
+                }
+              />
+            ) : null}
             <ActionEditor
               actions={rule.actions}
               fields={fields}
@@ -189,6 +258,10 @@ export default function FlowEditor({
               size="sm"
               variant="soft"
               onClick={() => {
+                if (rule.trigger.type === 'button' && !rule.trigger.actionId) {
+                  toast(t('flow.pickButton'), 'err')
+                  return
+                }
                 void updateAutomation(rule.id, {
                   name: rule.name,
                   enabled: rule.enabled,
@@ -227,6 +300,43 @@ export default function FlowEditor({
   )
 }
 
+function FieldEqualsTrigger({
+  listId,
+  userId,
+  fields,
+  fieldId,
+  value,
+  onFieldId,
+  onValue,
+}: {
+  listId: string
+  userId: string
+  fields: FieldDef[]
+  fieldId: string
+  value: unknown
+  onFieldId: (fieldId: string) => void
+  onValue: (value: unknown) => void
+}) {
+  const { t } = usePrefs()
+  const field = fields.find((row) => row.id === fieldId)
+  return (
+    <>
+      <FieldWrap label={t('flow.pickField')}>
+        <select className={selectClass} value={fieldId} onChange={(e) => onFieldId(e.target.value)}>
+          {fields.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </select>
+      </FieldWrap>
+      {field ? (
+        <FieldInput field={field} value={value} listId={listId} userId={userId} onChange={onValue} />
+      ) : null}
+    </>
+  )
+}
+
 function TransferCard({
   action,
   lists,
@@ -243,6 +353,7 @@ function TransferCard({
   const { t } = usePrefs()
   const target = lists.find((row) => row.id === action.targetListId)
   const targetFields = target?.schema.fields ?? []
+  const stampable = targetFields.filter((field) => field.type === 'date' || field.type === 'datetime')
   const pairs = Object.entries(action.fieldMap)
 
   return (
@@ -327,6 +438,34 @@ function TransferCard({
           {t('flow.deleteSource')}
         </label>
       </div>
+      {stampable.length ? (
+        <div className="space-y-2">
+          <p className="text-xs font-medium text-muted">{t('flow.setFields')}</p>
+          {stampable.map((field) => {
+            const current = action.setFields?.[field.id] ?? action.setFields?.[field.key ?? '']
+            const token = current === '$now' || current === '$today' ? current : ''
+            return (
+              <FieldWrap key={field.id} label={field.name}>
+                <select
+                  className={selectClass}
+                  value={token}
+                  onChange={(e) => {
+                    const next = { ...(action.setFields ?? {}) }
+                    delete next[field.id]
+                    if (field.key) delete next[field.key]
+                    if (e.target.value) next[field.id] = e.target.value
+                    onChange({ ...action, setFields: next })
+                  }}
+                >
+                  <option value="">{t('flow.setNone')}</option>
+                  <option value="$today">{t('flow.valueToday')}</option>
+                  <option value="$now">{t('flow.valueNow')}</option>
+                </select>
+              </FieldWrap>
+            )
+          })}
+        </div>
+      ) : null}
     </article>
   )
 }

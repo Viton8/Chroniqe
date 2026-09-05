@@ -33,7 +33,9 @@ export function facetFields(schema: ListSchema): FieldDef[] {
 
 export function sortableFields(schema: ListSchema): FieldDef[] {
   return schema.fields.filter((field) =>
-    ['text', 'number', 'integer', 'date', 'datetime', 'rating', 'select'].includes(field.type),
+    ['text', 'number', 'integer', 'date', 'datetime', 'rating', 'multi_rating', 'select'].includes(
+      field.type,
+    ),
   )
 }
 
@@ -145,7 +147,12 @@ function compareField(
   ratings: ItemRating[],
 ): number {
   if (!field) return 0
-  if (field.type === 'number' || field.type === 'integer' || field.type === 'rating') {
+  if (
+    field.type === 'number' ||
+    field.type === 'integer' ||
+    field.type === 'rating' ||
+    field.type === 'multi_rating'
+  ) {
     const left = itemScore(a, field.id, ratings) ?? -Infinity
     const right = itemScore(b, field.id, ratings) ?? -Infinity
     return left - right

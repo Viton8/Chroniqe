@@ -108,22 +108,49 @@ export function formatDateTime(value: string | null | undefined): string {
   })
 }
 
+export function formatRelativeTime(value: string | null | undefined): string {
+  if (!value) return '—'
+  const d = parseWallOrInstant(value)
+  if (!d) return value
+  const diffSec = Math.round((d.getTime() - Date.now()) / 1000)
+  const abs = Math.abs(diffSec)
+  const rtf = new Intl.RelativeTimeFormat(dateLocale(), { numeric: 'auto' })
+  if (abs < 60) return rtf.format(diffSec, 'second')
+  if (abs < 3600) return rtf.format(Math.round(diffSec / 60), 'minute')
+  if (abs < 86400) return rtf.format(Math.round(diffSec / 3600), 'hour')
+  if (abs < 86400 * 7) return rtf.format(Math.round(diffSec / 86400), 'day')
+  return formatDateTime(value)
+}
+
+function valueLabel(value: unknown): string {
+  if (value == null || value === '') return ''
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
+  if (Array.isArray(value)) return value.map(valueLabel).filter(Boolean).join(', ')
+  if (typeof value === 'object') {
+    const row = value as { title?: unknown; name?: unknown; username?: unknown }
+    if (row.title) return String(row.title)
+    if (row.name) return String(row.name)
+    if (row.username) return `@${String(row.username)}`
+  }
+  return ''
+}
+
 export function titleFromValues(
   values: Record<string, unknown>,
   titleFieldId?: string | string[],
 ): string {
   const ids = Array.isArray(titleFieldId) ? titleFieldId : titleFieldId ? [titleFieldId] : []
-  const parts = ids
-    .map((id) => values[id])
-    .filter((v) => v != null && v !== '')
-    .map(String)
+  const parts = ids.map((id) => valueLabel(values[id])).filter(Boolean)
   if (parts.length) return parts.join(' · ')
-  const first = Object.values(values).find(
-    (v) => typeof v === 'string' && v.trim().length > 0,
-  )
-  return first ? String(first) : msg('fields.untitled')
+  const first = Object.values(values).map(valueLabel).find((v) => v.trim().length > 0)
+  return first || msg('fields.untitled')
 }
 
 export function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n))
+}
+
+export function isApplePlatform(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return /Mac|iPhone|iPad|iPod/.test(navigator.platform) || /Mac OS X/.test(navigator.userAgent)
 }

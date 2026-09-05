@@ -26,7 +26,8 @@ export function applyLinkAccess(list: ListRow, access: LinkAccess): Pick<ListRow
   if (access === 'off') {
     delete settings.linkAccess
     return {
-      visibility: list.visibility === 'public' ? 'public' : list.visibility === 'friends' ? 'friends' : 'private',
+      visibility:
+        list.visibility === 'public' || list.visibility === 'link' ? 'private' : list.visibility,
       settings,
     }
   }

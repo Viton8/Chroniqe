@@ -10,6 +10,7 @@ import type {
   ListSchema,
   NamedView,
 } from '../../types/domain'
+import { collectedTags } from '../../lib/filters'
 import { fileMeta, hasCoverVisual, isImageFile } from '../../lib/files'
 import { fieldsWithRole, resolveViewSlots, styleForField } from '../../lib/views'
 import { cn, formatDate, titleFromValues } from '../../lib/cn'
@@ -153,8 +154,11 @@ export default function ListViews({
 
   if (view.kind === 'board' && groupId) {
     const field = schema.fields.find((f) => f.id === groupId)
-    const groups = field?.config?.options ?? []
-    const rest = items.filter((i) => !groups.some((g) => g.value === String(i.values[groupId] ?? '')))
+    const groups = boardGroups(field, items, t)
+    const rest =
+      field && (field.type === 'boolean' || field.type === 'checkbox')
+        ? []
+        : items.filter((i) => !groups.some((g) => (field ? itemInGroup(i, field, g.value) : false)))
     return (
       <div className="flex gap-3 overflow-x-auto pb-2">
         {groups.map((g) => (
@@ -167,7 +171,7 @@ export default function ListViews({
             items={items}
           >
             {items
-              .filter((i) => String(i.values[groupId] ?? '') === g.value)
+              .filter((i) => (field ? itemInGroup(i, field, g.value) : false))
               .map((item) => (
                 <ConfiguredCard
                   key={item.id}
@@ -247,9 +251,9 @@ export default function ListViews({
         {sorted.map((item) => (
           <li
             key={item.id}
-            className={cn('group mb-5 ml-4', highlightedId === item.id && 'rounded-xl bg-accent-soft/60 p-2')}
+            className={cn('group relative mb-5 ml-4', highlightedId === item.id && 'rounded-xl bg-accent-soft/60 p-2')}
           >
-            <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-accent" />
+            <span className="absolute -left-[1.375rem] top-1.5 h-3 w-3 rounded-full bg-accent" />
             <p className="text-xs text-muted">{formatDate(String(item.values[dateId] ?? ''))}</p>
             <div className="mt-1 flex items-start gap-2">
               {coverId && hasCoverVisual(item.values[coverId]) ? (
@@ -369,7 +373,7 @@ export default function ListViews({
             <tr
               key={item.id}
               className={cn(
-                'group cursor-pointer border-b border-line/70 last:border-0 hover:bg-black/[0.02]',
+                'group cursor-pointer border-b border-line/70 last:border-0 hover:bg-ink/[0.04]',
                 highlightedId === item.id && 'bg-accent-soft/70',
                 selectedIds?.has(item.id) && 'bg-accent-soft/40',
               )}
@@ -590,7 +594,7 @@ function ConfiguredCard({
             </p>
           ) : null}
         </button>
-        <BadgeRow item={item} badges={badges} schema={schema} renderField={renderField} />
+        <BadgeRow item={item} badges={badges} schema={schema} renderField={renderField} className="max-w-[9rem] justify-end" />
         <div className="relative h-7 w-7 shrink-0">{notes}</div>
       </article>
     )
@@ -734,6 +738,39 @@ function BadgeRow({
   )
 }
 
+function boardGroups(
+  field: FieldDef | undefined,
+  items: ItemRow[],
+  t: (key: string) => string,
+): Array<{ value: string; label: string; color?: string }> {
+  if (!field) return []
+  if (field.type === 'boolean' || field.type === 'checkbox') {
+    return [
+      { value: 'true', label: t('fields.yes') },
+      { value: 'false', label: t('fields.no') },
+    ]
+  }
+  if (field.type === 'select' || field.type === 'multiselect') {
+    const options = field.config?.options ?? []
+    if (options.length) return options.map((o) => ({ value: o.value, label: o.label, color: o.color }))
+  }
+  if (field.type === 'tags' || field.type === 'multiselect') {
+    return collectedTags(items, field).map((tag) => ({ value: tag, label: tag }))
+  }
+  return (field.config?.options ?? []).map((o) => ({ value: o.value, label: o.label, color: o.color }))
+}
+
+function itemInGroup(item: ItemRow, field: FieldDef, groupValue: string): boolean {
+  const raw = item.values[field.id]
+  if (field.type === 'boolean' || field.type === 'checkbox') {
+    return Boolean(raw) === (groupValue === 'true')
+  }
+  if (Array.isArray(raw)) {
+    return raw.map(String).includes(groupValue)
+  }
+  return String(raw ?? '') === groupValue
+}
+
 function BoardColumn({
   title,
   color,
@@ -751,7 +788,7 @@ function BoardColumn({
 }) {
   return (
     <div
-      className="w-72 shrink-0 rounded-2xl bg-black/[0.03] p-3"
+      className="w-72 shrink-0 rounded-2xl bg-ink/[0.04] p-3"
       onDragOver={(event) => {
         if (canDrop) event.preventDefault()
       }}

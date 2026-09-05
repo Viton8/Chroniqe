@@ -48,11 +48,12 @@ export function buildChartSeries(
   const agg = config.aggregation ?? (valueField ? 'avg' : 'count')
 
   if (type === 'pie') {
-    const groupId = config.groupFieldId ?? config.valueFieldId
+    const groupField = fieldById(schema, config.groupFieldId)
     const counts = new Map<string, number>()
     for (const item of items) {
-      const key = String(item.values[groupId ?? ''] ?? '—')
-      counts.set(key, (counts.get(key) ?? 0) + 1)
+      const raw = groupField ? item.values[groupField.id] : null
+      const key = groupField ? displayValue(groupField, raw, ratings, item.id) : '—'
+      counts.set(key || '—', (counts.get(key || '—') ?? 0) + 1)
     }
     return [...counts.entries()].map(([label, value]) => ({ label, value }))
   }

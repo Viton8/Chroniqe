@@ -69,11 +69,14 @@ export function cachedSignedUrl(path: string): Promise<string | null> {
   if (urlCache.has(path)) return Promise.resolve(urlCache.get(path) ?? null)
   const pending = inflight.get(path)
   if (pending) return pending
-  const next = signedFileUrl(path).then((url) => {
-    urlCache.set(path, url)
-    inflight.delete(path)
-    return url
-  })
+  const next = signedFileUrl(path)
+    .then((url) => {
+      urlCache.set(path, url)
+      return url
+    })
+    .finally(() => {
+      inflight.delete(path)
+    })
   inflight.set(path, next)
   return next
 }

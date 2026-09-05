@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Compass, Home, List, Plus, Search, Settings2, Users } from 'lucide-react'
+import { Compass, Home, List, Newspaper, Plus, Search, Settings2, Users } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useCommand } from '../../context/CommandContext'
 import { usePrefs } from '../../context/PrefsContext'
-import { fetchMyLists, fetchSharedLists } from '../../services/api'
-import type { ListRow } from '../../types/domain'
-import { cn } from '../../lib/cn'
+import { fetchItemsForLists, fetchMyLists, fetchSharedLists } from '../../services/api'
+import type { ItemRow, ListRow } from '../../types/domain'
+import { cn, titleFromValues } from '../../lib/cn'
 import { matchesQuery } from '../../lib/search'
+import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 
 interface Entry {
   id: string
@@ -44,11 +45,13 @@ function CommandPaletteDialog() {
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const [lists, setLists] = useState<ListRow[]>([])
+  const [catalog, setCatalog] = useState<Array<{ list: ListRow; item: ItemRow }>>([])
+  const debounced = useDebouncedValue(query)
 
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    void Promise.all([fetchMyLists(user.id), fetchSharedLists().catch(() => [] as ListRow[])]).then(
+    void Promise.all([fetchMyLists(user.id), fetchSharedLists(user.id).catch(() => [] as ListRow[])]).then(
       ([mine, shared]) => {
         if (cancelled) return
         const seen = new Set<string>()
@@ -65,6 +68,25 @@ function CommandPaletteDialog() {
       cancelled = true
     }
   }, [user])
+
+  useEffect(() => {
+    if (!lists.length) return
+    let cancelled = false
+    const sample = lists.slice(0, 24)
+    const byId = new Map(sample.map((row) => [row.id, row]))
+    void fetchItemsForLists(sample.map((row) => row.id)).then((items) => {
+      if (cancelled) return
+      setCatalog(
+        items.flatMap((item) => {
+          const list = byId.get(item.list_id)
+          return list ? [{ list, item }] : []
+        }),
+      )
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [lists])
 
   const entries = useMemo<Entry[]>(() => {
     const match = (...parts: Array<string | null | undefined>) => matchesQuery(query, ...parts)
@@ -112,6 +134,13 @@ function CommandPaletteDialog() {
           run: () => go('/friends'),
         },
         {
+          id: 'feed',
+          group: 'actions',
+          label: t('command.feed'),
+          icon: Newspaper,
+          run: () => go('/feed'),
+        },
+        {
           id: 'settings',
           group: 'actions',
           label: t('command.settings'),
@@ -145,22 +174,57 @@ function CommandPaletteDialog() {
         run: () => go(`/lists/${row.id}`),
       }))
 
-    const itemEntries: Entry[] = (workspace?.items ?? [])
+    const seenItems = new Set<string>()
+    const localItems: Entry[] = (workspace?.items ?? [])
       .filter((item) => match(item.title))
       .slice(0, 8)
-      .map((item) => ({
-        id: `item-${item.id}`,
-        group: 'items' as const,
-        label: item.title,
-        icon: Search,
-        run: () => {
-          setOpen(false)
-          workspace?.openItem(item.id)
-        },
-      }))
+      .map((item) => {
+        seenItems.add(item.id)
+        return {
+          id: `item-${item.id}`,
+          group: 'items' as const,
+          label: item.title,
+          icon: Search,
+          run: () => {
+            setOpen(false)
+            workspace?.openItem(item.id)
+          },
+        }
+      })
+
+    const globalItems: Entry[] =
+      debounced.trim().length < 2
+        ? []
+        : catalog
+            .filter(({ list, item }) => {
+              if (seenItems.has(item.id)) return false
+              const title = titleFromValues(item.values, list.schema.titleFieldId)
+              return matchesQuery(debounced, title, list.title)
+            })
+            .slice(0, 8)
+            .map(({ list, item }) => {
+              const title = titleFromValues(item.values, list.schema.titleFieldId)
+              return {
+                id: `gitem-${item.id}`,
+                group: 'items' as const,
+                label: title,
+                hint: `${list.icon ?? '📋'} ${list.title}`,
+                icon: Search,
+                run: () => {
+                  setOpen(false)
+                  if (workspace?.listId === list.id) {
+                    workspace.openItem(item.id)
+                    return
+                  }
+                  navigate(`/lists/${list.id}?item=${item.id}`)
+                },
+              }
+            })
+
+    const itemEntries = [...localItems, ...globalItems]
 
     return [...actions.filter((row) => match(row.label)), ...listEntries, ...itemEntries]
-  }, [lists, navigate, query, setOpen, t, user, workspace])
+  }, [catalog, debounced, lists, navigate, query, setOpen, t, user, workspace])
 
   const safeActive = entries.length ? Math.min(active, entries.length - 1) : 0
 
@@ -193,14 +257,14 @@ function CommandPaletteDialog() {
   const groups = [
     ['actions', t('command.actions')],
     ['lists', t('command.lists')],
-    ['items', t('command.items')],
+    ['items', workspace && debounced.trim().length < 2 ? t('command.items') : t('command.itemsAll')],
   ] as const
 
   return (
     <div className="fixed inset-0 z-[90] flex items-start justify-center px-4 pt-[12vh]">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/40"
+        className="chroniqe-backdrop absolute inset-0 bg-ink/40"
         aria-label={t('common.close')}
         onClick={() => setOpen(false)}
       />
@@ -208,7 +272,7 @@ function CommandPaletteDialog() {
         role="dialog"
         aria-modal="true"
         aria-label={t('command.title')}
-        className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-line bg-paper shadow-lift"
+        className="chroniqe-panel relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-line bg-paper shadow-lift"
       >
         <div className="flex items-center gap-2 border-b border-line px-4 py-3">
           <Search size={16} className="text-muted" />

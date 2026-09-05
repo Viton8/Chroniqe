@@ -3,7 +3,7 @@ import { Star } from 'lucide-react'
 import type { FieldDef, ItemRating } from '../../types/domain'
 import { FieldWrap, Input, Textarea } from '../ui/Input'
 import { signedFileUrl, uploadListFile, upsertRating } from '../../services/api'
-import { cn } from '../../lib/cn'
+import { asDateInputValue, asDatetimeInputValue, cn } from '../../lib/cn'
 import Avatar from '../ui/Avatar'
 import { usePrefs } from '../../context/PrefsContext'
 
@@ -62,7 +62,7 @@ export default function FieldInput(props: Props) {
         <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
             type={field.type === 'date' ? 'date' : 'datetime-local'}
-            value={String(value ?? '')}
+            value={field.type === 'date' ? asDateInputValue(value) : asDatetimeInputValue(value)}
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
           />

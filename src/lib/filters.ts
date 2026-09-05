@@ -1,4 +1,4 @@
-import { titleFromValues } from './cn'
+import { civilDateFromValue, titleFromValues } from './cn'
 import type { FieldDef, ItemRating, ItemRow, ListSchema } from '../types/domain'
 
 export type SortKey = 'new' | 'old' | 'az' | 'za' | `f:${string}:asc` | `f:${string}:desc`
@@ -56,18 +56,7 @@ export function countActiveFilters(filters: ListFilters): number {
 }
 
 export function itemDateIso(value: unknown): string | null {
-  if (value == null || value === '') return null
-  const raw = String(value)
-  if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return raw
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw) && !raw.endsWith('Z') && !/[+-]\d{2}:\d{2}$/.test(raw)) {
-    return raw.slice(0, 10)
-  }
-  const parsed = new Date(raw)
-  if (Number.isNaN(parsed.getTime())) return null
-  const y = parsed.getFullYear()
-  const m = String(parsed.getMonth() + 1).padStart(2, '0')
-  const d = String(parsed.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+  return civilDateFromValue(value)
 }
 
 export function itemScore(

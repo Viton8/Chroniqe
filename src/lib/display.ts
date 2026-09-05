@@ -1,4 +1,5 @@
 import type { FieldDef, FieldViewStyle, ItemRating, ListSchema, NumberDisplay } from '../types/domain'
+import { formatDate, formatDateTime } from './cn'
 import { evalFormula } from './formula'
 import { msg } from './i18n'
 
@@ -102,6 +103,8 @@ export function displayValue(
   if (field.type === 'boolean' || field.type === 'checkbox') {
     return value ? msg('fields.yes') : msg('fields.no')
   }
+  if (field.type === 'date') return formatDate(String(value))
+  if (field.type === 'datetime') return formatDateTime(String(value))
   return String(value)
 }
 

@@ -1,12 +1,22 @@
-import { nowIso, todayIso } from './cn'
+import { nowIso, nowLocalIso, todayIso } from './cn'
 import { moveItem, updateItem } from '../services/api'
-import type { AutomationAction, ItemRow, ListAutomation, ListSettings } from '../types/domain'
+import type { AutomationAction, FieldDef, ItemRow, ListAutomation, ListSettings } from '../types/domain'
 
-function resolveValue(action: AutomationAction, snapshot: Record<string, unknown>): unknown {
-  if (action.type === 'set_now') return todayIso()
+function stampForField(field: FieldDef | undefined, token: 'now' | 'today' | 'set_now'): string {
+  if (field?.type === 'datetime') return nowLocalIso()
+  if (field?.type === 'date' || token === 'today' || token === 'set_now') return todayIso()
+  return nowLocalIso()
+}
+
+function resolveValue(
+  action: AutomationAction,
+  snapshot: Record<string, unknown>,
+  field?: FieldDef,
+): unknown {
+  if (action.type === 'set_now') return stampForField(field, 'set_now')
   if (action.type === 'set_field') {
-    if (action.value === '$now') return nowIso()
-    if (action.value === '$today') return todayIso()
+    if (action.value === '$now') return stampForField(field, 'now')
+    if (action.value === '$today') return stampForField(field, 'today')
     return action.value
   }
   if (action.type === 'restore_snapshot') return snapshot
@@ -17,14 +27,16 @@ export async function applyActions(
   item: ItemRow,
   actions: AutomationAction[],
   userId: string,
+  fields?: FieldDef[],
 ): Promise<ItemRow> {
   let current = item
   for (const action of actions) {
     if (action.type === 'set_field' || action.type === 'set_now') {
-      const fieldId = action.type === 'set_now' ? action.fieldId : action.fieldId
+      const fieldId = action.fieldId
+      const field = fields?.find((row) => row.id === fieldId)
       const nextValues = {
         ...current.values,
-        [fieldId]: resolveValue(action, current.check_snapshot ?? {}),
+        [fieldId]: resolveValue(action, current.check_snapshot ?? {}, field),
       }
       current = await updateItem(current.id, {
         values: nextValues,
@@ -70,6 +82,7 @@ export async function toggleChecked(input: {
   settings: ListSettings
   automations: ListAutomation[]
   next: boolean
+  fields?: FieldDef[]
 }): Promise<ItemRow> {
   const snapshot = input.next ? input.item.values : input.item.check_snapshot
   let current = await updateItem(input.item.id, {
@@ -85,6 +98,7 @@ export async function toggleChecked(input: {
       { ...current, check_snapshot: snapshot as Record<string, unknown> },
       fromSettings,
       input.userId,
+      input.fields,
     )
   }
 
@@ -93,7 +107,7 @@ export async function toggleChecked(input: {
     input.next ? 'checked' : 'unchecked',
   )
   for (const auto of autos) {
-    current = await applyActions(current, auto.actions, input.userId)
+    current = await applyActions(current, auto.actions, input.userId, input.fields)
   }
   return current
 }

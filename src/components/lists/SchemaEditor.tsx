@@ -5,7 +5,7 @@ import Button from '../ui/Button'
 import { FieldWrap, Input, Textarea } from '../ui/Input'
 import { FIELD_TYPES, type FieldDef, type FieldType, type ListSchema } from '../../types/domain'
 import { newField } from '../../lib/templates'
-import { cn, uid } from '../../lib/cn'
+import { asDateInputValue, asDatetimeInputValue, cn, uid } from '../../lib/cn'
 import { usePrefs } from '../../context/PrefsContext'
 
 const HINT_TYPES: FieldType[] = ['text', 'number', 'integer', 'multi_rating', 'image', 'sublist', 'select']
@@ -296,7 +296,7 @@ function DefaultValueEditor({
       <FieldWrap label={t('schema.default')}>
         <Input
           type={field.type === 'date' ? 'date' : 'datetime-local'}
-          value={String(value ?? '')}
+          value={field.type === 'date' ? asDateInputValue(value) : asDatetimeInputValue(value)}
           onChange={(e) => onChange(e.target.value || undefined)}
         />
       </FieldWrap>

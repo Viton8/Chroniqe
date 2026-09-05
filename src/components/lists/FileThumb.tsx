@@ -14,9 +14,12 @@ export default function FileThumb({
   const meta = fileMeta(value)
   const [url, setUrl] = useState<string | null>(null)
   const [ready, setReady] = useState(!meta)
+  const [broken, setBroken] = useState(false)
+  const remote = Boolean(meta?.path && /^https?:\/\//i.test(meta.path))
 
   useEffect(() => {
     const path = meta?.path
+    setBroken(false)
     if (!path) {
       setUrl(null)
       setReady(true)
@@ -47,8 +50,15 @@ export default function FileThumb({
     return <div className={cn('animate-pulse bg-ink/5', className)} />
   }
 
-  if (url && isImageFile(meta)) {
-    return <img src={url} alt={alt} className={cn('object-cover', className)} />
+  if (url && !broken && (isImageFile(meta) || remote)) {
+    return (
+      <img
+        src={url}
+        alt={alt}
+        className={cn('object-cover', className)}
+        onError={() => setBroken(true)}
+      />
+    )
   }
 
   return (

@@ -30,27 +30,128 @@ const LEGACY_KIND: Record<string, ViewKind> = {
 
 export function rolesForKind(kind: ViewKind): FieldViewRole[] {
   if (kind === 'table') return ['hidden', 'column']
-  if (kind === 'timeline') return ['hidden', 'title', 'badge', 'meta']
+  if (kind === 'timeline') return ['hidden', 'cover', 'title', 'badge', 'meta']
   return ['hidden', 'cover', 'title', 'subtitle', 'badge', 'meta']
+}
+
+export function fallbackRole(kind: ViewKind): FieldViewRole {
+  return kind === 'table' ? 'column' : 'meta'
+}
+
+export function isCoverCandidate(field: { type: string }): boolean {
+  return field.type === 'image' || field.type === 'file' || field.type === 'url'
 }
 
 export function defaultRole(kind: ViewKind, fieldId: string, schema: ListSchema, index: number): FieldViewRole {
   if (kind === 'table') return 'column'
-  if (fieldId === schema.imageFieldId || schema.fields.find((f) => f.id === fieldId)?.type === 'image') {
-    return kind === 'timeline' ? 'hidden' : 'cover'
+  const field = schema.fields.find((f) => f.id === fieldId)
+  if (fieldId === schema.imageFieldId || field?.type === 'image') {
+    return 'cover'
   }
   if (fieldId === schema.titleFieldId || index === 0) return 'title'
   if (kind === 'cards' && index === 1) return 'subtitle'
-  if (index < 4) return kind === 'table' ? 'column' : 'meta'
+  if (index < 4) return 'meta'
   return 'hidden'
 }
 
 export function stylesForSchema(schema: ListSchema, kind: ViewKind, hiddenIds?: string[]): FieldViewStyle[] {
+  return mergeFieldStyles(schema, kind, undefined, hiddenIds)
+}
+
+export function mergeFieldStyles(
+  schema: ListSchema,
+  kind: ViewKind,
+  existing?: FieldViewStyle[],
+  hiddenIds?: string[],
+): FieldViewStyle[] {
+  const allowed = new Set(rolesForKind(kind))
   const hidden = new Set(hiddenIds ?? [])
-  return schema.fields.map((field, index) => ({
-    fieldId: field.id,
-    role: field.hidden || hidden.has(field.id) ? 'hidden' : defaultRole(kind, field.id, schema, index),
-  }))
+  const byId = new Map<string, FieldViewStyle>()
+  for (const row of existing ?? []) {
+    byId.set(row.fieldId, row)
+  }
+  return schema.fields.map((field, index) => {
+    const prev = byId.get(field.id) ?? (field.key ? byId.get(field.key) : undefined)
+    if (prev) {
+      const role = allowed.has(prev.role) ? prev.role : defaultRole(kind, field.id, schema, index)
+      return { ...prev, fieldId: field.id, role }
+    }
+    return {
+      fieldId: field.id,
+      role: field.hidden || hidden.has(field.id) ? 'hidden' : defaultRole(kind, field.id, schema, index),
+    }
+  })
+}
+
+export function applyFieldRole(
+  fields: FieldViewStyle[],
+  fieldId: string,
+  patch: Partial<FieldViewStyle>,
+  kind: ViewKind,
+): FieldViewStyle[] {
+  const next = fields.some((f) => f.fieldId === fieldId)
+    ? fields
+    : [...fields, { fieldId, role: 'hidden' as FieldViewRole }]
+  const exclusive = patch.role === 'cover'
+  const demote = fallbackRole(kind)
+  return next.map((row) => {
+    if (row.fieldId === fieldId) return { ...row, ...patch }
+    if (exclusive && row.role === patch.role) return { ...row, role: demote }
+    return row
+  })
+}
+
+function roleOf(fields: FieldViewStyle[], fieldId?: string): FieldViewRole | undefined {
+  return fieldId ? fields.find((f) => f.fieldId === fieldId)?.role : undefined
+}
+
+function usableFieldId(schema: ListSchema, fields: FieldViewStyle[], fieldId?: string): string | undefined {
+  if (!fieldId || !schema.fields.some((f) => f.id === fieldId)) return undefined
+  return roleOf(fields, fieldId) === 'hidden' ? undefined : fieldId
+}
+
+export function resolveViewSlots(
+  schema: ListSchema,
+  view: Pick<NamedView, 'kind' | 'fields' | 'coverFieldId' | 'titleFieldId'>,
+): { titleFieldId?: string; coverFieldId?: string } {
+  const fields = view.fields ?? []
+  const allowed = rolesForKind(view.kind)
+  const titleFromRole = allowed.includes('title') ? fields.find((f) => f.role === 'title')?.fieldId : undefined
+  const coverFromRole = allowed.includes('cover') ? fields.find((f) => f.role === 'cover')?.fieldId : undefined
+  return {
+    titleFieldId: usableFieldId(schema, fields, view.titleFieldId) ?? titleFromRole,
+    coverFieldId: allowed.includes('cover')
+      ? (usableFieldId(schema, fields, view.coverFieldId) ?? coverFromRole)
+      : undefined,
+  }
+}
+
+function assignSlots(
+  schema: ListSchema,
+  kind: ViewKind,
+  fields: FieldViewStyle[],
+  hints: Pick<NamedView, 'coverFieldId' | 'titleFieldId'>,
+): { fields: FieldViewStyle[]; coverFieldId?: string; titleFieldId?: string } {
+  const allowed = rolesForKind(kind)
+  let next = fields
+  const slots = resolveViewSlots(schema, { kind, fields, coverFieldId: hints.coverFieldId, titleFieldId: hints.titleFieldId })
+
+  if (slots.titleFieldId && allowed.includes('title') && !next.some((f) => f.role === 'title')) {
+    next = next.map((row) => (row.fieldId === slots.titleFieldId ? { ...row, role: 'title' as FieldViewRole } : row))
+  }
+  if (slots.coverFieldId && allowed.includes('cover')) {
+    next = applyFieldRole(next, slots.coverFieldId, { role: 'cover' }, kind)
+  } else if (allowed.includes('cover') && !hints.coverFieldId) {
+    next = next.map((row) => (row.role === 'cover' && !slots.coverFieldId ? { ...row, role: fallbackRole(kind) } : row))
+  }
+
+  const synced = resolveViewSlots(schema, {
+    kind,
+    fields: next,
+    coverFieldId: slots.coverFieldId,
+    titleFieldId: slots.titleFieldId,
+  })
+  return { fields: next, coverFieldId: synced.coverFieldId, titleFieldId: synced.titleFieldId }
 }
 
 export function createNamedView(
@@ -59,9 +160,8 @@ export function createNamedView(
   name: string,
   extra: Partial<NamedView> = {},
 ): NamedView {
-  const fields = extra.fields ?? stylesForSchema(schema, kind)
-  const title = fields.find((f) => f.role === 'title')?.fieldId ?? schema.titleFieldId
-  const cover = fields.find((f) => f.role === 'cover')?.fieldId ?? schema.imageFieldId
+  const fields = mergeFieldStyles(schema, kind, extra.fields)
+  const slots = assignSlots(schema, kind, fields, extra)
   return {
     id: extra.id ?? uid(),
     name,
@@ -70,9 +170,9 @@ export function createNamedView(
     density: kind === 'table' ? extra.density ?? 'comfortable' : extra.density,
     groupFieldId: extra.groupFieldId ?? schema.groupFieldId,
     dateFieldId: extra.dateFieldId ?? schema.dateFieldId,
-    coverFieldId: cover,
-    titleFieldId: title,
-    fields,
+    coverFieldId: slots.coverFieldId,
+    titleFieldId: slots.titleFieldId,
+    fields: slots.fields,
   }
 }
 

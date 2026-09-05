@@ -47,6 +47,9 @@ export type TableDensity = (typeof TABLE_DENSITIES)[number]
 export const FIELD_VIEW_ROLES = ['hidden', 'column', 'cover', 'title', 'subtitle', 'badge', 'meta'] as const
 export type FieldViewRole = (typeof FIELD_VIEW_ROLES)[number]
 
+export const NUMBER_DISPLAYS = ['number', 'range', 'fraction', 'stars'] as const
+export type NumberDisplay = (typeof NUMBER_DISPLAYS)[number]
+
 export interface FieldViewStyle {
   fieldId: string
   role: FieldViewRole
@@ -54,6 +57,7 @@ export interface FieldViewStyle {
   prefix?: string
   suffix?: string
   decimals?: number
+  numberDisplay?: NumberDisplay
 }
 
 export interface NamedView {

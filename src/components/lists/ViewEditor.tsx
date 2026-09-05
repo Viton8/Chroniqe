@@ -1,14 +1,15 @@
-import { Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { ChevronDown, Plus, Trash2 } from 'lucide-react'
 import type { FieldViewRole, ListSchema, NamedView, ViewKind } from '../../types/domain'
 import { CARD_LAYOUTS, TABLE_DENSITIES, VIEW_KINDS } from '../../types/domain'
-import { createNamedView, rolesForKind } from '../../lib/views'
+import { applyFieldRole, createNamedView, fallbackRole, rolesForKind } from '../../lib/views'
 import { usePrefs } from '../../context/PrefsContext'
 import { FieldWrap, Input } from '../ui/Input'
 import Button from '../ui/Button'
 import Hint from '../ui/Hint'
 import { cn } from '../../lib/cn'
-
-const NUMERIC = new Set(['number', 'integer', 'rating'])
+import { displaysForField, fieldBounds, isNumericField } from '../../lib/display'
+import { formulaExample } from '../../lib/formula'
 
 export function ViewsManager({
   schema,
@@ -25,6 +26,11 @@ export function ViewsManager({
 }) {
   const { t } = usePrefs()
   const kinds = allowedKinds.length ? allowedKinds : [...VIEW_KINDS]
+  const [openIds, setOpenIds] = useState<string[]>(() => [activeViewId].filter(Boolean))
+
+  const toggleOpen = (id: string) => {
+    setOpenIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+  }
 
   const patchView = (id: string, next: NamedView) => {
     onChange({
@@ -68,38 +74,61 @@ export function ViewsManager({
         </div>
       </div>
 
-      <div className="space-y-4">
-        {views.map((view, index) => (
-          <article key={view.id} className="rounded-2xl border border-line p-4">
-            <div className="mb-3 flex items-center justify-between gap-2">
-              <p className="text-sm font-medium">
-                {t('viewEditor.viewN', { n: index + 1 })}
-              </p>
-              {views.length > 1 ? (
+      <div className="space-y-3">
+        {views.map((view, index) => {
+          const open = openIds.includes(view.id)
+          return (
+            <article key={view.id} className="rounded-2xl border border-line">
+              <div className="flex items-center gap-2 px-3 py-2.5">
                 <button
                   type="button"
-                  className="text-xs text-muted hover:text-rose-700"
-                  onClick={() => {
-                    const nextViews = views.filter((v) => v.id !== view.id)
-                    onChange({
-                      allowedKinds: kinds,
-                      views: nextViews,
-                      activeViewId: activeViewId === view.id ? nextViews[0].id : activeViewId,
-                    })
-                  }}
+                  className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                  aria-expanded={open}
+                  aria-label={t('viewEditor.toggle')}
+                  onClick={() => toggleOpen(view.id)}
                 >
-                  <Trash2 size={14} className="inline" /> {t('common.delete')}
+                  <ChevronDown
+                    size={16}
+                    className={cn('shrink-0 text-muted transition-transform', open ? 'rotate-0' : '-rotate-90')}
+                  />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium">
+                      {view.name || t('viewEditor.viewN', { n: index + 1 })}
+                    </span>
+                    <span className="block text-xs text-muted">{t(`views.${view.kind}`)}</span>
+                  </span>
                 </button>
+                {views.length > 1 ? (
+                  <button
+                    type="button"
+                    className="shrink-0 text-xs text-muted hover:text-rose-700"
+                    onClick={() => {
+                      const nextViews = views.filter((v) => v.id !== view.id)
+                      setOpenIds((prev) => prev.filter((id) => id !== view.id))
+                      onChange({
+                        allowedKinds: kinds,
+                        views: nextViews,
+                        activeViewId: activeViewId === view.id ? nextViews[0].id : activeViewId,
+                      })
+                    }}
+                  >
+                    <Trash2 size={14} className="inline" /> {t('common.delete')}
+                  </button>
+                ) : null}
+              </div>
+              {open ? (
+                <div className="border-t border-line p-4">
+                  <ViewEditor
+                    schema={schema}
+                    view={view}
+                    allowedKinds={kinds}
+                    onChange={(next) => patchView(view.id, next)}
+                  />
+                </div>
               ) : null}
-            </div>
-            <ViewEditor
-              schema={schema}
-              view={view}
-              allowedKinds={kinds}
-              onChange={(next) => patchView(view.id, next)}
-            />
-          </article>
-        ))}
+            </article>
+          )
+        })}
       </div>
 
       <Button
@@ -109,6 +138,7 @@ export function ViewsManager({
           const kind = kinds[0]
           const name = `${t(`views.${kind}`)} ${views.length + 1}`
           const created = createNamedView(schema, kind, name)
+          setOpenIds((prev) => [...prev, created.id])
           onChange({ allowedKinds: kinds, views: [...views, created], activeViewId })
         }}
       >
@@ -134,29 +164,34 @@ export default function ViewEditor({
   const roles = rolesForKind(view.kind)
   const groupFields = schema.fields.filter((f) => f.type === 'select')
   const dateFields = schema.fields.filter((f) => f.type === 'date' || f.type === 'datetime')
-  const imageFields = schema.fields.filter((f) => f.type === 'image' || f.type === 'file')
+  const coverFields = schema.fields
 
   const setKind = (kind: ViewKind) => {
-    const fields = view.fields.map((row) => ({
-      ...row,
-      role: rolesForKind(kind).includes(row.role) ? row.role : rolesForKind(kind)[1] ?? 'hidden',
-    }))
-    onChange({
-      ...view,
-      kind,
-      fields,
-      cardLayout: kind === 'cards' ? view.cardLayout ?? 'grid' : view.cardLayout,
-      density: kind === 'table' ? view.density ?? 'comfortable' : view.density,
-    })
+    onChange(
+      createNamedView(schema, kind, view.name, {
+        ...view,
+        kind,
+        cardLayout: kind === 'cards' ? view.cardLayout ?? 'grid' : view.cardLayout,
+        density: kind === 'table' ? view.density ?? 'comfortable' : view.density,
+      }),
+    )
   }
 
   const setField = (fieldId: string, patch: Partial<NamedView['fields'][number]>) => {
-    const fields = view.fields.some((f) => f.fieldId === fieldId)
-      ? view.fields.map((f) => (f.fieldId === fieldId ? { ...f, ...patch } : f))
-      : [...view.fields, { fieldId, role: 'hidden' as FieldViewRole, ...patch }]
-    const titleFieldId = fields.find((f) => f.role === 'title')?.fieldId ?? view.titleFieldId
-    const coverFieldId = fields.find((f) => f.role === 'cover')?.fieldId ?? view.coverFieldId
+    const fields = applyFieldRole(view.fields, fieldId, patch, view.kind)
+    const titleFieldId = fields.find((f) => f.role === 'title')?.fieldId
+    const coverFieldId = fields.find((f) => f.role === 'cover')?.fieldId
     onChange({ ...view, fields, titleFieldId, coverFieldId })
+  }
+
+  const setCover = (coverFieldId?: string) => {
+    const canCover = roles.includes('cover')
+    const fields = !canCover
+      ? view.fields
+      : coverFieldId
+        ? applyFieldRole(view.fields, coverFieldId, { role: 'cover' }, view.kind)
+        : view.fields.map((row) => (row.role === 'cover' ? { ...row, role: fallbackRole(view.kind) } : row))
+    onChange({ ...view, fields, coverFieldId })
   }
 
   return (
@@ -254,20 +289,21 @@ export default function ViewEditor({
         </FieldWrap>
       ) : null}
 
-      {view.kind === 'cards' || view.kind === 'board' ? (
+      {roles.includes('cover') ? (
         <FieldWrap label={t('viewEditor.coverField')}>
           <select
             className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
             value={view.coverFieldId ?? ''}
-            onChange={(e) => onChange({ ...view, coverFieldId: e.target.value || undefined })}
+            onChange={(e) => setCover(e.target.value || undefined)}
           >
-            <option value="">—</option>
-            {imageFields.map((f) => (
+            <option value="">{t('viewEditor.noCover')}</option>
+            {coverFields.map((f) => (
               <option key={f.id} value={f.id}>
                 {f.name}
               </option>
             ))}
           </select>
+          {!coverFields.length ? <p className="mt-1 text-xs text-muted">{t('viewEditor.noCoverHint')}</p> : null}
         </FieldWrap>
       ) : null}
 
@@ -276,8 +312,11 @@ export default function ViewEditor({
         <div className="space-y-2">
           {schema.fields.map((field) => {
             const row = view.fields.find((f) => f.fieldId === field.id)
-            const role = row?.role ?? 'hidden'
-            const numeric = NUMERIC.has(field.type)
+            const rawRole = row?.role ?? 'hidden'
+            const role = roles.includes(rawRole) ? rawRole : 'hidden'
+            const numeric = isNumericField(field)
+            const modes = displaysForField(field)
+            const bounds = fieldBounds(field)
             return (
               <div key={field.id} className="rounded-xl bg-ink/[0.03] p-3">
                 <div className="grid gap-2 sm:grid-cols-[1fr_8rem]">
@@ -298,29 +337,63 @@ export default function ViewEditor({
                   </select>
                 </div>
                 {role !== 'hidden' ? (
-                  <div className="mt-2 grid gap-2 sm:grid-cols-3">
-                    {numeric ? (
+                  <div className="mt-2 space-y-2">
+                    {numeric && modes.length > 1 ? (
+                      <div>
+                        <p className="mb-1 text-xs text-muted">{t('viewEditor.display')}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {modes.map((mode) => (
+                            <button
+                              key={mode}
+                              type="button"
+                              className={cn(
+                                'rounded-xl px-2.5 py-1 text-xs',
+                                (row?.numberDisplay ?? 'number') === mode
+                                  ? 'bg-ink text-paper'
+                                  : 'bg-ink/5 text-muted',
+                              )}
+                              onClick={() =>
+                                setField(field.id, { numberDisplay: mode === 'number' ? undefined : mode })
+                              }
+                            >
+                              {t(`viewEditor.displayOpt.${mode}`)}
+                            </button>
+                          ))}
+                        </div>
+                        {row?.numberDisplay === 'range' || row?.numberDisplay === 'fraction' ? (
+                          <p className="mt-1 text-xs text-muted">
+                            {bounds.min == null && bounds.max == null
+                              ? t('viewEditor.displayNeedBounds')
+                              : t('viewEditor.displayBounds', {
+                                  from: bounds.min ?? '—',
+                                  to: bounds.max ?? '—',
+                                })}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                    <div className={cn('grid gap-2', numeric ? 'sm:grid-cols-3' : 'sm:grid-cols-2')}>
+                      {numeric ? (
+                        <Input
+                          className="text-xs"
+                          placeholder={formulaExample(field)}
+                          value={row?.formula ?? ''}
+                          onChange={(e) => setField(field.id, { formula: e.target.value || undefined })}
+                        />
+                      ) : null}
                       <Input
                         className="text-xs"
-                        placeholder={t('viewEditor.formulaPh')}
-                        value={row?.formula ?? ''}
-                        onChange={(e) => setField(field.id, { formula: e.target.value || undefined })}
+                        placeholder={t('viewEditor.prefix')}
+                        value={row?.prefix ?? ''}
+                        onChange={(e) => setField(field.id, { prefix: e.target.value || undefined })}
                       />
-                    ) : (
-                      <span />
-                    )}
-                    <Input
-                      className="text-xs"
-                      placeholder={t('viewEditor.prefix')}
-                      value={row?.prefix ?? ''}
-                      onChange={(e) => setField(field.id, { prefix: e.target.value || undefined })}
-                    />
-                    <Input
-                      className="text-xs"
-                      placeholder={t('viewEditor.suffix')}
-                      value={row?.suffix ?? ''}
-                      onChange={(e) => setField(field.id, { suffix: e.target.value || undefined })}
-                    />
+                      <Input
+                        className="text-xs"
+                        placeholder={t('viewEditor.suffix')}
+                        value={row?.suffix ?? ''}
+                        onChange={(e) => setField(field.id, { suffix: e.target.value || undefined })}
+                      />
+                    </div>
                   </div>
                 ) : null}
               </div>

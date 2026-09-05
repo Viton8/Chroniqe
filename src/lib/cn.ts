@@ -41,11 +41,14 @@ export function formatDateTime(value: string | null | undefined): string {
 
 export function titleFromValues(
   values: Record<string, unknown>,
-  titleFieldId?: string,
+  titleFieldId?: string | string[],
 ): string {
-  if (titleFieldId && values[titleFieldId] != null) {
-    return String(values[titleFieldId])
-  }
+  const ids = Array.isArray(titleFieldId) ? titleFieldId : titleFieldId ? [titleFieldId] : []
+  const parts = ids
+    .map((id) => values[id])
+    .filter((v) => v != null && v !== '')
+    .map(String)
+  if (parts.length) return parts.join(' · ')
   const first = Object.values(values).find(
     (v) => typeof v === 'string' && v.trim().length > 0,
   )

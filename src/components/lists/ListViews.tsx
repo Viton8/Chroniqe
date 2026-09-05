@@ -9,13 +9,14 @@ import type {
   ListSchema,
   NamedView,
 } from '../../types/domain'
-import { displayStyledValue, displayValue } from '../../lib/display'
 import { fileMeta, isImageFile } from '../../lib/files'
-import { fieldsWithRole, styleForField } from '../../lib/views'
+import { fieldsWithRole, resolveViewSlots, styleForField } from '../../lib/views'
 import { cn, formatDate, titleFromValues } from '../../lib/cn'
 import { usePrefs } from '../../context/PrefsContext'
 import FileThumb from './FileThumb'
+import CoverSlot, { hasCoverVisual } from './CoverSlot'
 import ItemNotesMarker from './ItemNotes'
+import StyledValue from './StyledValue'
 
 const KIND_ICON = {
   table: Table2,
@@ -89,11 +90,10 @@ export default function ListViews({
   onNoteDeleted?: (id: string) => void
 }) {
   const { t } = usePrefs()
-  const titleId = view.titleFieldId ?? schema.titleFieldId
-  const coverId =
-    view.coverFieldId ??
-    fieldsWithRole(view, 'cover')[0]?.fieldId ??
-    schema.imageFieldId
+  const slots = resolveViewSlots(schema, view)
+  const titleStyles = fieldsWithRole(view, 'title')
+  const titleId = titleStyles[0]?.fieldId ?? slots.titleFieldId
+  const coverId = slots.coverFieldId
   const groupId = view.groupFieldId ?? schema.groupFieldId
   const dateId = view.dateFieldId ?? schema.dateFieldId
 
@@ -114,7 +114,17 @@ export default function ListViews({
   const renderField = (item: ItemRow, style: FieldViewStyle) => {
     const field = schema.fields.find((f) => f.id === style.fieldId)
     if (!field) return '—'
-    return displayStyledValue(field, item.values[field.id], style, ratings, item.id, item.values, schema)
+    return (
+      <StyledValue
+        field={field}
+        value={item.values[field.id]}
+        style={style}
+        ratings={ratings}
+        itemId={item.id}
+        values={item.values}
+        schema={schema}
+      />
+    )
   }
 
   if (view.kind === 'board' && !groupId) {
@@ -183,7 +193,8 @@ export default function ListViews({
     const sorted = [...items].sort((a, b) =>
       String(b.values[dateId] ?? '').localeCompare(String(a.values[dateId] ?? '')),
     )
-    const meta = [...fieldsWithRole(view, 'badge'), ...fieldsWithRole(view, 'meta')]
+    const badges = fieldsWithRole(view, 'badge')
+    const meta = fieldsWithRole(view, 'meta')
     return (
       <ol className="relative ml-3 border-l border-line">
         {sorted.map((item) => (
@@ -191,16 +202,29 @@ export default function ListViews({
             <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-accent" />
             <p className="text-xs text-muted">{formatDate(String(item.values[dateId] ?? ''))}</p>
             <div className="mt-1 flex items-start gap-2">
-              {coverId && fileMeta(item.values[coverId]) ? (
-                <FileThumb value={item.values[coverId]} className="h-12 w-9 shrink-0 rounded-lg" alt="" />
+              {coverId && hasCoverVisual(item.values[coverId]) ? (
+                <CoverSlot
+                  field={schema.fields.find((f) => f.id === coverId)}
+                  value={item.values[coverId]}
+                  className="h-12 w-9 shrink-0 rounded-lg"
+                  fallback={renderField(item, styleForField(view, coverId) ?? { fieldId: coverId, role: 'cover' })}
+                />
               ) : null}
               <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
                 <span className={cn('font-medium', item.is_checked && 'checked-out')}>
-                  {titleFromValues(item.values, titleId)}
+                  <ItemTitle
+                    item={item}
+                    styles={titleStyles}
+                    titleId={titleId}
+                    renderField={renderField}
+                  />
                 </span>
+                {badges.length ? (
+                  <BadgeRow item={item} badges={badges} schema={schema} className="mt-1" renderField={renderField} />
+                ) : null}
                 {meta.length ? (
                   <p className="mt-1 text-xs text-muted">
-                    {meta.map((s) => renderField(item, s)).join(' · ')}
+                    <JoinedFields item={item} styles={meta} renderField={renderField} />
                   </p>
                 ) : null}
               </button>
@@ -330,7 +354,17 @@ function FieldCell({
       )
     }
   }
-  return <>{displayStyledValue(field, value, style, ratings, item.id, item.values, schema)}</>
+  return (
+    <StyledValue
+      field={field}
+      value={value}
+      style={style}
+      ratings={ratings}
+      itemId={item.id}
+      values={item.values}
+      schema={schema}
+    />
+  )
 }
 
 function CheckToggle({
@@ -374,17 +408,35 @@ function ConfiguredCard({
   coverId?: string
   enableCheck?: boolean
   notes: ReactNode
-  renderField: (item: ItemRow, style: FieldViewStyle) => string
+  renderField: (item: ItemRow, style: FieldViewStyle) => ReactNode
   onOpen: (item: ItemRow) => void
   onToggle?: (item: ItemRow, next: boolean) => void
 }) {
   const layout = view.cardLayout ?? 'grid'
   const cover = coverId ? item.values[coverId] : undefined
-  const hasCover = Boolean(fileMeta(cover))
+  const coverField = coverId ? schema.fields.find((f) => f.id === coverId) : undefined
+  const hasCover = Boolean(coverId && hasCoverVisual(cover))
+  const titles = fieldsWithRole(view, 'title')
   const subtitle = fieldsWithRole(view, 'subtitle')
   const badges = fieldsWithRole(view, 'badge')
   const meta = fieldsWithRole(view, 'meta')
-  const title = titleFromValues(item.values, titleId)
+  const titleText = titleFromValues(
+    item.values,
+    titles.length ? titles.map((s) => s.fieldId) : titleId,
+  )
+  const titleNode = (
+    <ItemTitle item={item} styles={titles} titleId={titleId} renderField={renderField} />
+  )
+  const coverNode = (className: string) =>
+    coverId ? (
+      <CoverSlot
+        field={coverField}
+        value={cover}
+        className={className}
+        alt={titleText}
+        fallback={renderField(item, styleForField(view, coverId) ?? { fieldId: coverId, role: 'cover' })}
+      />
+    ) : null
 
   if (layout === 'compact') {
     return (
@@ -392,16 +444,16 @@ function ConfiguredCard({
         {enableCheck && onToggle ? (
           <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
         ) : null}
-        {hasCover ? <FileThumb value={cover} className="h-10 w-8 shrink-0 rounded-md" alt="" /> : null}
+        {hasCover ? coverNode('h-10 w-8 shrink-0 rounded-md') : null}
         <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
-          <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>{title}</p>
-          {subtitle[0] || meta[0] ? (
+          <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>{titleNode}</p>
+          {subtitle.length ? (
             <p className="truncate text-xs text-muted">
-              {[...subtitle, ...meta].slice(0, 2).map((s) => renderField(item, s)).join(' · ')}
+              <JoinedFields item={item} styles={subtitle} renderField={renderField} />
             </p>
           ) : null}
         </button>
-        <BadgeRow item={item} badges={badges} schema={schema} />
+        <BadgeRow item={item} badges={badges} schema={schema} renderField={renderField} />
         <div className="relative h-7 w-7 shrink-0">{notes}</div>
       </article>
     )
@@ -411,11 +463,15 @@ function ConfiguredCard({
     return (
       <article className="group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift">
         <button type="button" className="block w-full text-left" onClick={() => onOpen(item)}>
-          <FileThumb value={cover} className="aspect-[3/4] w-full" alt={title} />
+          {coverNode('aspect-[3/4] w-full')}
           <div className="p-3">
-            <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>{title}</p>
-            {subtitle[0] ? <p className="mt-0.5 text-xs text-muted">{renderField(item, subtitle[0])}</p> : null}
-            <BadgeRow item={item} badges={badges} schema={schema} className="mt-2" />
+            <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>{titleNode}</p>
+            {subtitle.length ? (
+              <p className="mt-0.5 text-xs text-muted">
+                <JoinedFields item={item} styles={subtitle} renderField={renderField} />
+              </p>
+            ) : null}
+            <BadgeRow item={item} badges={badges} schema={schema} className="mt-2" renderField={renderField} />
           </div>
         </button>
         <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notes}</div>
@@ -426,20 +482,20 @@ function ConfiguredCard({
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift">
       <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notes}</div>
-      {hasCover ? <FileThumb value={cover} className="aspect-[16/10] w-full" alt="" /> : null}
+      {hasCover ? coverNode('aspect-[16/10] w-full') : null}
       <div className={hasCover ? 'p-3' : 'p-3 pr-12'}>
         <div className="flex items-start gap-2">
           {enableCheck && onToggle ? (
             <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
           ) : null}
           <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
-            <h3 className={cn('font-medium', item.is_checked && 'checked-out')}>{title}</h3>
-            {subtitle.map((s) => (
-              <p key={s.fieldId} className="mt-0.5 text-sm text-muted">
-                {renderField(item, s)}
+            <h3 className={cn('font-medium', item.is_checked && 'checked-out')}>{titleNode}</h3>
+            {subtitle.length ? (
+              <p className="mt-0.5 text-sm text-muted">
+                <JoinedFields item={item} styles={subtitle} renderField={renderField} />
               </p>
-            ))}
-            <BadgeRow item={item} badges={badges} schema={schema} className="mt-2" />
+            ) : null}
+            <BadgeRow item={item} badges={badges} schema={schema} className="mt-2" renderField={renderField} />
             {meta.length ? (
               <dl className="mt-2 space-y-1 text-xs text-muted">
                 {meta.map((s) => {
@@ -461,16 +517,55 @@ function ConfiguredCard({
   )
 }
 
+function JoinedFields({
+  item,
+  styles,
+  renderField,
+}: {
+  item: ItemRow
+  styles: FieldViewStyle[]
+  renderField: (item: ItemRow, style: FieldViewStyle) => ReactNode
+}) {
+  if (!styles.length) return null
+  return (
+    <>
+      {styles.map((s, i) => (
+        <span key={s.fieldId}>
+          {i > 0 ? ' · ' : null}
+          {renderField(item, s)}
+        </span>
+      ))}
+    </>
+  )
+}
+
+function ItemTitle({
+  item,
+  styles,
+  titleId,
+  renderField,
+}: {
+  item: ItemRow
+  styles: FieldViewStyle[]
+  titleId?: string
+  renderField: (item: ItemRow, style: FieldViewStyle) => ReactNode
+}) {
+  if (!styles.length) return <>{titleFromValues(item.values, titleId)}</>
+  return <JoinedFields item={item} styles={styles} renderField={renderField} />
+}
+
 function BadgeRow({
   item,
   badges,
   schema,
   className,
+  renderField,
 }: {
   item: ItemRow
   badges: FieldViewStyle[]
   schema: ListSchema
   className?: string
+  renderField: (item: ItemRow, style: FieldViewStyle) => ReactNode
 }) {
   if (!badges.length) return null
   return (
@@ -486,7 +581,7 @@ function BadgeRow({
             className="rounded-full bg-ink/5 px-2 py-0.5 text-[11px] text-ink/80"
             style={opt?.color ? { background: `${opt.color}22`, color: opt.color } : undefined}
           >
-            {opt?.label ?? displayValue(field, raw)}
+            {opt?.label ?? renderField(item, s)}
           </span>
         )
       })}

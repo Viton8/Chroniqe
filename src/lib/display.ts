@@ -1,5 +1,85 @@
-import type { FieldDef, ItemRating } from '../types/domain'
+import type { FieldDef, FieldViewStyle, ItemRating, ListSchema, NumberDisplay } from '../types/domain'
+import { formatDate, formatDateTime } from './cn'
+import { subfieldAsDef } from './fields'
+import { evalFormula } from './formula'
 import { msg } from './i18n'
+
+const NUMERIC_TYPES = new Set(['number', 'integer', 'rating', 'multi_rating'])
+
+export function isNumericField(field: FieldDef): boolean {
+  return NUMERIC_TYPES.has(field.type)
+}
+
+export function fieldBounds(field: FieldDef): { min?: number; max?: number } {
+  const cfg = field.config ?? {}
+  if (field.type === 'rating' || field.type === 'multi_rating') {
+    return {
+      min: cfg.min ?? 1,
+      max: cfg.ratingMax ?? cfg.max ?? 10,
+    }
+  }
+  return {
+    min: typeof cfg.min === 'number' ? cfg.min : undefined,
+    max: typeof cfg.max === 'number' ? cfg.max : undefined,
+  }
+}
+
+export function displaysForField(field: FieldDef): NumberDisplay[] {
+  const { min, max } = fieldBounds(field)
+  const modes: NumberDisplay[] = ['number']
+  if (min != null || max != null) modes.push('range')
+  if (max != null) modes.push('fraction')
+  if (field.type === 'rating' || field.type === 'multi_rating') modes.push('stars')
+  return modes
+}
+
+export function resolveNumericValue(
+  field: FieldDef,
+  value: unknown,
+  style?: FieldViewStyle,
+  ratings?: ItemRating[],
+  itemId?: string,
+  values?: Record<string, unknown>,
+  schema?: ListSchema,
+): number | null {
+  if (style?.formula && values && schema) {
+    const n = evalFormula(style.formula, values, schema, {
+      ratings,
+      itemId,
+      currentFieldId: field.id,
+    })
+    if (n != null) return n
+  }
+  if (field.type === 'multi_rating' && ratings && itemId) {
+    const all = ratings.filter((r) => r.field_id === field.id && r.item_id === itemId)
+    if (!all.length) return null
+    return all.reduce((s, r) => s + Number(r.value), 0) / all.length
+  }
+  if (value == null || value === '') return null
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+export function formatNumberBody(n: number, decimals?: number): string {
+  if (decimals != null) return n.toFixed(decimals)
+  if (Number.isInteger(n)) return String(n)
+  return String(Math.round(n * 100) / 100)
+}
+
+export function formatNumberText(n: number, field: FieldDef, style?: FieldViewStyle): string {
+  const mode = style?.numberDisplay ?? 'number'
+  const { min, max } = fieldBounds(field)
+  const body = formatNumberBody(n, style?.decimals)
+  let core = body
+  if (mode === 'range') {
+    if (min != null && max != null) core = `${body} (${min}–${max})`
+    else if (max != null) core = `${body} (${msg('viewEditor.boundTo', { n: max })})`
+    else if (min != null) core = `${body} (${msg('viewEditor.boundFrom', { n: min })})`
+  } else if (mode === 'fraction' && max != null) {
+    core = `${body}/${max}`
+  }
+  return `${style?.prefix ?? ''}${core}${style?.suffix ?? ''}`
+}
 
 export function displayValue(
   field: FieldDef,
@@ -14,6 +94,40 @@ export function displayValue(
     return `${avg.toFixed(1)} (${all.length})`
   }
   if (value == null || value === '') return '—'
+  if (field.type === 'relation' || field.type === 'user') {
+    if (Array.isArray(value)) {
+      const labels = value
+        .map((row) => {
+          if (typeof row === 'object' && row && ('title' in row || 'name' in row)) {
+            return String((row as { title?: string; name?: string }).title ?? (row as { name?: string }).name ?? '')
+          }
+          return String(row ?? '')
+        })
+        .filter(Boolean)
+      return labels.join(', ') || '—'
+    }
+    if (typeof value === 'object' && value) {
+      const row = value as { title?: string; name?: string }
+      return row.title || row.name || '—'
+    }
+  }
+  if (field.type === 'sublist' && Array.isArray(value)) {
+    const sub = field.config?.subfields ?? []
+    const lines = value
+      .map((row) => {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) return ''
+        const record = row as Record<string, unknown>
+        return sub
+          .map((subfield) => {
+            const text = displayValue(subfieldAsDef(subfield), record[subfield.id], ratings, itemId)
+            return text === '—' ? '' : text
+          })
+          .filter(Boolean)
+          .join(' · ')
+      })
+      .filter(Boolean)
+    return lines.join('; ') || '—'
+  }
   if (Array.isArray(value)) return value.map(String).join(', ')
   if (typeof value === 'object' && value && 'name' in value) {
     return String((value as { name?: string }).name)
@@ -24,5 +138,33 @@ export function displayValue(
   if (field.type === 'boolean' || field.type === 'checkbox') {
     return value ? msg('fields.yes') : msg('fields.no')
   }
+  if (field.type === 'date') return formatDate(String(value))
+  if (field.type === 'datetime') return formatDateTime(String(value))
   return String(value)
+}
+
+export function displayStyledValue(
+  field: FieldDef,
+  value: unknown,
+  style?: FieldViewStyle,
+  ratings?: ItemRating[],
+  itemId?: string,
+  values?: Record<string, unknown>,
+  schema?: ListSchema,
+): string {
+  const numeric = resolveNumericValue(field, value, style, ratings, itemId, values, schema)
+  if (numeric != null && (isNumericField(field) || style?.formula)) {
+    const asText =
+      style?.numberDisplay === 'stars'
+        ? formatNumberText(numeric, field, { ...style, numberDisplay: 'fraction' })
+        : formatNumberText(numeric, field, style)
+    if (field.type === 'multi_rating' && ratings && itemId) {
+      const count = ratings.filter((r) => r.field_id === field.id && r.item_id === itemId).length
+      if (count) return `${asText} (${count})`
+    }
+    return asText
+  }
+  const base = displayValue(field, value, ratings, itemId)
+  if (base === '—' || (!style?.prefix && !style?.suffix)) return base
+  return `${style?.prefix ?? ''}${base}${style?.suffix ?? ''}`
 }

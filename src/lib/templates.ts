@@ -40,6 +40,17 @@ export interface TemplatePack {
     label: string
     fieldMap: Record<string, string>
   }>
+  onCheckMoves?: Array<{
+    fromKey: string
+    toKey: string
+    fieldMap: Record<string, string>
+  }>
+  /** Wire relation fields to sibling lists created in the same pack. */
+  relations?: Array<{
+    fromKey: string
+    fieldId: string
+    toKey: string
+  }>
 }
 
 function f(
@@ -88,6 +99,40 @@ export const TEMPLATES: TemplateSpec[] = [
         f('poster', 'Постер', 'image', { config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] } }),
         f('watched_at', 'Дата просмотра', 'date'),
         f('ratings', 'Оценки', 'multi_rating', { config: { min: 1, max: 10, ratingMax: 10 } }),
+        f('seasons', 'Сезоны', 'sublist', {
+          config: {
+            subfields: [
+              {
+                id: 'season',
+                key: 'season',
+                name: 'Сезон',
+                type: 'integer',
+                required: true,
+                config: { min: 1, max: 80 },
+              },
+              {
+                id: 'episodes',
+                key: 'episodes',
+                name: 'Серии',
+                type: 'integer',
+                config: { min: 1, max: 200 },
+              },
+              {
+                id: 'finished_at',
+                key: 'finished_at',
+                name: 'Досмотрен',
+                type: 'date',
+              },
+              {
+                id: 'score',
+                key: 'score',
+                name: 'Оценка сезона',
+                type: 'rating',
+                config: { ratingMax: 10, min: 1, max: 10 },
+              },
+            ],
+          },
+        }),
         f('review', 'Отзыв', 'textarea', { config: { maxLength: 2000 } }),
       ],
       titleFieldId: 'title',
@@ -215,6 +260,46 @@ export const TEMPLATES: TemplateSpec[] = [
     ],
   },
   {
+    key: 'games_backlog',
+    title: 'К прохождению',
+    icon: '🕹️',
+    description: 'Очередь игр. Перекидывайте в «Пройденные» кнопкой.',
+    hint: 'Набор «Игры» свяжет очередь и каталог пройденного — дата прохождения поставится сама.',
+    example: 'Hades, Switch, срочно → «Пройдено» → часы и оценка уже в другом списке.',
+    schema: {
+      fields: [
+        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
+        f('platform', 'Платформа', 'select', {
+          config: {
+            options: [
+              { value: 'pc', label: 'PC' },
+              { value: 'ps', label: 'PlayStation' },
+              { value: 'xbox', label: 'Xbox' },
+              { value: 'switch', label: 'Switch' },
+              { value: 'mobile', label: 'Телефон' },
+              { value: 'other', label: 'Другое' },
+            ],
+          },
+        }),
+        f('cover', 'Обложка', 'image', { config: { maxSizeMb: 2 } }),
+        f('priority', 'Приоритет', 'select', {
+          config: {
+            options: [
+              { value: 'now', label: 'Срочно', color: '#be123c' },
+              { value: 'soon', label: 'Скоро', color: '#b45309' },
+              { value: 'someday', label: 'Когда-нибудь', color: '#6e6578' },
+            ],
+          },
+        }),
+        f('note', 'Заметка', 'textarea', { config: { maxLength: 500 } }),
+      ],
+      titleFieldId: 'title',
+      imageFieldId: 'cover',
+      groupFieldId: 'priority',
+    },
+    view: { mode: 'cards', imageFieldId: 'cover', groupFieldId: 'priority' },
+  },
+  {
     key: 'shopping',
     title: 'Покупки',
     icon: '🛒',
@@ -236,14 +321,17 @@ export const TEMPLATES: TemplateSpec[] = [
           },
         }),
         f('note', 'Заметка', 'text', { config: { maxLength: 200 } }),
+        f('bought_at', 'Куплено', 'date', { hidden: true }),
       ],
       titleFieldId: 'name',
+      dateFieldId: 'bought_at',
       groupFieldId: 'category',
     },
     settings: {
       enableCheck: true,
       checkLabel: 'Куплено',
       onCheck: [{ type: 'set_now', fieldId: 'bought_at' }],
+      onUncheck: [{ type: 'restore_snapshot' }],
     },
     view: { mode: 'compact', groupFieldId: 'category' },
   },
@@ -365,9 +453,88 @@ export const TEMPLATES: TemplateSpec[] = [
     },
     view: { mode: 'board', groupFieldId: 'status' },
   },
+  {
+    key: 'catalog_items',
+    title: 'Каталог',
+    icon: '📚',
+    description: 'Справочник сущностей без повторов: фильмы, книги, места, блюда — что угодно.',
+    hint: 'Одна запись = один объект. Повторные события с датами и оценками ведите в журнале из набора «Каталог и журнал».',
+    example: '«Дюна», 2021, постер. Сам фильм один — просмотры с разными оценками живут в журнале.',
+    schema: {
+      fields: [
+        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
+        f('year', 'Год', 'integer', { config: { min: 1, max: 2100 } }),
+        f('kind', 'Тип', 'select', {
+          config: {
+            options: [
+              { value: 'film', label: 'Фильм' },
+              { value: 'book', label: 'Книга' },
+              { value: 'game', label: 'Игра' },
+              { value: 'place', label: 'Место' },
+              { value: 'other', label: 'Другое' },
+            ],
+          },
+        }),
+        f('cover', 'Обложка', 'image', {
+          config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] },
+        }),
+        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+      ],
+      titleFieldId: 'title',
+      imageFieldId: 'cover',
+      groupFieldId: 'kind',
+    },
+    view: { mode: 'cards', imageFieldId: 'cover', groupFieldId: 'kind' },
+  },
+  {
+    key: 'event_log',
+    title: 'Журнал',
+    icon: '🗒️',
+    description: 'Повторяющиеся события: каждый раз — своя дата, оценка и заметка, ссылка на запись каталога.',
+    hint: 'Свяжите поле «Что» со списком-каталогом. Один фильм можно открыть много раз — каждый просмотр отдельной строкой.',
+    example: 'Дюна · 12.03.2024 · 9; Дюна · 01.09.2025 · 8 — два просмотра, две оценки.',
+    schema: {
+      fields: [
+        f('subject', 'Что', 'relation', {
+          required: true,
+          config: { relationDisplay: 'title_cover', allowMultiple: false },
+        }),
+        f('happened_at', 'Дата', 'date', { required: true }),
+        f('score', 'Оценка', 'rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
+        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+      ],
+      titleFieldId: 'subject',
+      dateFieldId: 'happened_at',
+    },
+    view: { mode: 'table', dateFieldId: 'happened_at' },
+    charts: [
+      {
+        name: 'Лента событий',
+        chart_type: 'timeline',
+        config: { dateFieldId: 'happened_at', aggregation: 'count' },
+      },
+      {
+        name: 'Оценки во времени',
+        chart_type: 'stem',
+        config: { dateFieldId: 'happened_at', valueFieldId: 'score', aggregation: 'avg' },
+      },
+    ],
+  },
 ]
 
 export const TEMPLATE_PACKS: TemplatePack[] = [
+  {
+    key: 'catalog_log',
+    title: 'Каталог и журнал',
+    icon: '📖',
+    description: 'Справочник объектов + журнал повторений: одна сущность — много дат и оценок.',
+    hint: 'Создаются «Каталог» и «Журнал». В журнале поле «Что» уже связано с каталогом и показывает название с обложкой.',
+    lists: [
+      TEMPLATES.find((t) => t.key === 'catalog_items')!,
+      TEMPLATES.find((t) => t.key === 'event_log')!,
+    ],
+    relations: [{ fromKey: 'event_log', fieldId: 'subject', toKey: 'catalog_items' }],
+  },
   {
     key: 'cinema',
     title: 'Кино и сериалы',
@@ -418,9 +585,48 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
         label: 'К Новому году',
         fieldMap: { name: 'name', qty: 'qty' },
       },
+      {
+        fromKey: 'bought',
+        toKey: 'shopping',
+        label: 'Вернуть в покупки',
+        fieldMap: { name: 'name', qty: 'qty', category: 'category' },
+      },
+    ],
+    onCheckMoves: [
+      {
+        fromKey: 'shopping',
+        toKey: 'bought',
+        fieldMap: { name: 'name', qty: 'qty', category: 'category', bought_at: 'bought_at' },
+      },
+    ],
+  },
+  {
+    key: 'games',
+    title: 'Игры',
+    icon: '🎮',
+    description: 'Очередь и пройденное. Кнопка переноса уже настроена.',
+    hint: 'В «К прохождению» появится кнопка «Пройдено» — дата прохождения ставится сегодня.',
+    lists: [
+      TEMPLATES.find((t) => t.key === 'games_backlog')!,
+      TEMPLATES.find((t) => t.key === 'games_done')!,
+    ],
+    transfers: [
+      {
+        fromKey: 'games_backlog',
+        toKey: 'games_done',
+        label: 'Пройдено',
+        fieldMap: { title: 'title', platform: 'platform', cover: 'cover' },
+      },
     ],
   },
 ]
+
+export function blankSchema(titleFieldName: string): ListSchema {
+  return {
+    fields: [f('title', titleFieldName, 'text', { required: true, config: { maxLength: 200 } })],
+    titleFieldId: 'title',
+  }
+}
 
 export function cloneTemplate(spec: TemplateSpec): {
   title: string
@@ -460,6 +666,80 @@ export function applyTransferDefaults(
     deleteSource: a.deleteSource ?? true,
     setFields: { ...(a.setFields ?? {}), ...(extraSet ?? {}) },
   }))
+}
+
+const STAMP_FIELDS = ['watched_at', 'bought_at', 'decided_at', 'finished_at'] as const
+
+function stampFieldsFor(target: TemplateSpec | undefined): Record<string, unknown> {
+  const ids = new Set((target?.schema.fields ?? []).map((field) => field.id))
+  return Object.fromEntries(STAMP_FIELDS.filter((id) => ids.has(id)).map((id) => [id, '$today']))
+}
+
+export function applyPackSettings(
+  pack: TemplatePack,
+  created: Record<string, string>,
+): Array<{ listId: string; settings: ListSettings; schema?: ListSchema }> {
+  const byKey: Record<string, ListSettings> = {}
+  const schemaByKey: Record<string, ListSchema> = {}
+  for (const spec of pack.lists) {
+    byKey[spec.key] = structuredClone(spec.settings ?? {})
+    schemaByKey[spec.key] = structuredClone(spec.schema)
+  }
+
+  for (const link of pack.relations ?? []) {
+    const relatedId = created[link.toKey]
+    const schema = schemaByKey[link.fromKey]
+    if (!relatedId || !schema) continue
+    const field = schema.fields.find((row) => row.id === link.fieldId)
+    if (!field) continue
+    field.config = { ...field.config, relatedListId: relatedId }
+  }
+
+  for (const transfer of pack.transfers ?? []) {
+    const fromId = created[transfer.fromKey]
+    const toId = created[transfer.toKey]
+    if (!fromId || !toId) continue
+    const target = pack.lists.find((row) => row.key === transfer.toKey)
+    const settings = byKey[transfer.fromKey] ?? {}
+    settings.transferActions = [
+      ...(settings.transferActions ?? []),
+      {
+        id: crypto.randomUUID(),
+        label: transfer.label,
+        targetListId: toId,
+        fieldMap: transfer.fieldMap,
+        deleteSource: true,
+        setFields: stampFieldsFor(target),
+      },
+    ]
+    byKey[transfer.fromKey] = settings
+  }
+
+  for (const move of pack.onCheckMoves ?? []) {
+    const toId = created[move.toKey]
+    if (!toId) continue
+    const settings = byKey[move.fromKey] ?? {}
+    settings.onCheck = [
+      ...(settings.onCheck ?? []),
+      { type: 'move_to_list', targetListId: toId, fieldMap: move.fieldMap, deleteSource: true },
+    ]
+    settings.onUncheck = settings.onUncheck ?? [{ type: 'restore_snapshot' }]
+    byKey[move.fromKey] = settings
+  }
+
+  return pack.lists
+    .map((spec) => {
+      const listId = created[spec.key]
+      if (!listId) return null
+      const schema = schemaByKey[spec.key]
+      const linked = Boolean(pack.relations?.some((row) => row.fromKey === spec.key))
+      return {
+        listId,
+        settings: byKey[spec.key] ?? {},
+        schema: linked ? schema : undefined,
+      }
+    })
+    .filter((row): row is { listId: string; settings: ListSettings; schema?: ListSchema } => Boolean(row))
 }
 
 export function checkActionsFromTemplate(spec: TemplateSpec): AutomationAction[] {

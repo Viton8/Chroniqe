@@ -1,15 +1,16 @@
 import { msg } from './i18n'
 import type { FieldDef, ItemRow, ListSchema } from '../types/domain'
 
+export function isEmptyValue(value: unknown): boolean {
+  return value == null || value === '' || (Array.isArray(value) && value.length === 0)
+}
+
 export function validateField(
   field: FieldDef,
   value: unknown,
 ): string | null {
   const cfg = field.config ?? {}
-  const empty =
-    value == null ||
-    value === '' ||
-    (Array.isArray(value) && value.length === 0)
+  const empty = isEmptyValue(value)
 
   if (field.required && empty) {
     return msg('fields.required', { name: field.name })
@@ -82,6 +83,27 @@ export function validateField(
     }
     case 'sublist': {
       if (!Array.isArray(value)) return msg('fields.nested')
+      const sub = cfg.subfields ?? []
+      for (const [index, row] of value.entries()) {
+        if (!row || typeof row !== 'object' || Array.isArray(row)) {
+          return msg('fields.nested')
+        }
+        const record = row as Record<string, unknown>
+        for (const subfield of sub) {
+          const nested = validateField(
+            {
+              id: subfield.id,
+              key: subfield.key,
+              name: subfield.name,
+              type: subfield.type,
+              required: subfield.required,
+              config: subfield.config,
+            },
+            record[subfield.id],
+          )
+          if (nested) return msg('fields.nestedRow', { n: index + 1, error: nested })
+        }
+      }
       break
     }
     default:
@@ -93,15 +115,45 @@ export function validateField(
 export function validateItem(
   schema: ListSchema,
   values: Record<string, unknown>,
+  ctx?: { items?: ItemRow[]; excludeId?: string },
 ): string[] {
-  return schema.fields
+  const fieldErrors = schema.fields
     .map((field) => validateField(field, values[field.id]))
-    .filter((msg): msg is string => Boolean(msg))
+    .filter((message): message is string => Boolean(message))
+  if (!ctx?.items) return fieldErrors
+  const uniqueErrors = schema.fields
+    .filter((field) => field.unique)
+    .flatMap((field) => {
+      const raw = values[field.id]
+      if (raw == null || raw === '') return []
+      const key = uniqueKey(raw)
+      const clash = ctx.items!.some(
+        (row) => row.id !== ctx.excludeId && uniqueKey(row.values[field.id]) === key,
+      )
+      return clash ? [msg('fields.unique', { name: field.name })] : []
+    })
+  return [...fieldErrors, ...uniqueErrors]
+}
+
+function uniqueKey(value: unknown): string {
+  if (Array.isArray(value)) return [...value].map(String).sort().join('\0')
+  return String(value).trim().toLowerCase()
+}
+
+function cloneDefault(value: unknown): unknown {
+  if (Array.isArray(value)) return [...value]
+  if (value && typeof value === 'object') return { ...(value as Record<string, unknown>) }
+  return value
 }
 
 export function emptyValues(schema: ListSchema): Record<string, unknown> {
   const values: Record<string, unknown> = {}
   for (const field of schema.fields) {
+    const fallback = field.config?.defaultValue
+    if (fallback !== undefined && fallback !== null && fallback !== '') {
+      values[field.id] = cloneDefault(fallback)
+      continue
+    }
     if (field.type === 'multiselect' || field.type === 'tags' || field.type === 'sublist') {
       values[field.id] = []
     } else if (field.type === 'boolean' || field.type === 'checkbox') {
@@ -136,6 +188,24 @@ export const IMAGE_MIMES = [
   'image/gif',
 ] as const
 
+const EXT_MIME: Record<string, string> = {
+  webp: 'image/webp',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  pdf: 'application/pdf',
+  csv: 'text/csv',
+  json: 'application/json',
+  txt: 'text/plain',
+}
+
+export function fileMime(file: File): string {
+  if (file.type && file.type !== 'application/octet-stream') return file.type
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return EXT_MIME[ext] ?? file.type
+}
+
 export function assertSafeFile(
   file: File,
   opts: { imagesOnly?: boolean; maxMb?: number },
@@ -145,7 +215,7 @@ export function assertSafeFile(
     return msg('fields.fileBig', { n: maxMb })
   }
   const allowed = opts.imagesOnly ? IMAGE_MIMES : ALLOWED_UPLOAD_MIMES
-  if (!(allowed as readonly string[]).includes(file.type)) {
+  if (!(allowed as readonly string[]).includes(fileMime(file))) {
     return msg('fields.fileType')
   }
   const name = file.name.toLowerCase()

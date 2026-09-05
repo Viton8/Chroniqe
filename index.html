@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="ru">
+<html lang="ru" data-palette="violet">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
@@ -22,8 +22,17 @@
           t === 'dark' ||
           (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
         if (dark) document.documentElement.classList.add('dark')
+        var palettes = ['violet', 'ocean', 'forest', 'rose', 'amber', 'slate']
+        var p = localStorage.getItem('chroniqe-palette')
+        document.documentElement.setAttribute(
+          'data-palette',
+          palettes.indexOf(p) >= 0 ? p : 'violet',
+        )
+        var langs = ['ru', 'en', 'pl', 'es', 'zh', 'de', 'fr', 'uk', 'be', 'it']
         var lang = localStorage.getItem('chroniqe-lang')
-        if (lang === 'en' || lang === 'ru') document.documentElement.lang = lang
+        if (langs.indexOf(lang) >= 0) {
+          document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang
+        }
       } catch (e) {}
     </script>
   </head>

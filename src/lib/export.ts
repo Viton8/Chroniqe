@@ -1,4 +1,4 @@
-import type { FieldDef, ItemRow, ListSchema } from '../types/domain'
+import type { FieldDef, ItemRow, ListSchema, ListSettings, ViewConfig } from '../types/domain'
 import { titleFromValues } from './cn'
 
 export function itemsToCsv(schema: ListSchema, items: ItemRow[]): string {
@@ -37,26 +37,37 @@ export function itemsToJson(
 
 export function parseImportJson(text: string): {
   schema?: ListSchema
-  items: Array<{ values: Record<string, unknown>; is_checked?: boolean }>
+  settings?: ListSettings
+  view_config?: ViewConfig
+  items: Array<{ values: Record<string, unknown>; is_checked?: boolean; position?: number }>
 } {
   const data = JSON.parse(text) as {
     schema?: ListSchema
-    list?: { schema?: ListSchema }
-    items?: Array<{ values?: Record<string, unknown>; is_checked?: boolean } | Record<string, unknown>>
+    settings?: ListSettings
+    view_config?: ViewConfig
+    list?: { schema?: ListSchema; settings?: ListSettings; view_config?: ViewConfig }
+    items?: Array<
+      | { values?: Record<string, unknown>; is_checked?: boolean; position?: number }
+      | Record<string, unknown>
+    >
   }
   const schema = data.schema ?? data.list?.schema
-  const items: Array<{ values: Record<string, unknown>; is_checked?: boolean }> = (
+  const settings = data.settings ?? data.list?.settings
+  const view_config = data.view_config ?? data.list?.view_config
+  const items: Array<{ values: Record<string, unknown>; is_checked?: boolean; position?: number }> = (
     data.items ?? []
   ).map((raw) => {
     if (raw && typeof raw === 'object' && 'values' in raw && raw.values) {
+      const row = raw as { values: Record<string, unknown>; is_checked?: boolean; position?: number }
       return {
-        values: raw.values as Record<string, unknown>,
-        is_checked: Boolean((raw as { is_checked?: boolean }).is_checked),
+        values: row.values,
+        is_checked: Boolean(row.is_checked),
+        position: typeof row.position === 'number' ? row.position : undefined,
       }
     }
     return { values: raw as Record<string, unknown> }
   })
-  return { schema, items }
+  return { schema, settings, view_config, items }
 }
 
 export function parseCsv(text: string): string[][] {
@@ -96,22 +107,56 @@ export function parseCsv(text: string): string[][] {
   return rows.filter((r) => r.some((c) => c.trim().length > 0))
 }
 
+export function mappingFromCsvHeader(header: string[], fields: FieldDef[]): Record<number, string> {
+  const mapping: Record<number, string> = {}
+  const used = new Set<string>()
+  const byName = new Map(fields.map((f) => [f.name.trim().toLowerCase(), f]))
+  const byKey = new Map(fields.map((f) => [f.key.trim().toLowerCase(), f]))
+  const byId = new Map(fields.map((f) => [f.id.toLowerCase(), f]))
+
+  header.forEach((raw, i) => {
+    const name = raw.trim().toLowerCase()
+    if (name === 'id' || name === 'checked') return
+    const field = byName.get(name) ?? byKey.get(name) ?? byId.get(name)
+    if (field && !used.has(field.id)) {
+      mapping[i] = field.id
+      used.add(field.id)
+    }
+  })
+
+  if (!Object.keys(mapping).length) {
+    const first = header[0]?.trim().toLowerCase()
+    const second = header[1]?.trim().toLowerCase()
+    const offset = first === 'id' ? (second === 'checked' ? 2 : 1) : 0
+    fields.forEach((f, i) => {
+      mapping[i + offset] = f.id
+    })
+  }
+  return mapping
+}
+
 export function mapCsvToItems(
   rows: string[][],
   fields: FieldDef[],
-  mapping: Record<number, string>,
-): Array<{ values: Record<string, unknown> }> {
+  mapping?: Record<number, string>,
+): Array<{ values: Record<string, unknown>; is_checked?: boolean }> {
   const [header, ...body] = rows
   if (!header) return []
+  const resolved = mapping ?? mappingFromCsvHeader(header, fields)
+  const checkedCol = header.findIndex((h) => h.trim().toLowerCase() === 'checked')
   return body.map((cols) => {
     const values: Record<string, unknown> = {}
-    for (const [colStr, fieldId] of Object.entries(mapping)) {
+    for (const [colStr, fieldId] of Object.entries(resolved)) {
       const col = Number(colStr)
       const field = fields.find((f) => f.id === fieldId)
       if (!field) continue
       values[fieldId] = coerce(field, cols[col] ?? '')
     }
-    return { values }
+    const is_checked =
+      checkedCol >= 0
+        ? ['1', 'true', 'yes', 'да'].includes((cols[checkedCol] ?? '').trim().toLowerCase())
+        : undefined
+    return { values, is_checked }
   })
 }
 

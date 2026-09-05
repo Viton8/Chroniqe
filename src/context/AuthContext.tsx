@@ -10,12 +10,16 @@ import {
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../services/supabase'
 import { fetchProfile } from '../services/api'
+import { appUrl } from '../lib/share'
 import type { Profile } from '../types/domain'
+
+export const ACCOUNT_BLOCKED = 'ACCOUNT_BLOCKED'
 
 interface AuthContextValue {
   session: Session | null
   user: User | null
   profile: Profile | null
+  isAdmin: boolean
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (input: {
@@ -42,6 +46,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
     const p = await fetchProfile(userId)
+    if (p?.blocked_at) {
+      await supabase.auth.signOut()
+      setProfile(null)
+      return
+    }
     setProfile(p)
   }, [])
 
@@ -74,10 +83,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       user: session?.user ?? null,
       profile,
+      isAdmin: Boolean(profile?.is_admin) && !profile?.blocked_at,
       loading,
       signIn: async (email, password) => {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+        const p = data.user ? await fetchProfile(data.user.id) : null
+        if (p?.blocked_at) {
+          await supabase.auth.signOut()
+          setProfile(null)
+          throw new Error(ACCOUNT_BLOCKED)
+        }
+        setProfile(p)
       },
       signUp: async ({ email, password, username, displayName }) => {
         const { data, error } = await supabase.auth.signUp({
@@ -85,7 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           password,
           options: {
             data: { username: username.toLowerCase(), display_name: displayName },
-            emailRedirectTo: `${window.location.origin}/Chroniqe/login`,
+            emailRedirectTo: appUrl('login'),
           },
         })
         if (error) throw error
@@ -97,7 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       resetPassword: async (email) => {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: `${window.location.origin}/Chroniqe/reset-password`,
+          redirectTo: appUrl('reset-password'),
         })
         if (error) throw error
       },

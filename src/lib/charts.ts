@@ -6,6 +6,7 @@ import type {
   ItemRow,
   ListSchema,
 } from '../types/domain'
+import { displayValue } from './display'
 import { msg } from './i18n'
 
 export interface ChartPoint {
@@ -47,11 +48,12 @@ export function buildChartSeries(
   const agg = config.aggregation ?? (valueField ? 'avg' : 'count')
 
   if (type === 'pie') {
-    const groupId = config.groupFieldId ?? config.valueFieldId
+    const groupField = fieldById(schema, config.groupFieldId)
     const counts = new Map<string, number>()
     for (const item of items) {
-      const key = String(item.values[groupId ?? ''] ?? '—')
-      counts.set(key, (counts.get(key) ?? 0) + 1)
+      const raw = groupField ? item.values[groupField.id] : null
+      const key = groupField ? displayValue(groupField, raw, ratings, item.id) : '—'
+      counts.set(key || '—', (counts.get(key || '—') ?? 0) + 1)
     }
     return [...counts.entries()].map(([label, value]) => ({ label, value }))
   }
@@ -70,27 +72,59 @@ export function buildChartSeries(
 
   const buckets = new Map<string, number[]>()
   for (const item of items) {
-    const rawDate = dateField ? item.values[dateField.id] : item.created_at
-    const dateStr = rawDate ? String(rawDate).slice(0, 10) : ''
-    if (!dateStr) continue
+    const label = axisLabel(dateField, dateField ? item.values[dateField.id] : item.created_at, ratings, item.id)
     const n =
       agg === 'count'
         ? 1
         : numericFromValue(valueField, item.values[valueField?.id ?? ''], ratings, item.id)
     if (n == null) continue
-    const arr = buckets.get(dateStr) ?? []
+    const arr = buckets.get(label) ?? []
     arr.push(n)
-    buckets.set(dateStr, arr)
+    buckets.set(label, arr)
   }
 
   return [...buckets.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) => compareAxisLabels(a, b, dateField))
     .map(([label, nums]) => {
       let value = nums.length
-      if (agg === 'sum') value = nums.reduce((a, b) => a + b, 0)
-      if (agg === 'avg') value = nums.reduce((a, b) => a + b, 0) / nums.length
+      if (agg === 'sum') value = nums.reduce((s, x) => s + x, 0)
+      if (agg === 'avg') value = nums.reduce((s, x) => s + x, 0) / nums.length
       if (agg === 'min') value = Math.min(...nums)
       if (agg === 'max') value = Math.max(...nums)
-      return { label, date: new Date(label).getTime(), value: Number(value.toFixed(2)) }
+      const ts = Date.parse(label)
+      return {
+        label,
+        date: Number.isFinite(ts) ? ts : undefined,
+        value: Number(value.toFixed(2)),
+      }
     })
+}
+
+function axisLabel(
+  field: FieldDef | undefined,
+  value: unknown,
+  ratings: ItemRating[],
+  itemId: string,
+): string {
+  if (!field) {
+    return value != null && value !== '' ? String(value).slice(0, 10) : '—'
+  }
+  if (field.type === 'date' || field.type === 'datetime') {
+    if (value == null || value === '') return '—'
+    const raw = String(value)
+    return field.type === 'date' ? raw.slice(0, 10) : raw.slice(0, 16).replace('T', ' ')
+  }
+  return displayValue(field, value, ratings, itemId)
+}
+
+function compareAxisLabels(a: string, b: string, field?: FieldDef): number {
+  if (!field || field.type === 'date' || field.type === 'datetime') {
+    return a.localeCompare(b)
+  }
+  if (field.type === 'number' || field.type === 'integer' || field.type === 'rating') {
+    const na = Number(a)
+    const nb = Number(b)
+    if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb
+  }
+  return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' })
 }

@@ -13,14 +13,16 @@ export default {
         accent: {
           DEFAULT: 'var(--c-accent)',
           soft: 'var(--c-accent-soft)',
+          hover: 'var(--c-accent-hover)',
         },
+        'on-accent': 'var(--c-on-accent)',
       },
       fontFamily: {
         sans: ['Manrope', 'system-ui', 'sans-serif'],
         serif: ['Fraunces', 'Georgia', 'serif'],
       },
       boxShadow: {
-        lift: '0 1px 0 rgba(28, 23, 36, 0.04), 0 12px 32px -18px rgba(28, 23, 36, 0.28)',
+        lift: 'var(--c-shadow)',
       },
     },
   },

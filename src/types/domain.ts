@@ -35,8 +35,52 @@ export const VIEW_MODES = [
 
 export type ViewMode = (typeof VIEW_MODES)[number]
 
-export const VISIBILITY = ['private', 'invite', 'friends', 'public'] as const
+export const VIEW_KINDS = ['table', 'cards', 'board', 'timeline', 'calendar'] as const
+export type ViewKind = (typeof VIEW_KINDS)[number]
+
+export const CARD_LAYOUTS = ['grid', 'media', 'compact'] as const
+export type CardLayout = (typeof CARD_LAYOUTS)[number]
+
+export const TABLE_DENSITIES = ['comfortable', 'compact'] as const
+export type TableDensity = (typeof TABLE_DENSITIES)[number]
+
+export const FIELD_VIEW_ROLES = ['hidden', 'column', 'cover', 'title', 'subtitle', 'badge', 'meta'] as const
+export type FieldViewRole = (typeof FIELD_VIEW_ROLES)[number]
+
+export const NUMBER_DISPLAYS = ['number', 'range', 'fraction', 'stars'] as const
+export type NumberDisplay = (typeof NUMBER_DISPLAYS)[number]
+
+export const RELATION_DISPLAYS = ['title', 'title_cover', 'media'] as const
+export type RelationDisplay = (typeof RELATION_DISPLAYS)[number]
+
+export interface FieldViewStyle {
+  fieldId: string
+  role: FieldViewRole
+  formula?: string
+  prefix?: string
+  suffix?: string
+  decimals?: number
+  numberDisplay?: NumberDisplay
+}
+
+export interface NamedView {
+  id: string
+  name: string
+  kind: ViewKind
+  cardLayout?: CardLayout
+  density?: TableDensity
+  groupFieldId?: string
+  dateFieldId?: string
+  coverFieldId?: string
+  titleFieldId?: string
+  fields: FieldViewStyle[]
+}
+
+export const VISIBILITY = ['private', 'invite', 'friends', 'public', 'link'] as const
 export type Visibility = (typeof VISIBILITY)[number]
+
+export const LINK_ACCESS = ['off', 'view', 'propose', 'edit'] as const
+export type LinkAccess = (typeof LINK_ACCESS)[number]
 
 export const EDIT_MODES = ['owner', 'selected', 'friends', 'proposals'] as const
 export type EditMode = (typeof EDIT_MODES)[number]
@@ -84,7 +128,10 @@ export interface FieldConfig {
   maxSizeMb?: number
   relatedListId?: string
   allowMultiple?: boolean
+  /** How linked items render in views: title only, thumb+title, or cover card. */
+  relationDisplay?: RelationDisplay
   subfields?: SublistField[]
+  defaultValue?: unknown
 }
 
 export interface FieldDef {
@@ -94,6 +141,8 @@ export interface FieldDef {
   type: FieldType
   required?: boolean
   hidden?: boolean
+  unique?: boolean
+  description?: string
   config?: FieldConfig
 }
 
@@ -132,10 +181,18 @@ export interface ListSettings {
   transferActions?: TransferAction[]
   onCheck?: AutomationAction[]
   onUncheck?: AutomationAction[]
+  linkAccess?: 'view' | 'propose' | 'edit'
+  showcase?: {
+    featured?: boolean
+    topic?: 'views' | 'charts' | 'collab' | 'flow' | 'ratings'
+  }
 }
 
 export interface ViewConfig {
-  mode: ViewMode
+  mode?: ViewMode
+  activeViewId?: string
+  allowedKinds?: ViewKind[]
+  views?: NamedView[]
   sortFieldId?: string
   sortDir?: 'asc' | 'desc'
   groupFieldId?: string
@@ -152,6 +209,8 @@ export interface Profile {
   avatar_url: string | null
   created_at: string
   updated_at: string
+  is_admin?: boolean
+  blocked_at?: string | null
 }
 
 export interface ListRow {
@@ -197,11 +256,17 @@ export interface ItemRating {
   profile?: Profile
 }
 
+export const NOTE_COLOR_IDS = ['violet', 'rose', 'amber', 'teal', 'sky', 'emerald', 'slate'] as const
+export type NoteColorId = (typeof NOTE_COLOR_IDS)[number]
+
 export interface ItemComment {
   id: string
   item_id: string
   user_id: string
   body: string
+  color?: NoteColorId | string
+  show_author?: boolean
+  show_time?: boolean
   created_at: string
   updated_at: string
   profile?: Profile
@@ -241,6 +306,8 @@ export interface ListInvite {
   status: 'pending' | 'accepted' | 'declined'
   created_at: string
   invitee?: Profile
+  inviter?: Profile
+  list?: Pick<ListRow, 'id' | 'title' | 'icon'>
 }
 
 export interface Friendship {
@@ -290,6 +357,35 @@ export interface ActivityEvent {
   payload: Record<string, unknown>
   created_at: string
   actor?: Profile
+}
+
+export const FEED_EVENT_TYPES = [
+  'item_created',
+  'item_checked',
+  'item_unchecked',
+  'item_moved',
+] as const
+
+export type FeedEventType = (typeof FEED_EVENT_TYPES)[number]
+export type FeedFilter = 'all' | 'added' | 'checked' | 'moved'
+
+export interface FriendFeedEvent {
+  id: string
+  list_id: string | null
+  item_id: string | null
+  actor_id: string | null
+  event_type: string
+  payload: Record<string, unknown>
+  created_at: string
+  actor_username: string
+  actor_display_name: string
+  actor_avatar_url: string | null
+  list_title: string | null
+  list_icon: string | null
+  list_schema: ListSchema | null
+  target_list_id: string | null
+  target_list_title: string | null
+  target_list_icon: string | null
 }
 
 export interface AppNotification {

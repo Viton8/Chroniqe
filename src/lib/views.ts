@@ -187,7 +187,7 @@ function layoutFromMode(mode?: ViewMode): CardLayout | undefined {
 }
 
 export function defaultViewConfig(schema: ListSchema): ViewConfig {
-  const table = createNamedView(schema, 'table', 'Таблица')
+  const table = createNamedView(schema, 'table', defaultName('table'))
   return {
     allowedKinds: ['table', 'cards'],
     views: [table],

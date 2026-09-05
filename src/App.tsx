@@ -5,6 +5,7 @@ import ProtectedRoute from './components/layout/ProtectedRoute'
 import AdminPage from './pages/AdminPage'
 import DashboardPage from './pages/DashboardPage'
 import ExplorePage from './pages/ExplorePage'
+import FeedPage from './pages/FeedPage'
 import ForgotPage from './pages/ForgotPage'
 import FriendsPage from './pages/FriendsPage'
 import LandingPage from './pages/LandingPage'
@@ -35,6 +36,7 @@ function App() {
         <Route path="/u/:username" element={<PublicUserPage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/feed" element={<FeedPage />} />
           <Route path="/lists" element={<ListsPage />} />
           <Route path="/lists/new" element={<NewListPage />} />
           <Route path="/lists/new/custom" element={<NewCustomListPage />} />

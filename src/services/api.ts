@@ -18,6 +18,7 @@ import type {
   ListSchema,
   ListSettings,
   Profile,
+  FriendFeedEvent,
   ViewConfig,
   Visibility,
   EditMode,
@@ -112,17 +113,19 @@ export async function fetchMyLists(userId: string): Promise<ListRow[]> {
   return (data ?? []) as ListRow[]
 }
 
-export async function fetchSharedLists(): Promise<ListRow[]> {
+export async function fetchSharedLists(userId: string): Promise<ListRow[]> {
   const { data: memberRows, error: memberError } = await supabase
     .from('list_members')
     .select('list_id')
+    .eq('user_id', userId)
   throwIf(memberError)
-  const ids = (memberRows ?? []).map((r) => r.list_id as string)
+  const ids = [...new Set((memberRows ?? []).map((r) => r.list_id as string))]
   if (!ids.length) return []
   const { data, error } = await supabase
     .from('lists')
     .select('*')
     .in('id', ids)
+    .neq('owner_id', userId)
     .order('updated_at', { ascending: false })
   throwIf(error)
   return (data ?? []) as ListRow[]
@@ -134,7 +137,7 @@ export async function fetchPublicLists(): Promise<ListRow[]> {
     .select('*, owner:profiles!owner_id(*)')
     .eq('visibility', 'public')
     .order('updated_at', { ascending: false })
-    .limit(60)
+    .limit(80)
   throwIf(error)
   return (data ?? []) as ListRow[]
 }
@@ -209,18 +212,54 @@ export async function duplicateList(sourceId: string, ownerId: string, title: st
     edit_mode: 'owner',
   })
   const items = await fetchItems(sourceId)
-  if (items.length) {
-    const payload = items.map((i) => ({
+  const idMap = new Map<string, string>()
+  for (const i of items) {
+    const created = await createItem({
       list_id: copy.id,
       values: i.values,
       position: i.position,
+      created_by: ownerId,
       is_checked: i.is_checked,
       checked_at: i.checked_at,
       check_snapshot: i.check_snapshot,
-      created_by: ownerId,
-    }))
-    const { error } = await supabase.from('items').insert(payload)
-    throwIf(error)
+    })
+    idMap.set(i.id, created.id)
+  }
+  if (items.length) {
+    const sourceIds = items.map((i) => i.id)
+    const ratings = (await fetchRatings(sourceIds)).filter((row) => row.user_id === ownerId)
+    if (ratings.length) {
+      const { error } = await supabase.from('item_ratings').insert(
+        ratings
+          .map((row) => {
+            const item_id = idMap.get(row.item_id)
+            if (!item_id) return null
+            return { item_id, field_id: row.field_id, user_id: ownerId, value: row.value }
+          })
+          .filter((row): row is NonNullable<typeof row> => Boolean(row)),
+      )
+      throwIf(error)
+    }
+    const comments = (await fetchCommentsForItems(sourceIds)).filter((row) => row.user_id === ownerId)
+    if (comments.length) {
+      const { error } = await supabase.from('item_comments').insert(
+        comments
+          .map((row) => {
+            const item_id = idMap.get(row.item_id)
+            if (!item_id) return null
+            return {
+              item_id,
+              user_id: ownerId,
+              body: row.body,
+              color: row.color ?? 'violet',
+              show_author: row.show_author ?? true,
+              show_time: row.show_time ?? true,
+            }
+          })
+          .filter((row): row is NonNullable<typeof row> => Boolean(row)),
+      )
+      throwIf(error)
+    }
   }
   const charts = await fetchCharts(sourceId)
   for (const c of charts) {
@@ -229,6 +268,15 @@ export async function duplicateList(sourceId: string, ownerId: string, title: st
       name: c.name,
       chart_type: c.chart_type,
       config: c.config,
+    })
+  }
+  const autos = await fetchAutomations(sourceId).catch(() => [])
+  for (const row of autos) {
+    await createAutomation({
+      list_id: copy.id,
+      name: row.name,
+      trigger: row.trigger,
+      actions: row.actions,
     })
   }
   return copy
@@ -244,11 +292,32 @@ export async function fetchItems(listId: string): Promise<ItemRow[]> {
   return (data ?? []) as ItemRow[]
 }
 
+export async function fetchItem(id: string): Promise<ItemRow | null> {
+  const { data, error } = await supabase.from('items').select('*').eq('id', id).maybeSingle()
+  throwIf(error)
+  return (data as ItemRow | null) ?? null
+}
+
+export async function fetchItemsForLists(listIds: string[], limit = 500): Promise<ItemRow[]> {
+  if (!listIds.length) return []
+  const { data, error } = await supabase
+    .from('items')
+    .select('*')
+    .in('list_id', listIds)
+    .order('updated_at', { ascending: false })
+    .limit(limit)
+  throwIf(error)
+  return (data ?? []) as ItemRow[]
+}
+
 export async function createItem(input: {
   list_id: string
   values: Record<string, unknown>
   position: number
   created_by: string
+  is_checked?: boolean
+  checked_at?: string | null
+  check_snapshot?: Record<string, unknown> | null
 }): Promise<ItemRow> {
   const { data, error } = await supabase
     .from('items')
@@ -494,18 +563,15 @@ export async function respondInvite(
   invite: ListInvite,
   accept: boolean,
 ): Promise<void> {
+  if (accept) {
+    await acceptInviteByToken(invite.token)
+    return
+  }
   const { error } = await supabase
     .from('list_invites')
-    .update({ status: accept ? 'accepted' : 'declined' })
+    .update({ status: 'declined' })
     .eq('id', invite.id)
   throwIf(error)
-  if (accept && invite.invitee_id) {
-    await addMember({
-      list_id: invite.list_id,
-      user_id: invite.invitee_id,
-      role: invite.role,
-    })
-  }
 }
 
 export async function fetchProposals(listId: string): Promise<ChangeProposal[]> {
@@ -551,6 +617,19 @@ export async function isSubscribed(listId: string, userId: string): Promise<bool
     .maybeSingle()
   throwIf(error)
   return Boolean(data)
+}
+
+export async function fetchSubscribedLists(userId: string): Promise<ListRow[]> {
+  const { data, error } = await supabase
+    .from('list_subscriptions')
+    .select('list_id')
+    .eq('user_id', userId)
+  throwIf(error)
+  const ids = [...new Set((data ?? []).map((row) => String(row.list_id)))]
+  if (!ids.length) return []
+  const { data: lists, error: listError } = await supabase.from('lists').select('*').in('id', ids)
+  throwIf(listError)
+  return (lists ?? []) as ListRow[]
 }
 
 export async function setSubscribed(
@@ -648,6 +727,12 @@ export async function fetchActivity(listId: string): Promise<ActivityEvent[]> {
   return (data ?? []) as ActivityEvent[]
 }
 
+export async function fetchFriendFeed(limit = 60): Promise<FriendFeedEvent[]> {
+  const { data, error } = await supabase.rpc('friend_feed', { p_limit: limit })
+  throwIf(error)
+  return (data ?? []) as FriendFeedEvent[]
+}
+
 export async function fetchNotifications(userId: string): Promise<AppNotification[]> {
   const { data, error } = await supabase
     .from('notifications')
@@ -666,6 +751,7 @@ export async function markNotificationsRead(userId: string): Promise<void> {
     .eq('user_id', userId)
     .is('read_at', null)
   throwIf(error)
+  window.dispatchEvent(new Event('chroniqe-notifications-read'))
 }
 
 export async function fetchFriendships(userId: string): Promise<Friendship[]> {
@@ -747,15 +833,30 @@ export async function uploadListFile(input: {
 }
 
 export async function uploadAvatar(userId: string, file: File): Promise<string> {
+  const mime = fileMime(file)
   const err = assertSafeFile(file, { imagesOnly: true, maxMb: 2 })
   if (err) throw new Error(err)
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
   const path = `${userId}/avatar.${ext}`
   const { error } = await supabase.storage.from('avatars').upload(path, file, {
-    contentType: file.type,
+    contentType: mime,
     upsert: true,
   })
   throwIf(error)
+  const { error: scanError, data: scan } = await supabase.functions.invoke('validate-file', {
+    body: {
+      bucket: 'avatars',
+      path,
+      mime,
+      size: file.size,
+      originalName: file.name,
+    },
+  })
+  if (scanError || !scan?.ok) {
+    await supabase.storage.from('avatars').remove([path])
+    const reason = typeof scan?.reason === 'string' ? scan.reason : ''
+    throw new Error(reason === 'magic' ? msg('fields.scanFail') : msg('fields.scanReject'))
+  }
   const { data } = supabase.storage.from('avatars').getPublicUrl(path)
   return `${data.publicUrl}?t=${Date.now()}`
 }

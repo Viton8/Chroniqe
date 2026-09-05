@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Bell, Compass, LayoutGrid, List, Search, Shield, UserRound } from 'lucide-react'
+import { Bell, Compass, LayoutGrid, List, LogIn, Newspaper, Search, Shield, UserRound } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
 import { useCommand } from '../../context/CommandContext'
 import { usePrefs } from '../../context/PrefsContext'
@@ -7,7 +7,7 @@ import Avatar from '../ui/Avatar'
 import LanguageSwitch from '../ui/LanguageSwitch'
 import ColorPalettePicker from '../ui/ColorPalettePicker'
 import ThemeSwitch from '../ui/ThemeSwitch'
-import { cn } from '../../lib/cn'
+import { cn, isApplePlatform } from '../../lib/cn'
 
 export default function Navbar({
   onMenu,
@@ -29,19 +29,22 @@ export default function Navbar({
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         <button
           type="button"
-          className="rounded-lg p-2 text-ink hover:bg-ink/5 md:hidden"
+          className="shrink-0 rounded-lg p-2 text-ink hover:bg-ink/5 md:hidden"
           onClick={onMenu}
           aria-label={t('nav.menu')}
         >
           <LayoutGrid size={18} />
         </button>
-        <NavLink to={user ? '/dashboard' : '/'} className="font-serif text-xl tracking-tight hover:text-accent">
+        <NavLink
+          to={user ? '/dashboard' : '/'}
+          className="shrink-0 font-serif text-xl tracking-tight hover:text-accent"
+        >
           Chroniqe
         </NavLink>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex min-w-0 items-center gap-1">
           <button
             type="button"
-            className="rounded-xl p-2 text-ink hover:bg-ink/5 sm:hidden"
+            className="shrink-0 rounded-xl p-2 text-ink hover:bg-ink/5 sm:hidden"
             aria-label={t('command.title')}
             onClick={() => setPaletteOpen(true)}
           >
@@ -49,16 +52,20 @@ export default function Navbar({
           </button>
           <button
             type="button"
-            className="hidden items-center rounded-xl px-3 py-1.5 text-sm text-muted hover:bg-ink/5 sm:inline-flex"
+            className="hidden min-w-0 items-center rounded-xl px-3 py-1.5 text-sm text-muted hover:bg-ink/5 sm:inline-flex"
             onClick={() => setPaletteOpen(true)}
           >
-            <Search size={16} className="mr-2" />
-            {t('command.placeholder')}
-            <kbd className="ml-2 rounded-md bg-ink/5 px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
+            <Search size={16} className="mr-2 shrink-0" />
+            <span className="truncate">{t('command.placeholder')}</span>
+            <kbd className="ml-2 hidden rounded-md bg-ink/5 px-1.5 py-0.5 font-mono text-[10px] lg:inline">
+              {isApplePlatform() ? '⌘K' : 'Ctrl K'}
+            </kbd>
           </button>
-          <LanguageSwitch compact />
-          <ThemeSwitch compact />
-          <ColorPalettePicker compact />
+          <div className="hidden items-center gap-1 sm:flex">
+            <LanguageSwitch compact />
+            <ThemeSwitch compact />
+            <ColorPalettePicker compact />
+          </div>
           {user ? (
             <>
               <button
@@ -84,7 +91,7 @@ export default function Navbar({
           ) : (
             <NavLink
               to="/login"
-              className="rounded-xl bg-ink px-3 py-1.5 text-sm text-paper transition-opacity hover:opacity-90"
+              className="shrink-0 rounded-xl bg-ink px-3 py-1.5 text-sm text-paper transition-opacity hover:opacity-90"
             >
               {t('nav.login')}
             </NavLink>
@@ -100,6 +107,7 @@ export function Sidebar() {
   const { t } = usePrefs()
   const links = [
     { to: '/dashboard', label: t('nav.overview'), icon: LayoutGrid },
+    { to: '/feed', label: t('nav.feed'), icon: Newspaper },
     { to: '/lists', label: t('nav.lists'), icon: List },
     { to: '/explore', label: t('nav.explore'), icon: Compass },
     { to: '/friends', label: t('nav.people'), icon: UserRound },
@@ -137,11 +145,44 @@ export function BottomNav({
   notesOpen: boolean
   onNotifications: (el: HTMLElement) => void
 }) {
+  const { user } = useAuth()
   const { t } = usePrefs()
+  if (!user) {
+    return (
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
+        <div className="grid grid-cols-2">
+          <NavLink
+            to="/explore"
+            className={({ isActive }) =>
+              cn(
+                'flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors hover:bg-ink/5',
+                isActive ? 'text-accent' : 'text-muted',
+              )
+            }
+          >
+            <Compass size={18} />
+            {t('nav.explore')}
+          </NavLink>
+          <NavLink
+            to="/login"
+            className={({ isActive }) =>
+              cn(
+                'flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors hover:bg-ink/5',
+                isActive ? 'text-accent' : 'text-muted',
+              )
+            }
+          >
+            <LogIn size={18} />
+            {t('nav.login')}
+          </NavLink>
+        </div>
+      </nav>
+    )
+  }
   const items = [
     { to: '/dashboard', label: t('nav.overview'), icon: LayoutGrid },
+    { to: '/feed', label: t('nav.feed'), icon: Newspaper },
     { to: '/lists', label: t('nav.lists'), icon: List },
-    { to: '/explore', label: t('nav.explore'), icon: Compass },
     { to: '/profile', label: t('nav.profile'), icon: UserRound },
   ]
   return (

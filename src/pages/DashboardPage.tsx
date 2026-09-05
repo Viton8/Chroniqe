@@ -2,14 +2,15 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
-import { fetchFriendships, fetchItems, fetchMyInvites, fetchMyLists, fetchNotifications, fetchSharedLists } from '../services/api'
+import { fetchFriendFeed, fetchFriendships, fetchItems, fetchMyInvites, fetchMyLists, fetchNotifications, fetchSharedLists, fetchSubscribedLists } from '../services/api'
 import { NotificationsFeed } from '../components/notifications/NotificationsModal'
-import type { AppNotification, ItemRow, ListRow } from '../types/domain'
+import type { AppNotification, FriendFeedEvent, ItemRow, ListRow } from '../types/domain'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import Button from '../components/ui/Button'
 import { SearchField } from '../components/ui/Input'
 import PageHeader from '../components/ui/PageHeader'
 import ListCard from '../components/lists/ListCard'
+import FriendFeed from '../components/lists/FriendFeed'
 import { readFavorites } from '../lib/favorites'
 import { buildInsights } from '../lib/insights'
 import { formatDate, titleFromValues } from '../lib/cn'
@@ -28,6 +29,9 @@ export default function DashboardPage() {
   const [openCount, setOpenCount] = useState(0)
   const [requests, setRequests] = useState(0)
   const [invites, setInvites] = useState(0)
+  const [following, setFollowing] = useState<ListRow[]>([])
+  const [feed, setFeed] = useState<FriendFeedEvent[]>([])
+  const [friendCount, setFriendCount] = useState(0)
   const [favIds, setFavIds] = useState(() => readFavorites())
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
@@ -36,16 +40,21 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!user) return
     void (async () => {
-      const [owned, sharedRows, inbox, friends, listInvites] = await Promise.all([
+      const [owned, sharedRows, inbox, friends, listInvites, subscribed, friendEvents] = await Promise.all([
         fetchMyLists(user.id),
-        fetchSharedLists().catch(() => [] as ListRow[]),
+        fetchSharedLists(user.id).catch(() => [] as ListRow[]),
         fetchNotifications(user.id),
         fetchFriendships(user.id).catch(() => []),
         fetchMyInvites(user.id).catch(() => []),
+        fetchSubscribedLists(user.id).catch(() => [] as ListRow[]),
+        fetchFriendFeed(12).catch(() => [] as FriendFeedEvent[]),
       ])
       setLists(owned)
       setShared(sharedRows)
+      setFollowing(subscribed.filter((row) => row.owner_id !== user.id))
       setNotes(inbox.slice(0, 5))
+      setFeed(friendEvents)
+      setFriendCount(friends.filter((row) => row.status === 'accepted').length)
       setRequests(friends.filter((row) => row.status === 'pending' && row.addressee_id === user.id).length)
       setInvites(listInvites.length)
       const sample = [...owned, ...sharedRows].slice(0, 12)
@@ -87,6 +96,11 @@ export default function DashboardPage() {
     [allLists, debounced],
   )
 
+  const visibleFollowing = useMemo(
+    () => following.filter((list) => matchesQuery(debounced, list.title, list.description, list.icon)),
+    [following, debounced],
+  )
+
   if (loading) return <Spinner />
 
   const greet = profile ? `${t('dash.hi')}, ${profile.display_name || profile.username}` : t('dash.hi')
@@ -108,7 +122,7 @@ export default function DashboardPage() {
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('dash.search')}
       />
-      <div className="mt-6 grid gap-4 sm:grid-cols-4">
+      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat label={t('dash.lists')} value={lists.length} />
         <Stat label={t('insights.open')} value={openCount} />
         <Stat label={t('dash.unread')} value={notes.filter((n) => !n.read_at).length} />
@@ -131,6 +145,39 @@ export default function DashboardPage() {
             </Link>
           ) : null}
         </div>
+      ) : null}
+
+      <section className="mt-8">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-serif text-2xl">{t('dash.feed')}</h2>
+          <Link to="/feed" className="text-sm text-accent hover:underline">
+            {t('feed.seeAll')}
+          </Link>
+        </div>
+        <div className="mt-3">
+          <FriendFeed
+            compact
+            events={feed}
+            empty={friendCount === 0 ? 'nofriends' : feed.length ? 'none' : 'quiet'}
+          />
+        </div>
+      </section>
+
+      {visibleFollowing.length ? (
+        <section className="mt-8">
+          <h2 className="font-serif text-2xl">{t('dash.following')}</h2>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+            {visibleFollowing.slice(0, 6).map((list) => (
+              <ListCard
+                key={list.id}
+                list={list}
+                badge={t('list.following')}
+                favorite
+                onFav={() => setFavIds(readFavorites())}
+              />
+            ))}
+          </ul>
+        </section>
       ) : null}
 
       {favorites.length ? (

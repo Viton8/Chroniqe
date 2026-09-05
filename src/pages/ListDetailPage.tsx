@@ -664,7 +664,6 @@ function ChartsTab({
   const { t } = usePrefs()
   const { toast } = useToast()
   const fields = list.schema.fields
-  const dateFields = fields.filter((f) => f.type === 'date' || f.type === 'datetime')
   const valueFields = fields.filter((f) =>
     ['number', 'integer', 'rating', 'multi_rating'].includes(f.type),
   )
@@ -673,7 +672,7 @@ function ChartsTab({
   )
   const [name, setName] = useState(t('charts.newChart'))
   const [type, setType] = useState<ChartType>('timeline')
-  const [dateFieldId, setDateFieldId] = useState(dateFields[0]?.id ?? '')
+  const [dateFieldId, setDateFieldId] = useState(fields[0]?.id ?? '')
   const [valueFieldId, setValueFieldId] = useState(valueFields[0]?.id ?? '')
   const [groupFieldId, setGroupFieldId] = useState(groupFields[0]?.id ?? '')
   const [aggregation, setAggregation] = useState<NonNullable<ListChart['config']['aggregation']>>('count')
@@ -736,7 +735,7 @@ function ChartsTab({
               <FieldWrap label={t('charts.dateField')}>
                 <select className={selectClass} value={dateFieldId} onChange={(e) => setDateFieldId(e.target.value)}>
                   <option value="">—</option>
-                  {dateFields.map((f) => (
+                  {fields.map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.name}
                     </option>

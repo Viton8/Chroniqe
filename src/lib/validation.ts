@@ -136,6 +136,24 @@ export const IMAGE_MIMES = [
   'image/gif',
 ] as const
 
+const EXT_MIME: Record<string, string> = {
+  webp: 'image/webp',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  pdf: 'application/pdf',
+  csv: 'text/csv',
+  json: 'application/json',
+  txt: 'text/plain',
+}
+
+export function fileMime(file: File): string {
+  if (file.type && file.type !== 'application/octet-stream') return file.type
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? ''
+  return EXT_MIME[ext] ?? file.type
+}
+
 export function assertSafeFile(
   file: File,
   opts: { imagesOnly?: boolean; maxMb?: number },
@@ -145,7 +163,7 @@ export function assertSafeFile(
     return msg('fields.fileBig', { n: maxMb })
   }
   const allowed = opts.imagesOnly ? IMAGE_MIMES : ALLOWED_UPLOAD_MIMES
-  if (!(allowed as readonly string[]).includes(file.type)) {
+  if (!(allowed as readonly string[]).includes(fileMime(file))) {
     return msg('fields.fileType')
   }
   const name = file.name.toLowerCase()

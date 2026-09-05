@@ -716,6 +716,24 @@
       "hint": "Creates three lists at once. Watchlist gets “Watched” and “Won’t watch”.",
       "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
+    "catalog_items": {
+      "title": "Catalog",
+      "description": "A reference list of things without duplicates — films, books, places, dishes, anything.",
+      "hint": "One row = one object. Put repeated events with dates and scores in the Journal from the Catalog & journal pack.",
+      "example": "Dune, 2021, poster. The film exists once; rewatches with different scores live in the journal."
+    },
+    "event_log": {
+      "title": "Journal",
+      "description": "Repeating events: each time gets its own date, score, and note, linked to a catalog row.",
+      "hint": "Point the “What” field at a catalog list. One film can appear many times — each viewing is its own row.",
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — two viewings, two scores."
+    },
+    "pack_catalog_log": {
+      "title": "Catalog & journal",
+      "description": "A library of objects plus a log of repeats: one thing, many dates and scores.",
+      "hint": "Creates Catalog and Journal. Journal’s “What” field is already linked and shows title with cover.",
+      "example": "Add Dune to the catalog once, then log two viewings with scores 9 and 8 on different dates."
+    },
     "pack_groceries": {
       "title": "Shopping",
       "description": "Current list, bought items, and deferred holiday buys.",

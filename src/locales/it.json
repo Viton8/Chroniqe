@@ -716,6 +716,24 @@
       "hint": "Crea tre liste in una volta. Da vedere ottiene «Visti» e «Non lo guardo».",
       "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
+    "catalog_items": {
+      "title": "Catalogo",
+      "description": "Elenco di riferimento senza duplicati: film, libri, luoghi, qualsiasi cosa.",
+      "hint": "Una riga = un oggetto. Gli eventi ripetuti con date e voti vanno nel diario del pack Catalogo e diario.",
+      "example": "Dune, 2021, poster. Il film una volta; le visioni con voti diversi vivono nel diario."
+    },
+    "event_log": {
+      "title": "Diario",
+      "description": "Eventi ripetuti: ogni volta data, voto e nota propri, collegati a una riga del catalogo.",
+      "hint": "Collega il campo «Cosa» a un catalogo. Un film può comparire molte volte — ogni visione è una riga.",
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — due visioni, due voti."
+    },
+    "pack_catalog_log": {
+      "title": "Catalogo e diario",
+      "description": "Libreria di oggetti più un registro delle ripetizioni: una cosa, molte date e voti.",
+      "hint": "Crea Catalogo e Diario. Il «Cosa» del diario è già collegato e mostra titolo con copertina.",
+      "example": "Aggiungi Dune al catalogo una volta, poi due visioni con voti 9 e 8 in date diverse."
+    },
     "pack_groceries": {
       "title": "Spesa",
       "description": "Lista attuale, comprati e acquisti festivi rimandati.",

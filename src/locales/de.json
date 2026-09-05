@@ -716,6 +716,24 @@
       "hint": "Legt drei Listen auf einmal an. Die Merkliste bekommt „Gesehen“ und „Schaue ich nicht“.",
       "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
+    "catalog_items": {
+      "title": "Katalog",
+      "description": "Nachschlage-Liste ohne Duplikate — Filme, Bücher, Orte, alles Mögliche.",
+      "hint": "Eine Zeile = ein Objekt. Wiederholte Ereignisse mit Datum und Bewertung gehören ins Journal aus dem Pack Katalog & Journal.",
+      "example": "Dune, 2021, Poster. Der Film einmal; Wiederschauen mit anderen Noten im Journal."
+    },
+    "event_log": {
+      "title": "Journal",
+      "description": "Wiederholte Ereignisse: jedes Mal eigenes Datum, Bewertung und Notiz, verknüpft mit dem Katalog.",
+      "hint": "Verknüpfe das Feld „Was“ mit einer Katalogliste. Ein Film kann oft vorkommen — jedes Mal eine eigene Zeile.",
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — zwei Sichtungen, zwei Noten."
+    },
+    "pack_catalog_log": {
+      "title": "Katalog & Journal",
+      "description": "Objektbibliothek plus Wiederholungs-Log: eine Sache, viele Daten und Bewertungen.",
+      "hint": "Erstellt Katalog und Journal. „Was“ im Journal ist schon verknüpft und zeigt Titel mit Cover.",
+      "example": "Dune einmal in den Katalog, dann zwei Sichtungen mit Noten 9 und 8 an verschiedenen Tagen."
+    },
     "pack_groceries": {
       "title": "Einkauf",
       "description": "Aktuelle Liste, Gekauftes und aufgeschobene Festtagskäufe.",

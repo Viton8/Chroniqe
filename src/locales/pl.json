@@ -716,6 +716,24 @@
       "hint": "Tworzy trzy listy naraz. Do obejrzenia dostaje „Obejrzane” i „Nie oglądam”.",
       "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
+    "catalog_items": {
+      "title": "Katalog",
+      "description": "Lista referencyjna bez duplikatów: filmy, książki, miejsca — cokolwiek.",
+      "hint": "Jeden wiersz = jeden obiekt. Powtarzane zdarzenia z datami i ocenami trafiają do dziennika z pakietu Katalog i dziennik.",
+      "example": "Dune, 2021, plakat. Film raz; ponowne seanse z różnymi ocenami są w dzienniku."
+    },
+    "event_log": {
+      "title": "Dziennik",
+      "description": "Powtarzane zdarzenia: za każdym razem własna data, ocena i notatka, powiązane z wierszem katalogu.",
+      "hint": "Wskaż pole „Co” na listę katalogu. Jeden film może pojawić się wiele razy — każdy seans to osobny wiersz.",
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — dwa seanse, dwie oceny."
+    },
+    "pack_catalog_log": {
+      "title": "Katalog i dziennik",
+      "description": "Biblioteka obiektów plus dziennik powtórzeń: jedna rzecz, wiele dat i ocen.",
+      "hint": "Tworzy Katalog i Dziennik. Pole „Co” w dzienniku jest już powiązane i pokazuje tytuł z okładką.",
+      "example": "Dodaj Dune do katalogu raz, potem dwa seanse z ocenami 9 i 8 w różne daty."
+    },
     "pack_groceries": {
       "title": "Zakupy",
       "description": "Bieżąca lista, kupione rzeczy i odłożone świąteczne zakupy.",

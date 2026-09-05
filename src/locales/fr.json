@@ -716,6 +716,24 @@
       "hint": "Crée trois listes d’un coup. À voir reçoit « Vus » et « Je ne regarderai pas ».",
       "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
+    "catalog_items": {
+      "title": "Catalogue",
+      "description": "Liste de référence sans doublons — films, livres, lieux, n’importe quoi.",
+      "hint": "Une ligne = un objet. Les événements répétés avec dates et notes vont dans le journal du pack Catalogue et journal.",
+      "example": "Dune, 2021, affiche. Le film une fois ; les visionnages avec notes différentes vivent dans le journal."
+    },
+    "event_log": {
+      "title": "Journal",
+      "description": "Événements répétés : chaque fois sa date, note et commentaire, liés à une fiche du catalogue.",
+      "hint": "Pointez le champ « Quoi » vers un catalogue. Un film peut apparaître plusieurs fois — chaque visionnage est une ligne.",
+      "example": "Dune · 12.03.2024 · 9 ; Dune · 01.09.2025 · 8 — deux visionnages, deux notes."
+    },
+    "pack_catalog_log": {
+      "title": "Catalogue et journal",
+      "description": "Bibliothèque d’objets + journal des répétitions : une chose, beaucoup de dates et de notes.",
+      "hint": "Crée Catalogue et Journal. Le « Quoi » du journal est déjà lié et affiche titre + couverture.",
+      "example": "Ajoutez Dune au catalogue une fois, puis deux visionnages notés 9 et 8 à des dates différentes."
+    },
     "pack_groceries": {
       "title": "Courses",
       "description": "Liste du moment, achetés, et achats de fêtes reportés.",

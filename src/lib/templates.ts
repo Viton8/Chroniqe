@@ -45,6 +45,12 @@ export interface TemplatePack {
     toKey: string
     fieldMap: Record<string, string>
   }>
+  /** Wire relation fields to sibling lists created in the same pack. */
+  relations?: Array<{
+    fromKey: string
+    fieldId: string
+    toKey: string
+  }>
 }
 
 function f(
@@ -447,9 +453,88 @@ export const TEMPLATES: TemplateSpec[] = [
     },
     view: { mode: 'board', groupFieldId: 'status' },
   },
+  {
+    key: 'catalog_items',
+    title: 'Каталог',
+    icon: '📚',
+    description: 'Справочник сущностей без повторов: фильмы, книги, места, блюда — что угодно.',
+    hint: 'Одна запись = один объект. Повторные события с датами и оценками ведите в журнале из набора «Каталог и журнал».',
+    example: '«Дюна», 2021, постер. Сам фильм один — просмотры с разными оценками живут в журнале.',
+    schema: {
+      fields: [
+        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
+        f('year', 'Год', 'integer', { config: { min: 1, max: 2100 } }),
+        f('kind', 'Тип', 'select', {
+          config: {
+            options: [
+              { value: 'film', label: 'Фильм' },
+              { value: 'book', label: 'Книга' },
+              { value: 'game', label: 'Игра' },
+              { value: 'place', label: 'Место' },
+              { value: 'other', label: 'Другое' },
+            ],
+          },
+        }),
+        f('cover', 'Обложка', 'image', {
+          config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] },
+        }),
+        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+      ],
+      titleFieldId: 'title',
+      imageFieldId: 'cover',
+      groupFieldId: 'kind',
+    },
+    view: { mode: 'cards', imageFieldId: 'cover', groupFieldId: 'kind' },
+  },
+  {
+    key: 'event_log',
+    title: 'Журнал',
+    icon: '🗒️',
+    description: 'Повторяющиеся события: каждый раз — своя дата, оценка и заметка, ссылка на запись каталога.',
+    hint: 'Свяжите поле «Что» со списком-каталогом. Один фильм можно открыть много раз — каждый просмотр отдельной строкой.',
+    example: 'Дюна · 12.03.2024 · 9; Дюна · 01.09.2025 · 8 — два просмотра, две оценки.',
+    schema: {
+      fields: [
+        f('subject', 'Что', 'relation', {
+          required: true,
+          config: { relationDisplay: 'title_cover', allowMultiple: false },
+        }),
+        f('happened_at', 'Дата', 'date', { required: true }),
+        f('score', 'Оценка', 'rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
+        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+      ],
+      titleFieldId: 'subject',
+      dateFieldId: 'happened_at',
+    },
+    view: { mode: 'table', dateFieldId: 'happened_at' },
+    charts: [
+      {
+        name: 'Лента событий',
+        chart_type: 'timeline',
+        config: { dateFieldId: 'happened_at', aggregation: 'count' },
+      },
+      {
+        name: 'Оценки во времени',
+        chart_type: 'stem',
+        config: { dateFieldId: 'happened_at', valueFieldId: 'score', aggregation: 'avg' },
+      },
+    ],
+  },
 ]
 
 export const TEMPLATE_PACKS: TemplatePack[] = [
+  {
+    key: 'catalog_log',
+    title: 'Каталог и журнал',
+    icon: '📖',
+    description: 'Справочник объектов + журнал повторений: одна сущность — много дат и оценок.',
+    hint: 'Создаются «Каталог» и «Журнал». В журнале поле «Что» уже связано с каталогом и показывает название с обложкой.',
+    lists: [
+      TEMPLATES.find((t) => t.key === 'catalog_items')!,
+      TEMPLATES.find((t) => t.key === 'event_log')!,
+    ],
+    relations: [{ fromKey: 'event_log', fieldId: 'subject', toKey: 'catalog_items' }],
+  },
   {
     key: 'cinema',
     title: 'Кино и сериалы',
@@ -593,10 +678,21 @@ function stampFieldsFor(target: TemplateSpec | undefined): Record<string, unknow
 export function applyPackSettings(
   pack: TemplatePack,
   created: Record<string, string>,
-): Array<{ listId: string; settings: ListSettings }> {
+): Array<{ listId: string; settings: ListSettings; schema?: ListSchema }> {
   const byKey: Record<string, ListSettings> = {}
+  const schemaByKey: Record<string, ListSchema> = {}
   for (const spec of pack.lists) {
     byKey[spec.key] = structuredClone(spec.settings ?? {})
+    schemaByKey[spec.key] = structuredClone(spec.schema)
+  }
+
+  for (const link of pack.relations ?? []) {
+    const relatedId = created[link.toKey]
+    const schema = schemaByKey[link.fromKey]
+    if (!relatedId || !schema) continue
+    const field = schema.fields.find((row) => row.id === link.fieldId)
+    if (!field) continue
+    field.config = { ...field.config, relatedListId: relatedId }
   }
 
   for (const transfer of pack.transfers ?? []) {
@@ -634,9 +730,16 @@ export function applyPackSettings(
   return pack.lists
     .map((spec) => {
       const listId = created[spec.key]
-      return listId ? { listId, settings: byKey[spec.key] ?? {} } : null
+      if (!listId) return null
+      const schema = schemaByKey[spec.key]
+      const linked = Boolean(pack.relations?.some((row) => row.fromKey === spec.key))
+      return {
+        listId,
+        settings: byKey[spec.key] ?? {},
+        schema: linked ? schema : undefined,
+      }
     })
-    .filter((row): row is { listId: string; settings: ListSettings } => Boolean(row))
+    .filter((row): row is { listId: string; settings: ListSettings; schema?: ListSchema } => Boolean(row))
 }
 
 export function checkActionsFromTemplate(spec: TemplateSpec): AutomationAction[] {

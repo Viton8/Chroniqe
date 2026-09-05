@@ -76,7 +76,10 @@ export default function NewListPage() {
         }
       }
       for (const row of applyPackSettings(pack, created)) {
-        await updateList(row.listId, { settings: row.settings })
+        await updateList(row.listId, {
+          settings: row.settings,
+          ...(row.schema ? { schema: row.schema } : {}),
+        })
       }
       const first = created[pack.lists[0].key]
       navigate(`/lists/${first}`)

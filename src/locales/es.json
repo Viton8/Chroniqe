@@ -716,6 +716,24 @@
       "hint": "Crea tres listas a la vez. Por ver recibe «Vistos» y «No veré».",
       "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
+    "catalog_items": {
+      "title": "Catálogo",
+      "description": "Lista de referencia sin duplicados: películas, libros, lugares, lo que sea.",
+      "hint": "Una fila = un objeto. Los eventos repetidos con fechas y notas van en el diario del pack Catálogo y diario.",
+      "example": "Dune, 2021, póster. La película una vez; los visionados con distintas notas viven en el diario."
+    },
+    "event_log": {
+      "title": "Diario",
+      "description": "Eventos repetidos: cada vez su fecha, nota y comentario, enlazados a una fila del catálogo.",
+      "hint": "Apunta el campo «Qué» a un catálogo. Una película puede aparecer muchas veces — cada visionado es una fila.",
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — dos visionados, dos notas."
+    },
+    "pack_catalog_log": {
+      "title": "Catálogo y diario",
+      "description": "Biblioteca de objetos más un registro de repeticiones: una cosa, muchas fechas y notas.",
+      "hint": "Crea Catálogo y Diario. El «Qué» del diario ya está enlazado y muestra título con portada.",
+      "example": "Añade Dune al catálogo una vez; luego dos visionados con notas 9 y 8 en fechas distintas."
+    },
     "pack_groceries": {
       "title": "Compras",
       "description": "Lista actual, comprado y compras aplazadas para fiestas.",

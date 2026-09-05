@@ -1,15 +1,16 @@
 import { msg } from './i18n'
 import type { FieldDef, ItemRow, ListSchema } from '../types/domain'
 
+export function isEmptyValue(value: unknown): boolean {
+  return value == null || value === '' || (Array.isArray(value) && value.length === 0)
+}
+
 export function validateField(
   field: FieldDef,
   value: unknown,
 ): string | null {
   const cfg = field.config ?? {}
-  const empty =
-    value == null ||
-    value === '' ||
-    (Array.isArray(value) && value.length === 0)
+  const empty = isEmptyValue(value)
 
   if (field.required && empty) {
     return msg('fields.required', { name: field.name })
@@ -93,15 +94,45 @@ export function validateField(
 export function validateItem(
   schema: ListSchema,
   values: Record<string, unknown>,
+  ctx?: { items?: ItemRow[]; excludeId?: string },
 ): string[] {
-  return schema.fields
+  const fieldErrors = schema.fields
     .map((field) => validateField(field, values[field.id]))
-    .filter((msg): msg is string => Boolean(msg))
+    .filter((message): message is string => Boolean(message))
+  if (!ctx?.items) return fieldErrors
+  const uniqueErrors = schema.fields
+    .filter((field) => field.unique)
+    .flatMap((field) => {
+      const raw = values[field.id]
+      if (raw == null || raw === '') return []
+      const key = uniqueKey(raw)
+      const clash = ctx.items!.some(
+        (row) => row.id !== ctx.excludeId && uniqueKey(row.values[field.id]) === key,
+      )
+      return clash ? [msg('fields.unique', { name: field.name })] : []
+    })
+  return [...fieldErrors, ...uniqueErrors]
+}
+
+function uniqueKey(value: unknown): string {
+  if (Array.isArray(value)) return [...value].map(String).sort().join('\0')
+  return String(value).trim().toLowerCase()
+}
+
+function cloneDefault(value: unknown): unknown {
+  if (Array.isArray(value)) return [...value]
+  if (value && typeof value === 'object') return { ...(value as Record<string, unknown>) }
+  return value
 }
 
 export function emptyValues(schema: ListSchema): Record<string, unknown> {
   const values: Record<string, unknown> = {}
   for (const field of schema.fields) {
+    const fallback = field.config?.defaultValue
+    if (fallback !== undefined && fallback !== null && fallback !== '') {
+      values[field.id] = cloneDefault(fallback)
+      continue
+    }
     if (field.type === 'multiselect' || field.type === 'tags' || field.type === 'sublist') {
       values[field.id] = []
     } else if (field.type === 'boolean' || field.type === 'checkbox') {

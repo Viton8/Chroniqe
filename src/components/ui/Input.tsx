@@ -1,4 +1,4 @@
-import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react'
+import { forwardRef, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react'
 import { cn } from '../../lib/cn'
 
 interface FieldWrapProps {
@@ -19,20 +19,20 @@ export function FieldWrap({ label, hint, error, children }: FieldWrapProps) {
   )
 }
 
-export function Input({
-  className,
-  ...props
-}: InputHTMLAttributes<HTMLInputElement>) {
-  return (
-    <input
-      className={cn(
-        'w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted/80 focus:border-accent',
-        className,
-      )}
-      {...props}
-    />
-  )
-}
+export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(
+  function Input({ className, ...props }, ref) {
+    return (
+      <input
+        ref={ref}
+        className={cn(
+          'w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm text-ink placeholder:text-muted/80 focus:border-accent',
+          className,
+        )}
+        {...props}
+      />
+    )
+  },
+)
 
 export function Textarea({
   className,

@@ -35,7 +35,7 @@ export const VIEW_MODES = [
 
 export type ViewMode = (typeof VIEW_MODES)[number]
 
-export const VIEW_KINDS = ['table', 'cards', 'board', 'timeline'] as const
+export const VIEW_KINDS = ['table', 'cards', 'board', 'timeline', 'calendar'] as const
 export type ViewKind = (typeof VIEW_KINDS)[number]
 
 export const CARD_LAYOUTS = ['grid', 'media', 'compact'] as const
@@ -123,6 +123,7 @@ export interface FieldConfig {
   relatedListId?: string
   allowMultiple?: boolean
   subfields?: SublistField[]
+  defaultValue?: unknown
 }
 
 export interface FieldDef {
@@ -132,6 +133,8 @@ export interface FieldDef {
   type: FieldType
   required?: boolean
   hidden?: boolean
+  unique?: boolean
+  description?: string
   config?: FieldConfig
 }
 

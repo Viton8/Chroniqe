@@ -31,6 +31,19 @@ export function fileMeta(value: unknown): FileMeta | null {
   }
 }
 
+export function httpUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const src = value.trim()
+  return /^https?:\/\//i.test(src) ? src : null
+}
+
+export function hasCoverVisual(value: unknown): boolean {
+  if (fileMeta(value) || httpUrl(value)) return true
+  if (value == null || value === '') return false
+  if (Array.isArray(value)) return value.length > 0
+  return true
+}
+
 export function isImageFile(meta: FileMeta | null): boolean {
   if (!meta) return false
   if (meta.mime?.startsWith('image/')) return true

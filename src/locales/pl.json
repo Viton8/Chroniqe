@@ -57,7 +57,9 @@
     "sortZa": "Z → A",
     "records": "pozycji",
     "example": "Przykład",
-    "cancel": "Anuluj"
+    "cancel": "Anuluj",
+    "pin": "Przypnij",
+    "unpin": "Odepnij"
   },
   "nav": {
     "overview": "Start",
@@ -79,7 +81,20 @@
     "text": "Pola, ograniczenia, udostępnianie, przenoszenie między listami, oceny od dowolnych osób i wykresy. Spokojny interfejs, także na telefonie.",
     "start": "Zaczynamy",
     "public": "Przeglądaj publiczne listy",
-    "register": "Utwórz konto"
+    "register": "Utwórz konto",
+    "featTitle": "To, co inne aplikacje dzielą na pięć produktów",
+    "featFilters": "Filtry według pól",
+    "featFiltersText": "Status, tagi, daty i oceny — jak w Airtable lub Letterboxd, w każdej liście.",
+    "featViews": "Kalendarz i widoki",
+    "featViewsText": "Tabela, karty, tablica, oś czasu i kalendarz miesiąca. Każdy widok ma własny układ.",
+    "featBulk": "Szybkie dodawanie i akcje zbiorcze",
+    "featBulkText": "Nowy wiersz przez Enter. Zaznacz wiele wpisów i odhacz, skopiuj, eksportuj lub usuń.",
+    "featInsights": "Podsumowanie",
+    "featInsightsText": "Postęp, średnie, zaległości i nadchodzące daty — na liście i na pulpicie.",
+    "featEditor": "Mocniejszy edytor pól",
+    "featEditorText": "Kolejność, duplikaty, wartości domyślne, unikalność i podpowiedzi dla każdego pola.",
+    "featShare": "Udostępnianie jak wcześniej",
+    "featShareText": "Widoczność, propozycje, znajomi, oceny i transfery zostają — dodaliśmy tylko więcej możliwości."
   },
   "auth": {
     "loginTitle": "Logowanie",
@@ -115,7 +130,10 @@
     "recent": "Ostatnie listy",
     "newList": "Nowa lista",
     "startCinema": "Zacznij od szablonu Kino.",
-    "events": "Aktywność"
+    "events": "Aktywność",
+    "pinned": "Przypięte",
+    "upcoming": "Wkrótce",
+    "noUpcoming": "Brak nadchodzących dat"
   },
   "lists": {
     "title": "Listy",
@@ -124,7 +142,8 @@
     "emptyTitle": "Nie ma jeszcze list",
     "emptyText": "Zbuduj pola od zera albo zacznij od zestawu.",
     "templates": "Otwórz szablony",
-    "find": "Szukaj"
+    "find": "Szukaj",
+    "pinned": "Przypięte"
   },
   "newList": {
     "title": "Nowa lista",
@@ -247,7 +266,11 @@
     "someone": "ktoś",
     "duplicated": "Zduplikowano listę",
     "duplicateFail": "Nie udało się zduplikować",
-    "copyOf": "{title} — kopia"
+    "copyOf": "{title} — kopia",
+    "insights": "Podsumowanie",
+    "prev": "Wstecz",
+    "next": "Dalej",
+    "duplicatedItem": "Wpis skopiowany"
   },
   "itemNotes": {
     "add": "Dodaj notatkę",
@@ -282,7 +305,8 @@
     "gallery": "Galeria",
     "timeline": "Oś czasu",
     "compact": "Wiersze",
-    "ungrouped": "Bez grup"
+    "ungrouped": "Bez grup",
+    "calendar": "Kalendarz"
   },
   "viewEditor": {
     "hint": "Właściciel wybiera, jakie typy widoków istnieją. Każdy widok ma nazwę, układ i własne pola.",
@@ -434,7 +458,20 @@
     "maxMb": "Maks. MB",
     "subfields": "Pola zagnieżdżonej listy",
     "subfield": "Podpole",
-    "newField": "Nowe pole"
+    "newField": "Nowe pole",
+    "description": "Podpowiedź dla edytora",
+    "descriptionHint": "Widoczna pod polem przy dodawaniu lub edycji wpisu.",
+    "default": "Wartość domyślna",
+    "defaultListHint": "Wartości oddzielone przecinkami",
+    "unique": "Unikalne wartości",
+    "hidden": "Ukryte w formularzach",
+    "moveUp": "W górę",
+    "moveDown": "W dół",
+    "duplicateField": "Duplikuj pole",
+    "groupField": "Pole tablicy / grupowania",
+    "placeholder": "Tekst zastępczy",
+    "pattern": "Wzorzec",
+    "patternPh": "np. ^[A-Z].+"
   },
   "fieldTypes": {
     "text": "Tekst",
@@ -491,7 +528,8 @@
     "uploadFail": "Przesyłanie nie powiodło się",
     "untitled": "Bez tytułu",
     "yes": "tak",
-    "no": "nie"
+    "no": "nie",
+    "unique": "„{name}” musi być unikalne"
   },
   "typeHint": {
     "text": "Ogranicz długość, jeśli trzeba.",
@@ -580,5 +618,64 @@
       "description": "Bieżąca lista, kupione rzeczy i odłożone świąteczne zakupy.",
       "hint": "Odhacz pozycję — albo stuknij przycisk, by wysłać ją do Kupionych / na Sylwestra."
     }
+  },
+  "filters": {
+    "title": "Filtry",
+    "clear": "Wyczyść filtry",
+    "dateField": "Pole daty",
+    "dateFrom": "Od daty",
+    "dateTo": "Do daty",
+    "ratingField": "Pole oceny",
+    "ratingMin": "Min. ocena",
+    "empty": "Nic nie pasuje",
+    "emptyText": "Poluzuj filtry albo je wyczyść, żeby znów zobaczyć wpisy."
+  },
+  "bulk": {
+    "mode": "Zaznacz",
+    "selected": "Zaznaczono: {n}",
+    "selectAll": "Zaznacz wszystko",
+    "clear": "Wyczyść zaznaczenie",
+    "check": "Odhacz",
+    "uncheck": "Cofnij odhaczenie",
+    "duplicate": "Duplikuj",
+    "export": "Eksport",
+    "delete": "Usuń",
+    "deleteConfirm": "Usunąć {n} wpisów?",
+    "done": "Gotowe"
+  },
+  "quickAdd": {
+    "placeholder": "Tytuł — Enter",
+    "add": "Dodaj"
+  },
+  "insights": {
+    "none": "Na razie brak danych",
+    "noneText": "Dodaj kilka wpisów, aby zobaczyć postęp, oceny i daty.",
+    "total": "Razem",
+    "open": "Otwarte",
+    "done": "Gotowe",
+    "completion": "Postęp",
+    "thisWeek": "W tym tygodniu",
+    "thisMonth": "W tym miesiącu",
+    "avgRating": "Średnia ocena",
+    "byGroup": "Według {field}",
+    "upcoming": "Wkrótce",
+    "overdue": "Zaległe",
+    "noUpcoming": "Brak nadchodzących dat",
+    "noOverdue": "Brak zaległości",
+    "noDate": "Bez daty"
+  },
+  "calendar": {
+    "prev": "Poprzedni miesiąc",
+    "next": "Następny miesiąc"
+  },
+  "shortcuts": {
+    "title": "Skróty klawiszowe",
+    "search": "Fokus na wyszukiwanie",
+    "new": "Nowy wpis",
+    "move": "Przesuń podświetlenie",
+    "open": "Otwórz podświetlony",
+    "selectAll": "Zaznacz wszystko",
+    "help": "Ta pomoc",
+    "close": "Zamknij"
   }
 }

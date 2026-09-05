@@ -57,7 +57,9 @@
     "sortZa": "Z → A",
     "records": "elementi",
     "example": "Esempio",
-    "cancel": "Annulla"
+    "cancel": "Annulla",
+    "pin": "Fissa",
+    "unpin": "Togli"
   },
   "nav": {
     "overview": "Home",
@@ -79,7 +81,20 @@
     "text": "Campi, limiti, condivisione, spostamenti tra liste, voti di chiunque e grafici. Interfaccia calma, anche sul telefono.",
     "start": "Inizia",
     "public": "Sfoglia le liste pubbliche",
-    "register": "Crea un account"
+    "register": "Crea un account",
+    "featTitle": "Quello che altre app spezzano in cinque prodotti",
+    "featFilters": "Filtri per campi",
+    "featFiltersText": "Stato, tag, date e voti — come Airtable o Letterboxd, in qualsiasi lista.",
+    "featViews": "Calendario e viste",
+    "featViewsText": "Tabella, schede, bacheca, linea del tempo e calendario del mese. Ogni vista ha il suo layout.",
+    "featBulk": "Aggiunta rapida e azioni multiple",
+    "featBulkText": "Una riga con Invio. Seleziona più voci e spunta, duplica, esporta o elimina.",
+    "featInsights": "Riepilogo",
+    "featInsightsText": "Completamento, medie, scaduti e date vicine — nella lista e in home.",
+    "featEditor": "Editor campi più potente",
+    "featEditorText": "Ordine, duplicati, valori predefiniti, unicità e suggerimenti per ogni campo.",
+    "featShare": "Condivisione com’era",
+    "featShareText": "Visibilità, proposte, amici, voti e trasferimenti restano — abbiamo solo aggiunto potenza."
   },
   "auth": {
     "loginTitle": "Accedi",
@@ -115,7 +130,10 @@
     "recent": "Liste recenti",
     "newList": "Nuova lista",
     "startCinema": "Inizia dal modello Cinema.",
-    "events": "Attività"
+    "events": "Attività",
+    "pinned": "Fissate",
+    "upcoming": "In arrivo",
+    "noUpcoming": "Nessuna data vicina"
   },
   "lists": {
     "title": "Liste",
@@ -124,7 +142,8 @@
     "emptyTitle": "Ancora nessuna lista",
     "emptyText": "Crea i campi da zero o parti da un pacchetto.",
     "templates": "Apri i modelli",
-    "find": "Cerca"
+    "find": "Cerca",
+    "pinned": "Fissate"
   },
   "newList": {
     "title": "Nuova lista",
@@ -247,7 +266,11 @@
     "someone": "qualcuno",
     "duplicated": "Lista duplicata",
     "duplicateFail": "Impossibile duplicare",
-    "copyOf": "{title} — copia"
+    "copyOf": "{title} — copia",
+    "insights": "Riepilogo",
+    "prev": "Indietro",
+    "next": "Avanti",
+    "duplicatedItem": "Voce duplicata"
   },
   "itemNotes": {
     "add": "Aggiungi nota",
@@ -282,7 +305,8 @@
     "gallery": "Galleria",
     "timeline": "Timeline",
     "compact": "Righe",
-    "ungrouped": "Senza gruppi"
+    "ungrouped": "Senza gruppi",
+    "calendar": "Calendario"
   },
   "viewEditor": {
     "hint": "Il proprietario sceglie quali tipi di vista esistono. Ogni vista ha nome, layout e i propri campi.",
@@ -434,7 +458,20 @@
     "maxMb": "Max MB",
     "subfields": "Sottocampi della lista nidificata",
     "subfield": "Sottocampo",
-    "newField": "Nuovo campo"
+    "newField": "Nuovo campo",
+    "description": "Suggerimento per chi modifica",
+    "descriptionHint": "Mostrato sotto il campo quando si aggiunge o modifica una voce.",
+    "default": "Valore predefinito",
+    "defaultListHint": "Valori separati da virgola",
+    "unique": "Valori unici",
+    "hidden": "Nascosto nei moduli",
+    "moveUp": "Su",
+    "moveDown": "Giù",
+    "duplicateField": "Duplica campo",
+    "groupField": "Campo bacheca / gruppo",
+    "placeholder": "Segnaposto",
+    "pattern": "Modello",
+    "patternPh": "es. ^[A-Z].+"
   },
   "fieldTypes": {
     "text": "Testo",
@@ -491,7 +528,8 @@
     "uploadFail": "Caricamento non riuscito",
     "untitled": "Senza titolo",
     "yes": "sì",
-    "no": "no"
+    "no": "no",
+    "unique": "“{name}” deve essere unico"
   },
   "typeHint": {
     "text": "Limita la lunghezza se serve.",
@@ -580,5 +618,64 @@
       "description": "Lista attuale, comprati e acquisti festivi rimandati.",
       "hint": "Spunta un elemento — o tocca un pulsante per mandarlo in Comprati / Capodanno."
     }
+  },
+  "filters": {
+    "title": "Filtri",
+    "clear": "Azzera filtri",
+    "dateField": "Campo data",
+    "dateFrom": "Dalla data",
+    "dateTo": "Alla data",
+    "ratingField": "Campo voto",
+    "ratingMin": "Voto minimo",
+    "empty": "Nessun risultato",
+    "emptyText": "Allenta i filtri o azzerali per rivedere le voci."
+  },
+  "bulk": {
+    "mode": "Seleziona",
+    "selected": "{n} selezionate",
+    "selectAll": "Seleziona tutto",
+    "clear": "Annulla selezione",
+    "check": "Segna",
+    "uncheck": "Togli segno",
+    "duplicate": "Duplica",
+    "export": "Esporta",
+    "delete": "Elimina",
+    "deleteConfirm": "Eliminare {n} voci?",
+    "done": "Fatto"
+  },
+  "quickAdd": {
+    "placeholder": "Titolo — Invio",
+    "add": "Aggiungi"
+  },
+  "insights": {
+    "none": "Ancora nessun dato",
+    "noneText": "Aggiungi alcune voci per vedere avanzamento, voti e date.",
+    "total": "Totale",
+    "open": "Aperte",
+    "done": "Fatte",
+    "completion": "Avanzamento",
+    "thisWeek": "Questa settimana",
+    "thisMonth": "Questo mese",
+    "avgRating": "Voto medio",
+    "byGroup": "Per {field}",
+    "upcoming": "In arrivo",
+    "overdue": "In ritardo",
+    "noUpcoming": "Niente in arrivo",
+    "noOverdue": "Niente in ritardo",
+    "noDate": "Senza data"
+  },
+  "calendar": {
+    "prev": "Mese precedente",
+    "next": "Mese successivo"
+  },
+  "shortcuts": {
+    "title": "Scorciatoie da tastiera",
+    "search": "Focus sulla ricerca",
+    "new": "Nuova voce",
+    "move": "Sposta evidenziazione",
+    "open": "Apri evidenziata",
+    "selectAll": "Seleziona tutto",
+    "help": "Questo aiuto",
+    "close": "Chiudi"
   }
 }

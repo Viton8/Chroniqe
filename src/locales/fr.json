@@ -57,7 +57,9 @@
     "sortZa": "Z → A",
     "records": "éléments",
     "example": "Exemple",
-    "cancel": "Annuler"
+    "cancel": "Annuler",
+    "pin": "Épingler",
+    "unpin": "Désépingler"
   },
   "nav": {
     "overview": "Accueil",
@@ -79,7 +81,20 @@
     "text": "Champs, limites, partage, déplacements entre listes, notes de n’importe qui et graphiques. Interface calme, aussi sur téléphone.",
     "start": "Commencer",
     "public": "Voir les listes publiques",
-    "register": "Créer un compte"
+    "register": "Créer un compte",
+    "featTitle": "Ce que d’autres apps éparpillent en cinq produits",
+    "featFilters": "Filtres par champs",
+    "featFiltersText": "Statut, tags, dates et notes — comme Airtable ou Letterboxd, dans n’importe quelle liste.",
+    "featViews": "Calendrier et vues",
+    "featViewsText": "Tableau, cartes, tableau kanban, frise et calendrier du mois. Chaque vue a sa mise en page.",
+    "featBulk": "Ajout rapide et actions groupées",
+    "featBulkText": "Une ligne avec Entrée. Sélectionnez plusieurs éléments pour cocher, dupliquer, exporter ou supprimer.",
+    "featInsights": "Aperçu",
+    "featInsightsText": "Progression, moyennes, retards et dates à venir — dans la liste et sur l’accueil.",
+    "featEditor": "Éditeur de champs plus fort",
+    "featEditorText": "Ordre, doublons, valeurs par défaut, unicité et aides pour chaque champ.",
+    "featShare": "Le partage inchangé",
+    "featShareText": "Visibilité, propositions, amis, notes et transferts restent — nous n’avons qu’ajouté de la puissance."
   },
   "auth": {
     "loginTitle": "Connexion",
@@ -115,7 +130,10 @@
     "recent": "Listes récentes",
     "newList": "Nouvelle liste",
     "startCinema": "Commencez avec le modèle Cinéma.",
-    "events": "Activité"
+    "events": "Activité",
+    "pinned": "Épinglées",
+    "upcoming": "À venir",
+    "noUpcoming": "Aucune date proche"
   },
   "lists": {
     "title": "Listes",
@@ -124,7 +142,8 @@
     "emptyTitle": "Pas encore de listes",
     "emptyText": "Créez les champs vous-même ou partez d’un pack.",
     "templates": "Ouvrir les modèles",
-    "find": "Rechercher"
+    "find": "Rechercher",
+    "pinned": "Épinglées"
   },
   "newList": {
     "title": "Nouvelle liste",
@@ -247,7 +266,11 @@
     "someone": "quelqu’un",
     "duplicated": "Liste dupliquée",
     "duplicateFail": "Impossible de dupliquer",
-    "copyOf": "{title} — copie"
+    "copyOf": "{title} — copie",
+    "insights": "Aperçu",
+    "prev": "Précédent",
+    "next": "Suivant",
+    "duplicatedItem": "Entrée dupliquée"
   },
   "itemNotes": {
     "add": "Ajouter une note",
@@ -282,7 +305,8 @@
     "gallery": "Galerie",
     "timeline": "Chronologie",
     "compact": "Lignes",
-    "ungrouped": "Sans groupe"
+    "ungrouped": "Sans groupe",
+    "calendar": "Calendrier"
   },
   "viewEditor": {
     "hint": "Le propriétaire choisit les types de vues. Chaque vue a un nom, une mise en page et ses propres champs.",
@@ -434,7 +458,20 @@
     "maxMb": "Max. Mo",
     "subfields": "Sous-champs de la liste imbriquée",
     "subfield": "Sous-champ",
-    "newField": "Nouveau champ"
+    "newField": "Nouveau champ",
+    "description": "Aide pour les éditeurs",
+    "descriptionHint": "Affichée sous le champ à l’ajout ou à la modification.",
+    "default": "Valeur par défaut",
+    "defaultListHint": "Valeurs séparées par des virgules",
+    "unique": "Valeurs uniques",
+    "hidden": "Masqué dans les formulaires",
+    "moveUp": "Monter",
+    "moveDown": "Descendre",
+    "duplicateField": "Dupliquer le champ",
+    "groupField": "Champ de tableau / groupe",
+    "placeholder": "Placeholder",
+    "pattern": "Motif",
+    "patternPh": "ex. ^[A-Z].+"
   },
   "fieldTypes": {
     "text": "Texte",
@@ -491,7 +528,8 @@
     "uploadFail": "Échec de l’envoi",
     "untitled": "Sans titre",
     "yes": "oui",
-    "no": "non"
+    "no": "non",
+    "unique": "« {name} » doit être unique"
   },
   "typeHint": {
     "text": "Limitez la longueur si besoin.",
@@ -580,5 +618,64 @@
       "description": "Liste du moment, achetés, et achats de fêtes reportés.",
       "hint": "Cochez un élément — ou envoyez-le vers Achetés / Nouvel An d’un bouton."
     }
+  },
+  "filters": {
+    "title": "Filtres",
+    "clear": "Effacer les filtres",
+    "dateField": "Champ date",
+    "dateFrom": "Depuis",
+    "dateTo": "Jusqu’au",
+    "ratingField": "Champ note",
+    "ratingMin": "Note min.",
+    "empty": "Aucun résultat",
+    "emptyText": "Assouplissez les filtres ou effacez-les pour revoir les entrées."
+  },
+  "bulk": {
+    "mode": "Sélectionner",
+    "selected": "{n} sélectionné(s)",
+    "selectAll": "Tout sélectionner",
+    "clear": "Vider la sélection",
+    "check": "Cocher",
+    "uncheck": "Décocher",
+    "duplicate": "Dupliquer",
+    "export": "Exporter",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer {n} entrées ?",
+    "done": "Fait"
+  },
+  "quickAdd": {
+    "placeholder": "Titre — Entrée",
+    "add": "Ajouter"
+  },
+  "insights": {
+    "none": "Pas encore de données",
+    "noneText": "Ajoutez quelques entrées pour voir progression, notes et dates.",
+    "total": "Total",
+    "open": "Ouvertes",
+    "done": "Terminées",
+    "completion": "Progression",
+    "thisWeek": "Cette semaine",
+    "thisMonth": "Ce mois",
+    "avgRating": "Note moyenne",
+    "byGroup": "Par {field}",
+    "upcoming": "À venir",
+    "overdue": "En retard",
+    "noUpcoming": "Rien à venir",
+    "noOverdue": "Rien en retard",
+    "noDate": "Sans date"
+  },
+  "calendar": {
+    "prev": "Mois précédent",
+    "next": "Mois suivant"
+  },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "search": "Focus recherche",
+    "new": "Nouvelle entrée",
+    "move": "Déplacer le surlignage",
+    "open": "Ouvrir le surligné",
+    "selectAll": "Tout sélectionner",
+    "help": "Cette aide",
+    "close": "Fermer"
   }
 }

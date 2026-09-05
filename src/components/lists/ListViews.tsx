@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { Check, Columns3, LayoutGrid, Table2, Waypoints } from 'lucide-react'
+import { CalendarDays, Check, Columns3, LayoutGrid, Table2, Waypoints } from 'lucide-react'
+import CalendarMonth from './CalendarMonth'
 import type {
   FieldDef,
   FieldViewStyle,
@@ -9,12 +10,12 @@ import type {
   ListSchema,
   NamedView,
 } from '../../types/domain'
-import { fileMeta, isImageFile } from '../../lib/files'
+import { fileMeta, hasCoverVisual, isImageFile } from '../../lib/files'
 import { fieldsWithRole, resolveViewSlots, styleForField } from '../../lib/views'
 import { cn, formatDate, titleFromValues } from '../../lib/cn'
 import { usePrefs } from '../../context/PrefsContext'
 import FileThumb from './FileThumb'
-import CoverSlot, { hasCoverVisual } from './CoverSlot'
+import CoverSlot from './CoverSlot'
 import ItemNotesMarker from './ItemNotes'
 import StyledValue from './StyledValue'
 
@@ -23,6 +24,7 @@ const KIND_ICON = {
   cards: LayoutGrid,
   board: Columns3,
   timeline: Waypoints,
+  calendar: CalendarDays,
 } as const
 
 export function ViewSwitcher({
@@ -38,7 +40,7 @@ export function ViewSwitcher({
   return (
     <div className="flex min-w-0 flex-1 flex-wrap gap-1 rounded-2xl bg-ink/5 p-1">
       {views.map((view) => {
-        const Icon = KIND_ICON[view.kind]
+        const Icon = KIND_ICON[view.kind] ?? Table2
         return (
           <button
             key={view.id}
@@ -73,6 +75,10 @@ export default function ListViews({
   onNoteCreated,
   onNoteUpdated,
   onNoteDeleted,
+  selectMode,
+  selectedIds,
+  highlightedId,
+  onToggleSelect,
 }: {
   schema: ListSchema
   items: ItemRow[]
@@ -88,6 +94,10 @@ export default function ListViews({
   onNoteCreated?: (row: ItemComment) => void
   onNoteUpdated?: (row: ItemComment) => void
   onNoteDeleted?: (id: string) => void
+  selectMode?: boolean
+  selectedIds?: Set<string>
+  highlightedId?: string
+  onToggleSelect?: (item: ItemRow) => void
 }) {
   const { t } = usePrefs()
   const slots = resolveViewSlots(schema, view)
@@ -156,6 +166,10 @@ export default function ListViews({
                     renderField={renderField}
                     onOpen={onOpen}
                     onToggle={onToggle}
+                    selectMode={selectMode}
+                    selected={selectedIds?.has(item.id)}
+                    highlighted={highlightedId === item.id}
+                    onToggleSelect={onToggleSelect}
                   />
                 ))}
             </div>
@@ -177,6 +191,10 @@ export default function ListViews({
                 renderField={renderField}
                 onOpen={onOpen}
                 onToggle={onToggle}
+                selectMode={selectMode}
+                selected={selectedIds?.has(item.id)}
+                highlighted={highlightedId === item.id}
+                onToggleSelect={onToggleSelect}
               />
             ))}
           </div>
@@ -198,7 +216,10 @@ export default function ListViews({
     return (
       <ol className="relative ml-3 border-l border-line">
         {sorted.map((item) => (
-          <li key={item.id} className="group mb-5 ml-4">
+          <li
+            key={item.id}
+            className={cn('group mb-5 ml-4', highlightedId === item.id && 'rounded-xl bg-accent-soft/60 p-2')}
+          >
             <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-accent" />
             <p className="text-xs text-muted">{formatDate(String(item.values[dateId] ?? ''))}</p>
             <div className="mt-1 flex items-start gap-2">
@@ -209,6 +230,9 @@ export default function ListViews({
                   className="h-12 w-9 shrink-0 rounded-lg"
                   fallback={renderField(item, styleForField(view, coverId) ?? { fieldId: coverId, role: 'cover' })}
                 />
+              ) : null}
+              {selectMode && onToggleSelect ? (
+                <SelectBox selected={Boolean(selectedIds?.has(item.id))} onChange={() => onToggleSelect(item)} />
               ) : null}
               <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
                 <span className={cn('font-medium', item.is_checked && 'checked-out')}>
@@ -236,6 +260,23 @@ export default function ListViews({
     )
   }
 
+  if (view.kind === 'calendar') {
+    if (!dateId) return <p className="text-sm text-muted">{t('viewEditor.dateField')}</p>
+    return (
+      <CalendarMonth
+        schema={schema}
+        items={items}
+        view={view}
+        dateId={dateId}
+        highlightedId={highlightedId}
+        selectedIds={selectedIds}
+        selectMode={selectMode}
+        onOpen={onOpen}
+        onToggleSelect={onToggleSelect}
+      />
+    )
+  }
+
   if (view.kind === 'cards') {
     const layout = view.cardLayout ?? 'grid'
     const cols =
@@ -259,6 +300,10 @@ export default function ListViews({
             renderField={renderField}
             onOpen={onOpen}
             onToggle={onToggle}
+            selectMode={selectMode}
+            selected={selectedIds?.has(item.id)}
+            highlighted={highlightedId === item.id}
+            onToggleSelect={onToggleSelect}
           />
         ))}
       </div>
@@ -277,6 +322,7 @@ export default function ListViews({
       <table className="w-full text-left text-sm">
         <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
           <tr>
+            {selectMode ? <th className={cn('w-10', pad)} /> : null}
             {enableCheck ? <th className={cn('w-10', pad)} /> : null}
             {columns.map((f) => (
               <th key={f.id} className={cn(pad, 'font-medium')}>
@@ -290,9 +336,18 @@ export default function ListViews({
           {items.map((item) => (
             <tr
               key={item.id}
-              className="group cursor-pointer border-b border-line/70 last:border-0 hover:bg-black/[0.02]"
+              className={cn(
+                'group cursor-pointer border-b border-line/70 last:border-0 hover:bg-black/[0.02]',
+                highlightedId === item.id && 'bg-accent-soft/70',
+                selectedIds?.has(item.id) && 'bg-accent-soft/40',
+              )}
               onClick={() => onOpen(item)}
             >
+              {selectMode && onToggleSelect ? (
+                <td className={pad} onClick={(e) => e.stopPropagation()}>
+                  <SelectBox selected={Boolean(selectedIds?.has(item.id))} onChange={() => onToggleSelect(item)} />
+                </td>
+              ) : null}
               {enableCheck && onToggle ? (
                 <td className={pad} onClick={(e) => e.stopPropagation()}>
                   <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
@@ -367,6 +422,28 @@ function FieldCell({
   )
 }
 
+function SelectBox({
+  selected,
+  onChange,
+}: {
+  selected: boolean
+  onChange: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onChange}
+      className={cn(
+        'flex h-5 w-5 items-center justify-center rounded border',
+        selected ? 'border-accent bg-accent text-on-accent' : 'border-line',
+      )}
+      aria-pressed={selected}
+    >
+      {selected ? <Check size={12} /> : null}
+    </button>
+  )
+}
+
 function CheckToggle({
   checked,
   onChange,
@@ -400,6 +477,10 @@ function ConfiguredCard({
   renderField,
   onOpen,
   onToggle,
+  selectMode,
+  selected,
+  highlighted,
+  onToggleSelect,
 }: {
   item: ItemRow
   schema: ListSchema
@@ -411,6 +492,10 @@ function ConfiguredCard({
   renderField: (item: ItemRow, style: FieldViewStyle) => ReactNode
   onOpen: (item: ItemRow) => void
   onToggle?: (item: ItemRow, next: boolean) => void
+  selectMode?: boolean
+  selected?: boolean
+  highlighted?: boolean
+  onToggleSelect?: (item: ItemRow) => void
 }) {
   const layout = view.cardLayout ?? 'grid'
   const cover = coverId ? item.values[coverId] : undefined
@@ -438,9 +523,14 @@ function ConfiguredCard({
       />
     ) : null
 
+  const ring = cn(highlighted && 'ring-2 ring-accent', selected && 'ring-1 ring-accent')
+
   if (layout === 'compact') {
     return (
-      <article className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift">
+      <article className={cn('group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift', ring)}>
+        {selectMode && onToggleSelect ? (
+          <SelectBox selected={Boolean(selected)} onChange={() => onToggleSelect(item)} />
+        ) : null}
         {enableCheck && onToggle ? (
           <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
         ) : null}
@@ -461,7 +551,12 @@ function ConfiguredCard({
 
   if (layout === 'media') {
     return (
-      <article className="group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift">
+      <article className={cn('group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift', ring)}>
+        {selectMode && onToggleSelect ? (
+          <div className="absolute left-2 top-2 z-10">
+            <SelectBox selected={Boolean(selected)} onChange={() => onToggleSelect(item)} />
+          </div>
+        ) : null}
         <button type="button" className="block w-full text-left" onClick={() => onOpen(item)}>
           {coverNode('aspect-[3/4] w-full')}
           <div className="p-3">
@@ -480,11 +575,14 @@ function ConfiguredCard({
   }
 
   return (
-    <article className="group relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift">
+    <article className={cn('group relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift', ring)}>
       <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notes}</div>
       {hasCover ? coverNode('aspect-[16/10] w-full') : null}
       <div className={hasCover ? 'p-3' : 'p-3 pr-12'}>
         <div className="flex items-start gap-2">
+          {selectMode && onToggleSelect ? (
+            <SelectBox selected={Boolean(selected)} onChange={() => onToggleSelect(item)} />
+          ) : null}
           {enableCheck && onToggle ? (
             <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
           ) : null}

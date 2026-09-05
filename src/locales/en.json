@@ -57,7 +57,9 @@
     "sortZa": "Z → A",
     "records": "items",
     "example": "Example",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "pin": "Pin",
+    "unpin": "Unpin"
   },
   "nav": {
     "overview": "Home",
@@ -79,7 +81,20 @@
     "text": "Fields, constraints, sharing, moves between lists, ratings from anyone, and charts. Calm UI, including on a phone.",
     "start": "Get started",
     "public": "Browse public lists",
-    "register": "Create account"
+    "register": "Create account",
+    "featTitle": "What other apps split into five products",
+    "featFilters": "Faceted filters",
+    "featFiltersText": "Filter by status, tags, dates and ratings — like Airtable or Letterboxd, inside any list.",
+    "featViews": "Calendar and views",
+    "featViewsText": "Table, cards, board, timeline and a month calendar. Each view keeps its own layout.",
+    "featBulk": "Quick add and bulk edit",
+    "featBulkText": "Add a row with Enter. Select many items and check, duplicate, export or delete them.",
+    "featInsights": "Insights",
+    "featInsightsText": "Completion, averages, overdue and upcoming dates on the list and on the home screen.",
+    "featEditor": "Stronger field editor",
+    "featEditorText": "Reorder, duplicate, defaults, unique values and hints for every field.",
+    "featShare": "Sharing you already have",
+    "featShareText": "Visibility, proposals, friends, ratings and transfers stay in place — we only added more power."
   },
   "auth": {
     "loginTitle": "Log in",
@@ -115,7 +130,10 @@
     "recent": "Recent lists",
     "newList": "New list",
     "startCinema": "Start with the Cinema template.",
-    "events": "Activity"
+    "events": "Activity",
+    "pinned": "Pinned",
+    "upcoming": "Coming up",
+    "noUpcoming": "No upcoming dates"
   },
   "lists": {
     "title": "Lists",
@@ -124,7 +142,8 @@
     "emptyTitle": "No lists yet",
     "emptyText": "Build fields from scratch or start from a pack.",
     "templates": "Open templates",
-    "find": "Find"
+    "find": "Find",
+    "pinned": "Pinned"
   },
   "newList": {
     "title": "New list",
@@ -247,7 +266,11 @@
     "someone": "someone",
     "duplicated": "List duplicated",
     "duplicateFail": "Could not duplicate",
-    "copyOf": "{title} — copy"
+    "copyOf": "{title} — copy",
+    "insights": "Insights",
+    "prev": "Previous",
+    "next": "Next",
+    "duplicatedItem": "Entry duplicated"
   },
   "itemNotes": {
     "add": "Add note",
@@ -282,7 +305,8 @@
     "gallery": "Gallery",
     "timeline": "Timeline",
     "compact": "Rows",
-    "ungrouped": "Ungrouped"
+    "ungrouped": "Ungrouped",
+    "calendar": "Calendar"
   },
   "viewEditor": {
     "hint": "The owner picks which view types exist. Each view has a name, layout, and its own fields.",
@@ -434,7 +458,20 @@
     "maxMb": "Max MB",
     "subfields": "Nested list subfields",
     "subfield": "Subfield",
-    "newField": "New field"
+    "newField": "New field",
+    "description": "Hint for editors",
+    "descriptionHint": "Shown under the field when someone adds or edits an item.",
+    "default": "Default value",
+    "defaultListHint": "Comma-separated values",
+    "unique": "Unique values",
+    "hidden": "Hidden in forms",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "duplicateField": "Duplicate field",
+    "groupField": "Board / grouping field",
+    "placeholder": "Placeholder",
+    "pattern": "Pattern",
+    "patternPh": "e.g. ^[A-Z].+"
   },
   "fieldTypes": {
     "text": "Text",
@@ -491,7 +528,8 @@
     "uploadFail": "Upload failed",
     "untitled": "Untitled",
     "yes": "yes",
-    "no": "no"
+    "no": "no",
+    "unique": "“{name}” must be unique"
   },
   "typeHint": {
     "text": "Cap the length if you need to.",
@@ -580,5 +618,64 @@
       "description": "Current list, bought items, and deferred holiday buys.",
       "hint": "Check an item off — or tap a button to send it to Bought / New Year."
     }
+  },
+  "filters": {
+    "title": "Filters",
+    "clear": "Clear filters",
+    "dateField": "Date field",
+    "dateFrom": "From date",
+    "dateTo": "To date",
+    "ratingField": "Rating field",
+    "ratingMin": "Min rating",
+    "empty": "Nothing matches",
+    "emptyText": "Relax the filters or clear them to see items again."
+  },
+  "bulk": {
+    "mode": "Select",
+    "selected": "{n} selected",
+    "selectAll": "Select all",
+    "clear": "Clear selection",
+    "check": "Check off",
+    "uncheck": "Uncheck",
+    "duplicate": "Duplicate",
+    "export": "Export",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {n} entries?",
+    "done": "Done"
+  },
+  "quickAdd": {
+    "placeholder": "Title — press Enter",
+    "add": "Add"
+  },
+  "insights": {
+    "none": "No insights yet",
+    "noneText": "Add a few items to see completion, ratings and dates.",
+    "total": "Total",
+    "open": "Open",
+    "done": "Done",
+    "completion": "Completion",
+    "thisWeek": "Added this week",
+    "thisMonth": "Added this month",
+    "avgRating": "Average rating",
+    "byGroup": "By {field}",
+    "upcoming": "Upcoming",
+    "overdue": "Overdue",
+    "noUpcoming": "Nothing upcoming",
+    "noOverdue": "Nothing overdue",
+    "noDate": "No date"
+  },
+  "calendar": {
+    "prev": "Previous month",
+    "next": "Next month"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "search": "Focus search",
+    "new": "New entry",
+    "move": "Move highlight",
+    "open": "Open highlighted",
+    "selectAll": "Select all",
+    "help": "This help",
+    "close": "Close"
   }
 }

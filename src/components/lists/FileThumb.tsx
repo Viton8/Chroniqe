@@ -12,32 +12,6 @@ export default function FileThumb({
   alt?: string
 }) {
   const meta = fileMeta(value)
-  const [url, setUrl] = useState<string | null>(null)
-  const [ready, setReady] = useState(!meta)
-  const [broken, setBroken] = useState(false)
-  const remote = Boolean(meta?.path && /^https?:\/\//i.test(meta.path))
-
-  useEffect(() => {
-    const path = meta?.path
-    setBroken(false)
-    if (!path) {
-      setUrl(null)
-      setReady(true)
-      return
-    }
-    let cancelled = false
-    setReady(false)
-    void cachedSignedUrl(path).then((next) => {
-      if (!cancelled) {
-        setUrl(next)
-        setReady(true)
-      }
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [meta?.path])
-
   if (!meta) {
     return (
       <div className={cn('flex items-center justify-center bg-accent-soft text-lg text-accent', className)}>
@@ -45,6 +19,34 @@ export default function FileThumb({
       </div>
     )
   }
+  return <LoadedThumb key={meta.path} meta={meta} className={className} alt={alt} />
+}
+
+function LoadedThumb({
+  meta,
+  className,
+  alt,
+}: {
+  meta: NonNullable<ReturnType<typeof fileMeta>>
+  className?: string
+  alt: string
+}) {
+  const [url, setUrl] = useState<string | null>(null)
+  const [ready, setReady] = useState(false)
+  const [broken, setBroken] = useState(false)
+  const remote = Boolean(meta.path && /^https?:\/\//i.test(meta.path))
+
+  useEffect(() => {
+    let cancelled = false
+    void cachedSignedUrl(meta.path).then((next) => {
+      if (cancelled) return
+      setUrl(next)
+      setReady(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [meta.path])
 
   if (!ready) {
     return <div className={cn('animate-pulse bg-ink/5', className)} />

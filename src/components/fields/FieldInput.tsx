@@ -19,6 +19,10 @@ interface Props {
   error?: string
 }
 
+function fieldHint(field: FieldDef, extra?: string) {
+  return [field.description, extra].filter(Boolean).join(' · ') || undefined
+}
+
 export default function FieldInput(props: Props) {
   const { field, value, onChange, disabled, error } = props
   const { t } = usePrefs()
@@ -27,7 +31,7 @@ export default function FieldInput(props: Props) {
   switch (field.type) {
     case 'textarea':
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Textarea
             value={String(value ?? '')}
             maxLength={cfg.maxLength}
@@ -40,7 +44,7 @@ export default function FieldInput(props: Props) {
     case 'number':
     case 'integer':
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
             type="number"
             step={field.type === 'integer' ? 1 : 'any'}
@@ -55,7 +59,7 @@ export default function FieldInput(props: Props) {
     case 'date':
     case 'datetime':
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
             type={field.type === 'date' ? 'date' : 'datetime-local'}
             value={String(value ?? '')}
@@ -67,19 +71,22 @@ export default function FieldInput(props: Props) {
     case 'boolean':
     case 'checkbox':
       return (
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={Boolean(value)}
-            disabled={disabled}
-            onChange={(e) => onChange(e.target.checked)}
-          />
-          {field.name}
+        <label className="block text-sm">
+          <span className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={Boolean(value)}
+              disabled={disabled}
+              onChange={(e) => onChange(e.target.checked)}
+            />
+            {field.name}
+          </span>
+          {field.description ? <span className="mt-1 block text-xs text-muted">{field.description}</span> : null}
         </label>
       )
     case 'select':
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <select
             className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
             value={String(value ?? '')}
@@ -99,7 +106,7 @@ export default function FieldInput(props: Props) {
     case 'tags': {
       const selected = Array.isArray(value) ? (value as string[]) : []
       return (
-        <FieldWrap label={field.name} error={error} hint={field.type === 'tags' ? t('fields.tagEnter') : undefined}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field, field.type === 'tags' ? t('fields.tagEnter') : undefined)}>
           {field.type === 'tags' ? (
             <TagEditor value={selected} disabled={disabled} onChange={onChange} />
           ) : (
@@ -130,7 +137,7 @@ export default function FieldInput(props: Props) {
     }
     case 'rating':
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Stars
             max={cfg.ratingMax ?? 10}
             value={Number(value ?? 0)}
@@ -146,7 +153,7 @@ export default function FieldInput(props: Props) {
     case 'text':
     case 'color':
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
             type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : field.type === 'color' ? 'color' : 'text'}
             value={String(value ?? '')}
@@ -165,7 +172,7 @@ export default function FieldInput(props: Props) {
       return <SublistField {...props} />
     default:
       return (
-        <FieldWrap label={field.name} error={error}>
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
             value={String(value ?? '')}
             disabled={disabled}
@@ -225,7 +232,7 @@ function MultiRating({
   return (
     <FieldWrap
       label={field.name}
-      hint={t('fields.multiHint')}
+      hint={fieldHint(field, t('fields.multiHint'))}
     >
       <Stars
         max={max}
@@ -273,7 +280,7 @@ function FileField({ field, value, onChange, disabled, listId, userId }: Props) 
   }, [meta?.path])
 
   return (
-    <FieldWrap label={field.name} error={err ?? undefined} hint={t('fields.fileHint')}>
+    <FieldWrap label={field.name} error={err ?? undefined} hint={fieldHint(field, t('fields.fileHint'))}>
       {meta?.path && url && field.type === 'image' ? (
         <img src={url} alt="" className="mb-2 h-28 w-28 rounded-xl object-cover" />
       ) : null}
@@ -359,7 +366,7 @@ function SublistField({ field, value, onChange, disabled }: Props) {
   return (
     <FieldWrap
       label={field.name}
-      hint={t('fields.nestedHint')}
+      hint={fieldHint(field, t('fields.nestedHint'))}
     >
       <div className="space-y-2">
         {rows.map((row, idx) => (

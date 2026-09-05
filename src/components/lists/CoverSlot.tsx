@@ -1,22 +1,9 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import type { FieldDef } from '../../types/domain'
-import { fileMeta } from '../../lib/files'
+import { fileMeta, httpUrl } from '../../lib/files'
 import { cn } from '../../lib/cn'
 import FileThumb from './FileThumb'
-
-function httpUrl(value: unknown): string | null {
-  if (typeof value !== 'string') return null
-  const src = value.trim()
-  return /^https?:\/\//i.test(src) ? src : null
-}
-
-export function hasCoverVisual(value: unknown): boolean {
-  if (fileMeta(value) || httpUrl(value)) return true
-  if (value == null || value === '') return false
-  if (Array.isArray(value)) return value.length > 0
-  return true
-}
 
 export default function CoverSlot({
   field,

@@ -57,7 +57,9 @@
     "sortZa": "Z → A",
     "records": "Einträge",
     "example": "Beispiel",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "pin": "Anheften",
+    "unpin": "Lösen"
   },
   "nav": {
     "overview": "Start",
@@ -79,7 +81,20 @@
     "text": "Felder, Grenzen, Teilen, Verschieben zwischen Listen, Bewertungen von allen und Diagramme. Ruhige Oberfläche, auch am Handy.",
     "start": "Loslegen",
     "public": "Öffentliche Listen ansehen",
-    "register": "Konto erstellen"
+    "register": "Konto erstellen",
+    "featTitle": "Was andere Apps auf fünf Produkte verteilen",
+    "featFilters": "Filter nach Feldern",
+    "featFiltersText": "Status, Tags, Daten und Bewertungen — wie Airtable oder Letterboxd, in jeder Liste.",
+    "featViews": "Kalender und Ansichten",
+    "featViewsText": "Tabelle, Karten, Board, Zeitachse und Monatskalender. Jede Ansicht hat ihr eigenes Layout.",
+    "featBulk": "Schnell hinzufügen und Stapelaktionen",
+    "featBulkText": "Neue Zeile mit Enter. Mehrere Einträge wählen und abhaken, duplizieren, exportieren oder löschen.",
+    "featInsights": "Überblick",
+    "featInsightsText": "Fortschritt, Durchschnitte, Überfälliges und Termine — in der Liste und auf der Startseite.",
+    "featEditor": "Stärkerer Feld-Editor",
+    "featEditorText": "Reihenfolge, Duplikate, Standardwerte, Eindeutigkeit und Hinweise für jedes Feld.",
+    "featShare": "Teilen wie bisher",
+    "featShareText": "Sichtbarkeit, Vorschläge, Freunde, Bewertungen und Transfers bleiben — wir haben nur mehr Kraft ergänzt."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -115,7 +130,10 @@
     "recent": "Letzte Listen",
     "newList": "Neue Liste",
     "startCinema": "Starte mit der Kino-Vorlage.",
-    "events": "Aktivität"
+    "events": "Aktivität",
+    "pinned": "Angeheftet",
+    "upcoming": "Demnächst",
+    "noUpcoming": "Keine nahen Termine"
   },
   "lists": {
     "title": "Listen",
@@ -124,7 +142,8 @@
     "emptyTitle": "Noch keine Listen",
     "emptyText": "Baue Felder selbst oder starte mit einem Paket.",
     "templates": "Vorlagen öffnen",
-    "find": "Suchen"
+    "find": "Suchen",
+    "pinned": "Angeheftet"
   },
   "newList": {
     "title": "Neue Liste",
@@ -247,7 +266,11 @@
     "someone": "jemand",
     "duplicated": "Liste dupliziert",
     "duplicateFail": "Duplizieren fehlgeschlagen",
-    "copyOf": "{title} — Kopie"
+    "copyOf": "{title} — Kopie",
+    "insights": "Überblick",
+    "prev": "Zurück",
+    "next": "Weiter",
+    "duplicatedItem": "Eintrag dupliziert"
   },
   "itemNotes": {
     "add": "Notiz hinzufügen",
@@ -282,7 +305,8 @@
     "gallery": "Galerie",
     "timeline": "Zeitachse",
     "compact": "Zeilen",
-    "ungrouped": "Ungruppiert"
+    "ungrouped": "Ungruppiert",
+    "calendar": "Kalender"
   },
   "viewEditor": {
     "hint": "Die Besitzenden wählen, welche Ansichtstypen es gibt. Jede Ansicht hat Namen, Layout und eigene Felder.",
@@ -434,7 +458,20 @@
     "maxMb": "Max. MB",
     "subfields": "Felder der verschachtelten Liste",
     "subfield": "Unterfeld",
-    "newField": "Neues Feld"
+    "newField": "Neues Feld",
+    "description": "Hinweis für Bearbeiter",
+    "descriptionHint": "Erscheint unter dem Feld beim Anlegen oder Bearbeiten.",
+    "default": "Standardwert",
+    "defaultListHint": "Kommagetrennte Werte",
+    "unique": "Eindeutige Werte",
+    "hidden": "In Formularen verborgen",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "duplicateField": "Feld duplizieren",
+    "groupField": "Board- / Gruppierungsfeld",
+    "placeholder": "Platzhalter",
+    "pattern": "Muster",
+    "patternPh": "z. B. ^[A-Z].+"
   },
   "fieldTypes": {
     "text": "Text",
@@ -491,7 +528,8 @@
     "uploadFail": "Upload fehlgeschlagen",
     "untitled": "Ohne Titel",
     "yes": "ja",
-    "no": "nein"
+    "no": "nein",
+    "unique": "„{name}“ muss eindeutig sein"
   },
   "typeHint": {
     "text": "Begrenze die Länge, wenn nötig.",
@@ -580,5 +618,64 @@
       "description": "Aktuelle Liste, Gekauftes und aufgeschobene Festtagskäufe.",
       "hint": "Hake einen Eintrag ab — oder sende ihn per Button nach Gekauft / Silvester."
     }
+  },
+  "filters": {
+    "title": "Filter",
+    "clear": "Filter leeren",
+    "dateField": "Datumsfeld",
+    "dateFrom": "Von Datum",
+    "dateTo": "Bis Datum",
+    "ratingField": "Bewertungsfeld",
+    "ratingMin": "Min. Bewertung",
+    "empty": "Nichts passt",
+    "emptyText": "Filter lockern oder leeren, um Einträge wieder zu sehen."
+  },
+  "bulk": {
+    "mode": "Auswählen",
+    "selected": "{n} ausgewählt",
+    "selectAll": "Alle auswählen",
+    "clear": "Auswahl aufheben",
+    "check": "Abhaken",
+    "uncheck": "Haken entfernen",
+    "duplicate": "Duplizieren",
+    "export": "Export",
+    "delete": "Löschen",
+    "deleteConfirm": "{n} Einträge löschen?",
+    "done": "Fertig"
+  },
+  "quickAdd": {
+    "placeholder": "Titel — Enter",
+    "add": "Hinzufügen"
+  },
+  "insights": {
+    "none": "Noch keine Daten",
+    "noneText": "Lege ein paar Einträge an, um Fortschritt, Bewertungen und Daten zu sehen.",
+    "total": "Gesamt",
+    "open": "Offen",
+    "done": "Erledigt",
+    "completion": "Fortschritt",
+    "thisWeek": "Diese Woche",
+    "thisMonth": "Dieser Monat",
+    "avgRating": "Durchschnitt",
+    "byGroup": "Nach {field}",
+    "upcoming": "Demnächst",
+    "overdue": "Überfällig",
+    "noUpcoming": "Nichts demnächst",
+    "noOverdue": "Nichts überfällig",
+    "noDate": "Ohne Datum"
+  },
+  "calendar": {
+    "prev": "Vorheriger Monat",
+    "next": "Nächster Monat"
+  },
+  "shortcuts": {
+    "title": "Tastenkürzel",
+    "search": "Suche fokussieren",
+    "new": "Neuer Eintrag",
+    "move": "Markierung bewegen",
+    "open": "Markierten öffnen",
+    "selectAll": "Alle auswählen",
+    "help": "Diese Hilfe",
+    "close": "Schließen"
   }
 }

@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Bell,
   BellOff,
+  CheckSquare,
+  ChevronLeft,
+  ChevronRight,
   Copy,
   Download,
+  Keyboard,
   Link2,
   Plus,
   Settings2,
@@ -71,11 +75,27 @@ import ViewEditor, { ViewsManager } from '../components/lists/ViewEditor'
 import { normalizeViewConfig, toViewConfig } from '../lib/views'
 import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
-import { emptyValues, itemMatchesQuery, validateItem } from '../lib/validation'
+import { emptyValues, isEmptyValue, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
 import { toggleChecked } from '../lib/automations'
 import { formatDateTime, titleFromValues } from '../lib/cn'
 import { CHART_TYPES as CHART_TYPE_LIST } from '../types/domain'
+import {
+  applyListFilters,
+  emptyFilters,
+  sortItems,
+  sortableFields,
+  titleFieldId,
+  type ListFilters,
+  type SortKey,
+} from '../lib/filters'
+import { buildInsights } from '../lib/insights'
+import FacetFilters from '../components/lists/FacetFilters'
+import BulkBar from '../components/lists/BulkBar'
+import QuickAdd from '../components/lists/QuickAdd'
+import ListInsights from '../components/lists/ListInsights'
+import FavoriteButton from '../components/lists/FavoriteButton'
+import ShortcutsHelp from '../components/lists/ShortcutsHelp'
 
 function listShareUrl(id: string): string {
   const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`
@@ -110,14 +130,21 @@ function ListWorkspace({ id }: { id: string }) {
   const [sub, setSub] = useState(false)
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
-  const [tab, setTab] = useState<'items' | 'charts' | 'activity'>('items')
+  const [tab, setTab] = useState<'items' | 'insights' | 'charts' | 'activity'>('items')
   const [openItem, setOpenItem] = useState<ItemRow | null>(null)
   const [creating, setCreating] = useState(false)
+  const [draftValues, setDraftValues] = useState<Record<string, unknown> | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
   const [activeViewId, setActiveViewId] = useState<string>()
   const [hideChecked, setHideChecked] = useState(false)
-  const [sort, setSort] = useState<'new' | 'old' | 'az' | 'za'>('new')
+  const [sort, setSort] = useState<SortKey>('new')
+  const [filters, setFilters] = useState<ListFilters>(() => emptyFilters())
+  const [selectMode, setSelectMode] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(() => new Set())
+  const [focusIndex, setFocusIndex] = useState(-1)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
 
   const reload = async () => {
     if (!id) return
@@ -184,18 +211,71 @@ function ListWorkspace({ id }: { id: string }) {
     }
   }, [id])
 
-  const schema = list?.schema ?? { fields: [] }
+  const schema = useMemo(() => list?.schema ?? { fields: [] }, [list?.schema])
   const filtered = useMemo(() => {
     let rows = items.filter((i) => itemMatchesQuery(i, query))
     if (hideChecked) rows = rows.filter((i) => !i.is_checked)
-    const titleOf = (row: ItemRow) => titleFromValues(row.values, schema.titleFieldId).toLowerCase()
-    const next = [...rows]
-    if (sort === 'new') next.sort((a, b) => b.created_at.localeCompare(a.created_at))
-    if (sort === 'old') next.sort((a, b) => a.created_at.localeCompare(b.created_at))
-    if (sort === 'az') next.sort((a, b) => titleOf(a).localeCompare(titleOf(b), locale))
-    if (sort === 'za') next.sort((a, b) => titleOf(b).localeCompare(titleOf(a), locale))
-    return next
-  }, [items, query, hideChecked, sort, schema.titleFieldId, locale])
+    rows = applyListFilters(rows, schema, filters, ratings)
+    return sortItems(rows, sort, schema, locale, ratings)
+  }, [items, query, hideChecked, sort, schema, locale, filters, ratings])
+  const insights = useMemo(() => buildInsights(schema, items, ratings), [schema, items, ratings])
+
+  const overlayOpen = creating || Boolean(openItem) || settingsOpen || customizeOpen || helpOpen
+  const safeFocusIndex =
+    focusIndex >= filtered.length ? (filtered.length ? filtered.length - 1 : -1) : focusIndex
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const typing = Boolean(target?.closest('input, textarea, select, [contenteditable="true"]'))
+      if (event.key === 'Escape') {
+        if (overlayOpen) return
+        setSelectMode(false)
+        setSelected(new Set())
+        return
+      }
+      if (overlayOpen) return
+      if (event.key === '?' && !typing) {
+        event.preventDefault()
+        setHelpOpen(true)
+        return
+      }
+      if ((event.key === '/' || ((event.key === 'k' || event.key === 'K') && (event.metaKey || event.ctrlKey))) && !typing) {
+        event.preventDefault()
+        searchRef.current?.focus()
+        return
+      }
+      if (typing) return
+      if (event.key === 'n' || event.key === 'N') {
+        event.preventDefault()
+        if (perms?.edit || perms?.propose) setCreating(true)
+        return
+      }
+      if ((event.key === 'a' || event.key === 'A') && perms?.edit) {
+        event.preventDefault()
+        setSelectMode(true)
+        setSelected(new Set(filtered.map((row) => row.id)))
+        return
+      }
+      if (event.key === 'j' || event.key === 'k' || event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        if (tab !== 'items' || !filtered.length) return
+        event.preventDefault()
+        const dir = event.key === 'j' || event.key === 'ArrowDown' ? 1 : -1
+        setFocusIndex((prev) => {
+          const current = prev >= filtered.length ? (filtered.length ? filtered.length - 1 : -1) : prev
+          const start = current < 0 ? (dir > 0 ? -1 : 0) : current
+          return (start + dir + filtered.length) % filtered.length
+        })
+        return
+      }
+      if (event.key === 'Enter' && safeFocusIndex >= 0 && filtered[safeFocusIndex]) {
+        event.preventDefault()
+        setOpenItem(filtered[safeFocusIndex])
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [filtered, focusIndex, perms, tab, overlayOpen, safeFocusIndex])
 
   const notesByItem = useMemo(() => {
     const map: Record<string, ItemComment[]> = {}
@@ -268,8 +348,24 @@ function ListWorkspace({ id }: { id: string }) {
           <p className="text-xs uppercase tracking-wide text-muted">
             {list.icon} {t(`visibility.${list.visibility}`)} · {t(`editMode.${list.edit_mode}`)}
           </p>
-          <h1 className="font-serif text-3xl">{list.title}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="font-serif text-3xl">{list.title}</h1>
+            {user ? <FavoriteButton id={list.id} /> : null}
+          </div>
           {list.description ? <p className="mt-1 max-w-xl text-sm text-muted">{list.description}</p> : null}
+          {list.settings?.enableCheck && items.length ? (
+            <div className="mt-3 max-w-sm">
+              <div className="flex justify-between text-xs text-muted">
+                <span>{t('insights.completion')}</span>
+                <span>
+                  {insights.checked}/{insights.total} · {insights.completion}%
+                </span>
+              </div>
+              <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-ink/10">
+                <div className="h-full rounded-full bg-accent" style={{ width: `${insights.completion}%` }} />
+              </div>
+            </div>
+          ) : null}
         </div>
         <div className="flex flex-wrap gap-2">
           {user ? (
@@ -322,18 +418,27 @@ function ListWorkspace({ id }: { id: string }) {
               <Plus size={14} /> {t('list.entry')}
             </Button>
           ) : null}
+          <Button variant="ghost" size="sm" onClick={() => setHelpOpen(true)} aria-label={t('shortcuts.title')}>
+            <Keyboard size={14} />
+          </Button>
         </div>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {(['items', 'charts', 'activity'] as const).map((key) => (
+        {(['items', 'insights', 'charts', 'activity'] as const).map((key) => (
           <button
             key={key}
             type="button"
             onClick={() => setTab(key)}
             className={`rounded-full px-3 py-1 text-sm ${tab === key ? 'bg-ink text-paper' : 'bg-ink/5 text-muted'}`}
           >
-            {key === 'items' ? t('list.items') : key === 'charts' ? t('list.charts') : t('list.activity')}
+            {key === 'items'
+              ? t('list.items')
+              : key === 'insights'
+                ? t('list.insights')
+                : key === 'charts'
+                  ? t('list.charts')
+                  : t('list.activity')}
           </button>
         ))}
       </div>
@@ -351,11 +456,44 @@ function ListWorkspace({ id }: { id: string }) {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Input
+                ref={searchRef}
                 className="min-w-0 flex-1 sm:max-w-xs"
                 placeholder={t('list.searchItems')}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
+              {canEdit || canPropose ? (
+                <QuickAdd
+                  schema={schema}
+                  disabled={!user}
+                  onCreate={async (title) => {
+                    const fieldId = titleFieldId(schema)
+                    const values = emptyValues(schema)
+                    if (fieldId) values[fieldId] = title
+                    const extraRequired = schema.fields.filter((field) => {
+                      if (!field.required || field.id === fieldId) return false
+                      return isEmptyValue(values[field.id])
+                    })
+                    if (extraRequired.length || (canPropose && !canEdit)) {
+                      setDraftValues(values)
+                      setCreating(true)
+                      return
+                    }
+                    if (!user) return
+                    try {
+                      await createItem({
+                        list_id: list.id,
+                        values,
+                        position: Date.now() / 1000,
+                        created_by: user.id,
+                      })
+                      await reload()
+                    } catch (error) {
+                      toast(error instanceof Error ? error.message : t('common.error'), 'err')
+                    }
+                  }}
+                />
+              ) : null}
               <label className="flex items-center gap-2 text-xs text-muted">
                 <input
                   type="checkbox"
@@ -368,22 +506,101 @@ function ListWorkspace({ id }: { id: string }) {
                 className="rounded-xl border border-line bg-paper px-3 py-2 text-sm"
                 value={sort}
                 aria-label={t('common.sort')}
-                onChange={(e) => setSort(e.target.value as typeof sort)}
+                onChange={(e) => setSort(e.target.value as SortKey)}
               >
                 <option value="new">{t('common.sortNew')}</option>
                 <option value="old">{t('common.sortOld')}</option>
                 <option value="az">{t('common.sortAz')}</option>
                 <option value="za">{t('common.sortZa')}</option>
+                {sortableFields(schema).flatMap((field) => [
+                  <option key={`${field.id}-asc`} value={`f:${field.id}:asc`}>
+                    {field.name} ↑
+                  </option>,
+                  <option key={`${field.id}-desc`} value={`f:${field.id}:desc`}>
+                    {field.name} ↓
+                  </option>,
+                ])}
               </select>
+              {canEdit ? (
+                <Button
+                  variant={selectMode ? 'primary' : 'soft'}
+                  size="sm"
+                  onClick={() => {
+                    setSelectMode((value) => !value)
+                    if (selectMode) setSelected(new Set())
+                  }}
+                >
+                  <CheckSquare size={14} /> {t('bulk.mode')}
+                </Button>
+              ) : null}
             </div>
+            <FacetFilters schema={schema} items={items} filters={filters} onChange={setFilters} />
+            {selectMode && canEdit ? (
+              <BulkBar
+                count={selected.size}
+                enableCheck={list.settings?.enableCheck}
+                onSelectAll={() => setSelected(new Set(filtered.map((row) => row.id)))}
+                onClear={() => setSelected(new Set())}
+                onCheck={() => {
+                  void Promise.all(
+                    items
+                      .filter((item) => selected.has(item.id) && !item.is_checked)
+                      .map((item) => onToggle(item, true)),
+                  ).catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
+                }}
+                onUncheck={() => {
+                  void Promise.all(
+                    items
+                      .filter((item) => selected.has(item.id) && item.is_checked)
+                      .map((item) => onToggle(item, false)),
+                  ).catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
+                }}
+                onDuplicate={async () => {
+                  if (!user) return
+                  const rows = items.filter((item) => selected.has(item.id))
+                  const base = Date.now() / 1000
+                  try {
+                    await Promise.all(
+                      rows.map((item, index) =>
+                        createItem({
+                          list_id: list.id,
+                          values: { ...item.values },
+                          position: base + index * 0.001,
+                          created_by: user.id,
+                        }),
+                      ),
+                    )
+                    setSelected(new Set())
+                    await reload()
+                    toast(t('bulk.done'))
+                  } catch (error) {
+                    toast(error instanceof Error ? error.message : t('common.error'), 'err')
+                  }
+                }}
+                onExport={() => {
+                  const rows = items.filter((item) => selected.has(item.id))
+                  downloadText(`${list.title}-sel.csv`, itemsToCsv(schema, rows), 'text/csv')
+                }}
+                onDelete={async () => {
+                  if (!window.confirm(t('bulk.deleteConfirm', { n: selected.size }))) return
+                  try {
+                    await Promise.all([...selected].map((id) => deleteItem(id)))
+                    setSelected(new Set())
+                    await reload()
+                  } catch (error) {
+                    toast(error instanceof Error ? error.message : t('common.error'), 'err')
+                  }
+                }}
+              />
+            ) : null}
           </div>
           {filtered.length === 0 ? (
             <EmptyState
               icon={list.icon ?? '📋'}
-              title={t('list.emptyTitle')}
-              text={t('list.emptyText')}
+              title={items.length ? t('filters.empty') : t('list.emptyTitle')}
+              text={items.length ? t('filters.emptyText') : t('list.emptyText')}
               action={
-                canEdit || canPropose
+                !items.length && (canEdit || canPropose)
                   ? { label: t('list.add'), onClick: () => setCreating(true) }
                   : undefined
               }
@@ -404,9 +621,24 @@ function ListWorkspace({ id }: { id: string }) {
               onNoteCreated={(row) => setItemNotes((prev) => [...prev, row])}
               onNoteUpdated={(row) => setItemNotes((prev) => prev.map((n) => (n.id === row.id ? row : n)))}
               onNoteDeleted={(noteId) => setItemNotes((prev) => prev.filter((n) => n.id !== noteId))}
+              selectMode={selectMode}
+              selectedIds={selected}
+              highlightedId={filtered[safeFocusIndex]?.id}
+              onToggleSelect={(item) => {
+                setSelected((prev) => {
+                  const next = new Set(prev)
+                  if (next.has(item.id)) next.delete(item.id)
+                  else next.add(item.id)
+                  return next
+                })
+              }}
             />
           )}
         </>
+      ) : null}
+
+      {tab === 'insights' ? (
+        <ListInsights schema={schema} items={items} ratings={ratings} onOpen={setOpenItem} />
       ) : null}
 
       {tab === 'charts' ? (
@@ -445,18 +677,24 @@ function ListWorkspace({ id }: { id: string }) {
           key={openItem?.id ?? 'new'}
           item={openItem}
           list={list}
+          items={items}
+          siblings={filtered}
+          initialValues={openItem ? undefined : draftValues ?? undefined}
           userId={user?.id}
           ratings={ratings}
           canEdit={canEdit}
           canPropose={canPropose}
+          onNavigate={setOpenItem}
           onClose={() => {
             setCreating(false)
             setOpenItem(null)
+            setDraftValues(null)
           }}
           onSaved={async () => {
             await reload()
             setCreating(false)
             setOpenItem(null)
+            setDraftValues(null)
           }}
           onPropose={async (payload) => {
             if (!user) return
@@ -470,6 +708,7 @@ function ListWorkspace({ id }: { id: string }) {
             toast(t('list.proposedOk'))
             setCreating(false)
             setOpenItem(null)
+            setDraftValues(null)
           }}
         />
       ) : null}
@@ -504,6 +743,8 @@ function ListWorkspace({ id }: { id: string }) {
         </Modal>
       ) : null}
 
+      <ShortcutsHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
+
       {perms?.owner ? (
         <SettingsModal
           open={settingsOpen}
@@ -523,52 +764,81 @@ function ListWorkspace({ id }: { id: string }) {
 function ItemModal({
   item,
   list,
+  items,
+  siblings,
+  initialValues,
   userId,
   ratings,
   canEdit,
   canPropose,
+  onNavigate,
   onClose,
   onSaved,
   onPropose,
 }: {
   item: ItemRow | null
   list: ListRow
+  items: ItemRow[]
+  siblings: ItemRow[]
+  initialValues?: Record<string, unknown>
   userId?: string
   ratings: ItemRating[]
   canEdit: boolean
   canPropose: boolean
+  onNavigate: (item: ItemRow) => void
   onClose: () => void
   onSaved: () => Promise<void>
   onPropose: (payload: Record<string, unknown>) => Promise<void>
 }) {
   const schema = list.schema
   const [values, setValues] = useState<Record<string, unknown>>(
-    () => item?.values ?? emptyValues(schema),
+    () => item?.values ?? initialValues ?? emptyValues(schema),
   )
   const [errors, setErrors] = useState<string[]>([])
   const write = canEdit || canPropose
   const { t } = usePrefs()
+  const { toast } = useToast()
+  const index = item ? siblings.findIndex((row) => row.id === item.id) : -1
+  const prev = index > 0 ? siblings[index - 1] : undefined
+  const next = index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : undefined
 
   const save = async () => {
-    const errs = validateItem(schema, values)
+    const errs = validateItem(schema, values, { items, excludeId: item?.id })
     setErrors(errs)
     if (errs.length) return
-    if (canPropose && !canEdit) {
-      await onPropose({ values })
-      return
+    try {
+      if (canPropose && !canEdit) {
+        await onPropose({ values })
+        return
+      }
+      if (!userId) return
+      if (item) {
+        await updateItem(item.id, { values, updated_by: userId })
+      } else {
+        const pos = Date.now() / 1000
+        await createItem({ list_id: list.id, values, position: pos, created_by: userId })
+      }
+      await onSaved()
+    } catch (error) {
+      toast(error instanceof Error ? error.message : t('common.error'), 'err')
     }
-    if (!userId) return
-    if (item) {
-      await updateItem(item.id, { values, updated_by: userId })
-    } else {
-      const pos = Date.now() / 1000
-      await createItem({ list_id: list.id, values, position: pos, created_by: userId })
-    }
-    await onSaved()
   }
 
   return (
     <Modal open onClose={onClose} title={item ? titleFromValues(values, schema.titleFieldId) : t('list.newItem')} wide>
+      {item && siblings.length > 1 ? (
+        <div className="mb-3 flex justify-between gap-2">
+          <Button variant="ghost" size="sm" disabled={!prev} onClick={() => prev && onNavigate(prev)}>
+            <ChevronLeft size={14} /> {t('list.prev')}
+          </Button>
+          <span className="self-center text-xs text-muted">
+            {index + 1} / {siblings.length}
+          </span>
+          <Button variant="ghost" size="sm" disabled={!next} onClick={() => next && onNavigate(next)}>
+            {t('list.next')} <ChevronRight size={14} />
+          </Button>
+        </div>
+      ) : null}
       {errors.length ? (
         <ul className="mb-3 text-sm text-rose-700">
           {errors.map((e) => (
@@ -617,15 +887,33 @@ function ItemModal({
 
       <div className="mt-5 flex justify-between gap-2">
         {item && canEdit ? (
-          <Button
-            variant="danger"
-            onClick={async () => {
-              await deleteItem(item.id)
-              await onSaved()
-            }}
-          >
-            <Trash2 size={14} /> {t('common.delete')}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="danger"
+              onClick={async () => {
+                await deleteItem(item.id)
+                await onSaved()
+              }}
+            >
+              <Trash2 size={14} /> {t('common.delete')}
+            </Button>
+            <Button
+              variant="soft"
+              onClick={async () => {
+                if (!userId) return
+                await createItem({
+                  list_id: list.id,
+                  values: { ...values },
+                  position: Date.now() / 1000,
+                  created_by: userId,
+                })
+                toast(t('list.duplicatedItem'))
+                await onSaved()
+              }}
+            >
+              <Copy size={14} /> {t('common.duplicate')}
+            </Button>
+          </div>
         ) : (
           <span />
         )}

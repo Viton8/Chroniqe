@@ -30,7 +30,7 @@ const LEGACY_KIND: Record<string, ViewKind> = {
 
 export function rolesForKind(kind: ViewKind): FieldViewRole[] {
   if (kind === 'table') return ['hidden', 'column']
-  if (kind === 'timeline') return ['hidden', 'cover', 'title', 'badge', 'meta']
+  if (kind === 'timeline' || kind === 'calendar') return ['hidden', 'cover', 'title', 'badge', 'meta']
   return ['hidden', 'cover', 'title', 'subtitle', 'badge', 'meta']
 }
 
@@ -177,7 +177,12 @@ export function createNamedView(
 }
 
 function kindFromMode(mode?: ViewMode): ViewKind {
-  return LEGACY_KIND[mode ?? 'table'] ?? 'table'
+  return coerceViewKind(mode)
+}
+
+export function coerceViewKind(kind: string | undefined): ViewKind {
+  if (kind && (VIEW_KINDS as readonly string[]).includes(kind)) return kind as ViewKind
+  return LEGACY_KIND[kind ?? ''] ?? 'table'
 }
 
 function layoutFromMode(mode?: ViewMode): CardLayout | undefined {
@@ -202,12 +207,14 @@ export function normalizeViewConfig(raw: ViewConfig | null | undefined, schema: 
   const fromStored = (raw?.views ?? []).filter((v) => v && v.id && v.kind)
   const views =
     fromStored.length > 0
-      ? fromStored.map((v) =>
-          createNamedView(schema, v.kind, v.name || v.kind, {
+      ? fromStored.map((v) => {
+          const kind = coerceViewKind(v.kind)
+          return createNamedView(schema, kind, v.name || kind, {
             ...v,
-            fields: v.fields?.length ? v.fields : stylesForSchema(schema, v.kind, raw?.hiddenFieldIds),
-          }),
-        )
+            kind,
+            fields: v.fields?.length ? v.fields : stylesForSchema(schema, kind, raw?.hiddenFieldIds),
+          })
+        })
       : [
           createNamedView(schema, legacyKind, defaultName(legacyKind), {
             cardLayout: layoutFromMode(raw?.mode),
@@ -244,7 +251,7 @@ export function toViewConfig(resolved: Omit<ResolvedViews, 'active'>, extras?: P
     allowedKinds: resolved.allowedKinds,
     views: resolved.views,
     activeViewId: resolved.activeViewId,
-    mode: active?.kind ?? 'table',
+    mode: active?.kind === 'calendar' ? 'timeline' : (active?.kind ?? 'table'),
     imageFieldId: active?.coverFieldId,
     groupFieldId: active?.groupFieldId,
     dateFieldId: active?.dateFieldId,

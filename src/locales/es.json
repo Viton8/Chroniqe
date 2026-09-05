@@ -57,7 +57,9 @@
     "sortZa": "Z → A",
     "records": "elementos",
     "example": "Ejemplo",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "pin": "Fijar",
+    "unpin": "Quitar"
   },
   "nav": {
     "overview": "Inicio",
@@ -79,7 +81,20 @@
     "text": "Campos, límites, compartir, mover entre listas, valoraciones de cualquiera y gráficos. Interfaz calmada, también en el móvil.",
     "start": "Empezar",
     "public": "Ver listas públicas",
-    "register": "Crear cuenta"
+    "register": "Crear cuenta",
+    "featTitle": "Lo que otras apps parten en cinco productos",
+    "featFilters": "Filtros por campos",
+    "featFiltersText": "Estado, etiquetas, fechas y notas — como Airtable o Letterboxd, en cualquier lista.",
+    "featViews": "Calendario y vistas",
+    "featViewsText": "Tabla, tarjetas, tablero, línea de tiempo y calendario mensual. Cada vista tiene su diseño.",
+    "featBulk": "Alta rápida y acciones masivas",
+    "featBulkText": "Añade una fila con Enter. Selecciona varias y márcalas, duplica, exporta o bórralas.",
+    "featInsights": "Resumen",
+    "featInsightsText": "Progreso, medias, atrasos y fechas próximas en la lista y en el inicio.",
+    "featEditor": "Editor de campos más potente",
+    "featEditorText": "Orden, duplicados, valores por defecto, unicidad y pistas para cada campo.",
+    "featShare": "El compartir de siempre",
+    "featShareText": "Visibilidad, propuestas, amigos, valoraciones y traslados siguen — solo añadimos más potencia."
   },
   "auth": {
     "loginTitle": "Iniciar sesión",
@@ -115,7 +130,10 @@
     "recent": "Listas recientes",
     "newList": "Nueva lista",
     "startCinema": "Empieza con la plantilla Cine.",
-    "events": "Actividad"
+    "events": "Actividad",
+    "pinned": "Fijadas",
+    "upcoming": "Próximas",
+    "noUpcoming": "No hay fechas próximas"
   },
   "lists": {
     "title": "Listas",
@@ -124,7 +142,8 @@
     "emptyTitle": "Aún no hay listas",
     "emptyText": "Crea los campos desde cero o parte de un paquete.",
     "templates": "Abrir plantillas",
-    "find": "Buscar"
+    "find": "Buscar",
+    "pinned": "Fijadas"
   },
   "newList": {
     "title": "Nueva lista",
@@ -247,7 +266,11 @@
     "someone": "alguien",
     "duplicated": "Lista duplicada",
     "duplicateFail": "No se pudo duplicar",
-    "copyOf": "{title} — copia"
+    "copyOf": "{title} — copia",
+    "insights": "Resumen",
+    "prev": "Anterior",
+    "next": "Siguiente",
+    "duplicatedItem": "Entrada duplicada"
   },
   "itemNotes": {
     "add": "Añadir nota",
@@ -282,7 +305,8 @@
     "gallery": "Galería",
     "timeline": "Línea de tiempo",
     "compact": "Filas",
-    "ungrouped": "Sin agrupar"
+    "ungrouped": "Sin agrupar",
+    "calendar": "Calendario"
   },
   "viewEditor": {
     "hint": "El propietario elige qué tipos de vista existen. Cada vista tiene nombre, diseño y sus propios campos.",
@@ -434,7 +458,20 @@
     "maxMb": "Máx. MB",
     "subfields": "Subcampos de la lista anidada",
     "subfield": "Subcampo",
-    "newField": "Campo nuevo"
+    "newField": "Campo nuevo",
+    "description": "Pista para editores",
+    "descriptionHint": "Se muestra bajo el campo al añadir o editar una entrada.",
+    "default": "Valor por defecto",
+    "defaultListHint": "Valores separados por comas",
+    "unique": "Valores únicos",
+    "hidden": "Oculto en formularios",
+    "moveUp": "Subir",
+    "moveDown": "Bajar",
+    "duplicateField": "Duplicar campo",
+    "groupField": "Campo de tablero / grupo",
+    "placeholder": "Marcador",
+    "pattern": "Patrón",
+    "patternPh": "p. ej. ^[A-Z].+"
   },
   "fieldTypes": {
     "text": "Texto",
@@ -491,7 +528,8 @@
     "uploadFail": "La subida falló",
     "untitled": "Sin título",
     "yes": "sí",
-    "no": "no"
+    "no": "no",
+    "unique": "“{name}” debe ser único"
   },
   "typeHint": {
     "text": "Limita la longitud si lo necesitas.",
@@ -580,5 +618,64 @@
       "description": "Lista actual, comprado y compras aplazadas para fiestas.",
       "hint": "Marca un elemento o pulsa un botón para enviarlo a Comprado / Año Nuevo."
     }
+  },
+  "filters": {
+    "title": "Filtros",
+    "clear": "Quitar filtros",
+    "dateField": "Campo de fecha",
+    "dateFrom": "Desde",
+    "dateTo": "Hasta",
+    "ratingField": "Campo de nota",
+    "ratingMin": "Nota mínima",
+    "empty": "Nada coincide",
+    "emptyText": "Afloja los filtros o límpialos para volver a ver las entradas."
+  },
+  "bulk": {
+    "mode": "Seleccionar",
+    "selected": "{n} seleccionadas",
+    "selectAll": "Seleccionar todo",
+    "clear": "Quitar selección",
+    "check": "Marcar",
+    "uncheck": "Desmarcar",
+    "duplicate": "Duplicar",
+    "export": "Exportar",
+    "delete": "Eliminar",
+    "deleteConfirm": "¿Eliminar {n} entradas?",
+    "done": "Hecho"
+  },
+  "quickAdd": {
+    "placeholder": "Título — Enter",
+    "add": "Añadir"
+  },
+  "insights": {
+    "none": "Aún no hay datos",
+    "noneText": "Añade algunas entradas para ver progreso, notas y fechas.",
+    "total": "Total",
+    "open": "Abiertas",
+    "done": "Hechas",
+    "completion": "Progreso",
+    "thisWeek": "Esta semana",
+    "thisMonth": "Este mes",
+    "avgRating": "Nota media",
+    "byGroup": "Por {field}",
+    "upcoming": "Próximas",
+    "overdue": "Atrasadas",
+    "noUpcoming": "Nada próximo",
+    "noOverdue": "Nada atrasado",
+    "noDate": "Sin fecha"
+  },
+  "calendar": {
+    "prev": "Mes anterior",
+    "next": "Mes siguiente"
+  },
+  "shortcuts": {
+    "title": "Atajos de teclado",
+    "search": "Enfocar búsqueda",
+    "new": "Nueva entrada",
+    "move": "Mover resaltado",
+    "open": "Abrir resaltada",
+    "selectAll": "Seleccionar todo",
+    "help": "Esta ayuda",
+    "close": "Cerrar"
   }
 }

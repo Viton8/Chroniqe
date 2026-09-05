@@ -272,7 +272,7 @@ export default function ViewEditor({
         </FieldWrap>
       ) : null}
 
-      {view.kind === 'timeline' ? (
+      {view.kind === 'timeline' || view.kind === 'calendar' ? (
         <FieldWrap label={t('viewEditor.dateField')}>
           <select
             className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"

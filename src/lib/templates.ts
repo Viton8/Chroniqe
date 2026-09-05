@@ -422,6 +422,13 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
   },
 ]
 
+export function blankSchema(titleFieldName: string): ListSchema {
+  return {
+    fields: [f('title', titleFieldName, 'text', { required: true, config: { maxLength: 200 } })],
+    titleFieldId: 'title',
+  }
+}
+
 export function cloneTemplate(spec: TemplateSpec): {
   title: string
   icon: string

@@ -82,7 +82,7 @@ export default function SchemaEditor({
       >
         <Plus size={16} /> {t('schema.addField')}
       </Button>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <MetaSelect
           label={t('schema.titleField')}
           value={schema.titleFieldId ?? ''}
@@ -94,12 +94,6 @@ export default function SchemaEditor({
           value={schema.imageFieldId ?? ''}
           fields={schema.fields}
           onChange={(imageFieldId) => onChange({ ...schema, imageFieldId })}
-        />
-        <MetaSelect
-          label={t('schema.dateField')}
-          value={schema.dateFieldId ?? ''}
-          fields={schema.fields}
-          onChange={(dateFieldId) => onChange({ ...schema, dateFieldId })}
         />
       </div>
     </div>

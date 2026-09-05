@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import { useToast } from '../context/ToastContext'
@@ -7,7 +7,6 @@ import { createChart, createList, updateList } from '../services/api'
 import { TEMPLATES, TEMPLATE_PACKS, cloneTemplate } from '../lib/templates'
 import type { ListSettings, TransferAction } from '../types/domain'
 import Button from '../components/ui/Button'
-import Hint from '../components/ui/Hint'
 import { todayIso } from '../lib/cn'
 
 export default function NewListPage() {
@@ -113,7 +112,18 @@ export default function NewListPage() {
       <h1 className="font-serif text-3xl">{t('newList.title')}</h1>
       <p className="mt-1 text-sm text-muted">{t('newList.lead')}</p>
 
-      <h2 className="mt-8 font-serif text-2xl">{t('newList.packs')}</h2>
+      <Link
+        to="/lists/new/custom"
+        className="mt-8 block rounded-3xl border border-line bg-paper p-5 shadow-lift hover:border-accent"
+      >
+        <h2 className="font-serif text-2xl">{t('newList.custom')}</h2>
+        <p className="mt-1 text-sm text-muted">{t('newList.customLead')}</p>
+        <span className="mt-4 inline-flex rounded-xl bg-accent px-4 py-2 text-sm font-medium text-on-accent">
+          {t('newList.openCustom')}
+        </span>
+      </Link>
+
+      <h2 className="mt-10 font-serif text-2xl">{t('newList.packs')}</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2">
         {TEMPLATE_PACKS.map((p) => (
           <article key={p.key} className="rounded-3xl border border-line bg-paper p-5 shadow-lift">
@@ -121,9 +131,6 @@ export default function NewListPage() {
               {p.icon} {t(`tpl.pack_${p.key}.title`)}
             </h3>
             <p className="mt-1 text-sm text-muted">{t(`tpl.pack_${p.key}.description`)}</p>
-            <div className="mt-3">
-              <Hint compact title={t(`tpl.pack_${p.key}.hint`)} />
-            </div>
             <Button className="mt-4" disabled={busy} onClick={() => void makePack(p.key)}>
               {t('newList.makePack')}
             </Button>
@@ -133,19 +140,12 @@ export default function NewListPage() {
 
       <h2 className="mt-10 font-serif text-2xl">{t('newList.templates')}</h2>
       <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {TEMPLATES.map((tpl) => (
+        {TEMPLATES.filter((tpl) => tpl.key !== 'blank').map((tpl) => (
           <article key={tpl.key} className="rounded-3xl border border-line bg-paper p-4">
             <h3>
               {tpl.icon} {t(`tpl.${tpl.key}.title`)}
             </h3>
             <p className="mt-1 text-sm text-muted">{t(`tpl.${tpl.key}.description`)}</p>
-            <details className="mt-2 text-xs text-muted">
-              <summary>{t('newList.how')}</summary>
-              <p className="mt-1">{t(`tpl.${tpl.key}.hint`)}</p>
-              <p className="mt-1">
-                {t('newList.example')}: {t(`tpl.${tpl.key}.example`)}
-              </p>
-            </details>
             <Button className="mt-3" size="sm" disabled={busy} onClick={() => void makeOne(tpl.key)}>
               {t('newList.makeOne')}
             </Button>

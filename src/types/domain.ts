@@ -73,8 +73,11 @@ export interface NamedView {
   fields: FieldViewStyle[]
 }
 
-export const VISIBILITY = ['private', 'invite', 'friends', 'public'] as const
+export const VISIBILITY = ['private', 'invite', 'friends', 'public', 'link'] as const
 export type Visibility = (typeof VISIBILITY)[number]
+
+export const LINK_ACCESS = ['off', 'view', 'propose', 'edit'] as const
+export type LinkAccess = (typeof LINK_ACCESS)[number]
 
 export const EDIT_MODES = ['owner', 'selected', 'friends', 'proposals'] as const
 export type EditMode = (typeof EDIT_MODES)[number]
@@ -173,6 +176,7 @@ export interface ListSettings {
   transferActions?: TransferAction[]
   onCheck?: AutomationAction[]
   onUncheck?: AutomationAction[]
+  linkAccess?: 'view' | 'propose' | 'edit'
 }
 
 export interface ViewConfig {
@@ -293,6 +297,8 @@ export interface ListInvite {
   status: 'pending' | 'accepted' | 'declined'
   created_at: string
   invitee?: Profile
+  inviter?: Profile
+  list?: Pick<ListRow, 'id' | 'title' | 'icon'>
 }
 
 export interface Friendship {

@@ -433,15 +433,56 @@ export async function createInvite(input: {
   email?: string
   role: MemberRole
 }): Promise<ListInvite> {
-  const { data, error } = await supabase.from('list_invites').insert(input).select('*').single()
+  const { data, error } = await supabase
+    .from('list_invites')
+    .insert(input)
+    .select('*, invitee:profiles!invitee_id(username, display_name)')
+    .single()
   throwIf(error)
   return data as ListInvite
+}
+
+export async function fetchListInvites(listId: string): Promise<ListInvite[]> {
+  const { data, error } = await supabase
+    .from('list_invites')
+    .select('*, invitee:profiles!invitee_id(username, display_name)')
+    .eq('list_id', listId)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+  throwIf(error)
+  return (data ?? []) as ListInvite[]
+}
+
+export async function peekInvite(token: string): Promise<{
+  id: string
+  list_id: string
+  role: MemberRole
+  status: ListInvite['status']
+  list_title: string
+  list_icon: string | null
+} | null> {
+  const { data, error } = await supabase.rpc('peek_list_invite', { p_token: token })
+  throwIf(error)
+  return data as {
+    id: string
+    list_id: string
+    role: MemberRole
+    status: ListInvite['status']
+    list_title: string
+    list_icon: string | null
+  } | null
+}
+
+export async function acceptInviteByToken(token: string): Promise<string> {
+  const { data, error } = await supabase.rpc('accept_list_invite', { p_token: token })
+  throwIf(error)
+  return data as string
 }
 
 export async function fetchMyInvites(userId: string): Promise<ListInvite[]> {
   const { data, error } = await supabase
     .from('list_invites')
-    .select('*')
+    .select('*, list:lists(id, title, icon), inviter:profiles!inviter_id(username, display_name)')
     .eq('invitee_id', userId)
     .eq('status', 'pending')
     .order('created_at', { ascending: false })

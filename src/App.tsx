@@ -19,6 +19,7 @@ import PublicUserPage from './pages/PublicUserPage'
 import RegisterPage from './pages/RegisterPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SettingsPage from './pages/SettingsPage'
+import JoinPage from './pages/JoinPage'
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/forgot" element={<ForgotPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/join/:token" element={<JoinPage />} />
       <Route element={<AppLayout />}>
         <Route path="/explore" element={<ExplorePage />} />
         <Route path="/u/:username" element={<PublicUserPage />} />

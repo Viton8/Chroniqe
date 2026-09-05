@@ -57,17 +57,19 @@ import type {
   ItemRow,
   ListAutomation,
   ListChart,
+  LinkAccess,
   ListMember,
   ListPermissions,
   ListRow,
+  MemberRole,
   Profile,
-  TransferAction,
   NamedView,
 } from '../types/domain'
 import Button from '../components/ui/Button'
 import Hint from '../components/ui/Hint'
 import Modal from '../components/ui/Modal'
-import { FieldWrap, Input, Textarea } from '../components/ui/Input'
+import { FieldWrap, Input, SearchField, Select, Textarea } from '../components/ui/Input'
+import PersonRow from '../components/people/PersonRow'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import SchemaEditor from '../components/lists/SchemaEditor'
 import ListViews, { ViewSwitcher } from '../components/lists/ListViews'
@@ -78,7 +80,8 @@ import ChartView from '../components/charts/ChartView'
 import { emptyValues, isEmptyValue, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
 import { toggleChecked } from '../lib/automations'
-import { formatDateTime, titleFromValues } from '../lib/cn'
+import { asDatetimeInputValue, formatDateTime, titleFromValues } from '../lib/cn'
+import { useCommand } from '../context/CommandContext'
 import { CHART_TYPES as CHART_TYPE_LIST } from '../types/domain'
 import {
   applyListFilters,
@@ -96,11 +99,13 @@ import QuickAdd from '../components/lists/QuickAdd'
 import ListInsights from '../components/lists/ListInsights'
 import FavoriteButton from '../components/lists/FavoriteButton'
 import ShortcutsHelp from '../components/lists/ShortcutsHelp'
-
-function listShareUrl(id: string): string {
-  const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : `${import.meta.env.BASE_URL}/`
-  return `${window.location.origin}${base}lists/${id}`
-}
+import ActivityFeed from '../components/lists/ActivityFeed'
+import FlowEditor from '../components/lists/FlowEditor'
+import { ItemNotesPanel } from '../components/lists/ItemNotes'
+import { readWorkspace, writeWorkspace } from '../lib/workspace'
+import { applyLinkAccess, joinShareUrl, listLinkAccess, listShareUrl } from '../lib/share'
+import ShareDialog from '../components/share/ShareDialog'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
 export default function ListDetailPage() {
   const { id } = useParams()
@@ -116,6 +121,8 @@ function ListWorkspace({ id }: { id: string }) {
   const { t, locale } = usePrefs()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const { open: paletteOpen, setWorkspace } = useCommand()
+  const storedWorkspace = readWorkspace(id)
 
   const [list, setList] = useState<ListRow | null>(null)
   const [items, setItems] = useState<ItemRow[]>([])
@@ -136,14 +143,17 @@ function ListWorkspace({ id }: { id: string }) {
   const [draftValues, setDraftValues] = useState<Record<string, unknown> | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
-  const [activeViewId, setActiveViewId] = useState<string>()
-  const [hideChecked, setHideChecked] = useState(false)
+  const [activeViewId, setActiveViewId] = useState<string | undefined>(storedWorkspace.viewId)
+  const [hideChecked, setHideChecked] = useState(Boolean(storedWorkspace.hideChecked))
   const [sort, setSort] = useState<SortKey>('new')
   const [filters, setFilters] = useState<ListFilters>(() => emptyFilters())
+  const appliedViewRef = useRef<string | null>(null)
+  const ignoreWorkspaceWrite = useRef(false)
   const [selectMode, setSelectMode] = useState(false)
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [focusIndex, setFocusIndex] = useState(-1)
   const [helpOpen, setHelpOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
 
   const reload = async () => {
@@ -220,7 +230,8 @@ function ListWorkspace({ id }: { id: string }) {
   }, [items, query, hideChecked, sort, schema, locale, filters, ratings])
   const insights = useMemo(() => buildInsights(schema, items, ratings), [schema, items, ratings])
 
-  const overlayOpen = creating || Boolean(openItem) || settingsOpen || customizeOpen || helpOpen
+  const overlayOpen =
+    creating || Boolean(openItem) || settingsOpen || customizeOpen || helpOpen || paletteOpen || shareOpen
   const safeFocusIndex =
     focusIndex >= filtered.length ? (filtered.length ? filtered.length - 1 : -1) : focusIndex
 
@@ -240,7 +251,7 @@ function ListWorkspace({ id }: { id: string }) {
         setHelpOpen(true)
         return
       }
-      if ((event.key === '/' || ((event.key === 'k' || event.key === 'K') && (event.metaKey || event.ctrlKey))) && !typing) {
+      if (event.key === '/' && !typing) {
         event.preventDefault()
         searchRef.current?.focus()
         return
@@ -276,6 +287,54 @@ function ListWorkspace({ id }: { id: string }) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [filtered, focusIndex, perms, tab, overlayOpen, safeFocusIndex])
+
+  useEffect(() => {
+    if (!list) return
+    const resolvedViews = normalizeViewConfig(list.view_config, list.schema)
+    const viewId =
+      (activeViewId && resolvedViews.views.some((row) => row.id === activeViewId)
+        ? activeViewId
+        : null) ?? resolvedViews.activeViewId
+    if (appliedViewRef.current === viewId) return
+    appliedViewRef.current = viewId
+    ignoreWorkspaceWrite.current = true
+    const slice = readWorkspace(id).views?.[viewId]
+    setSort(slice?.sort ?? 'new')
+    setFilters(slice?.filters ?? emptyFilters())
+  }, [list, activeViewId, id])
+
+  useEffect(() => {
+    if (!list || !appliedViewRef.current) return
+    if (ignoreWorkspaceWrite.current) {
+      ignoreWorkspaceWrite.current = false
+      return
+    }
+    writeWorkspace(id, {
+      viewId: appliedViewRef.current,
+      hideChecked,
+      views: { [appliedViewRef.current]: { sort, filters } },
+    })
+  }, [sort, filters, hideChecked, id, list])
+
+  useEffect(() => {
+    if (!list) {
+      setWorkspace(null)
+      return
+    }
+    setWorkspace({
+      listId: list.id,
+      items: items.map((item) => ({
+        id: item.id,
+        title: titleFromValues(item.values, list.schema.titleFieldId),
+      })),
+      openItem: (itemId) => {
+        const row = items.find((item) => item.id === itemId)
+        if (row) setOpenItem(row)
+      },
+      createItem: () => setCreating(true),
+    })
+    return () => setWorkspace(null)
+  }, [list, items, setWorkspace])
 
   const notesByItem = useMemo(() => {
     const map: Record<string, ItemComment[]> = {}
@@ -337,8 +396,54 @@ function ListWorkspace({ id }: { id: string }) {
       settings: list.settings ?? {},
       automations,
       next,
+      fields: list.schema.fields,
     })
     setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
+  }
+
+  const dateFieldId = view.dateFieldId ?? schema.dateFieldId
+  const groupFieldId = view.groupFieldId ?? schema.groupFieldId
+
+  const startCreate = (patch?: Record<string, unknown>) => {
+    setDraftValues({ ...emptyValues(schema), ...patch })
+    setCreating(true)
+  }
+
+  const restoreItems = async (rows: ItemRow[]) => {
+    if (!user) return
+    await Promise.all(
+      rows.map((row, index) =>
+        createItem({
+          list_id: list.id,
+          values: { ...row.values },
+          position: row.position || Date.now() / 1000 + index * 0.001,
+          created_by: user.id,
+        }),
+      ),
+    )
+    await reload()
+  }
+
+  const onMoveDate = async (item: ItemRow, iso: string) => {
+    if (!user || !canEdit || !dateFieldId) return
+    const field = schema.fields.find((row) => row.id === dateFieldId)
+    const prev = asDatetimeInputValue(item.values[dateFieldId])
+    const next =
+      field?.type === 'datetime' ? `${iso}T${prev.slice(11, 16) || '12:00'}` : iso
+    const updated = await updateItem(item.id, {
+      values: { ...item.values, [dateFieldId]: next },
+      updated_by: user.id,
+    })
+    setItems((prevItems) => prevItems.map((row) => (row.id === updated.id ? updated : row)))
+  }
+
+  const onMoveGroup = async (item: ItemRow, value: string) => {
+    if (!user || !canEdit || !groupFieldId) return
+    const updated = await updateItem(item.id, {
+      values: { ...item.values, [groupFieldId]: value || null },
+      updated_by: user.id,
+    })
+    setItems((prevItems) => prevItems.map((row) => (row.id === updated.id ? updated : row)))
   }
 
   return (
@@ -346,7 +451,10 @@ function ListWorkspace({ id }: { id: string }) {
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="text-xs uppercase tracking-wide text-muted">
-            {list.icon} {t(`visibility.${list.visibility}`)} · {t(`editMode.${list.edit_mode}`)}
+            {list.icon} {t(`visibility.${list.visibility}`)}
+            {list.visibility === 'link' || list.visibility === 'public' ? ` · ${t(`share.access.${listLinkAccess(list)}`)}` : ''}
+            {' · '}
+            {t(`editMode.${list.edit_mode}`)}
           </p>
           <div className="flex items-center gap-2">
             <h1 className="font-serif text-3xl">{list.title}</h1>
@@ -384,9 +492,12 @@ function ListWorkspace({ id }: { id: string }) {
           <Button
             variant="soft"
             size="sm"
-            onClick={async () => {
-              await navigator.clipboard.writeText(listShareUrl(list.id))
-              toast(t('common.copied'))
+            onClick={() => {
+              if (perms?.owner) {
+                setShareOpen(true)
+                return
+              }
+              void navigator.clipboard.writeText(listShareUrl(list.id)).then(() => toast(t('common.copied')))
             }}
           >
             <Link2 size={14} /> {t('common.share')}
@@ -583,10 +694,19 @@ function ListWorkspace({ id }: { id: string }) {
                 }}
                 onDelete={async () => {
                   if (!window.confirm(t('bulk.deleteConfirm', { n: selected.size }))) return
+                  const snapshot = items.filter((item) => selected.has(item.id))
                   try {
-                    await Promise.all([...selected].map((id) => deleteItem(id)))
+                    await Promise.all(snapshot.map((item) => deleteItem(item.id)))
                     setSelected(new Set())
                     await reload()
+                    toast(t('list.deleted'), 'ok', {
+                      label: t('common.undo'),
+                      onClick: () => {
+                        void restoreItems(snapshot).catch((error) =>
+                          toast(error instanceof Error ? error.message : t('common.error'), 'err'),
+                        )
+                      },
+                    })
                   } catch (error) {
                     toast(error instanceof Error ? error.message : t('common.error'), 'err')
                   }
@@ -632,6 +752,28 @@ function ListWorkspace({ id }: { id: string }) {
                   return next
                 })
               }}
+              canEdit={canEdit}
+              onCreateOnDate={(iso) => {
+                if (!dateFieldId) return
+                const field = schema.fields.find((row) => row.id === dateFieldId)
+                startCreate({
+                  [dateFieldId]: field?.type === 'datetime' ? `${iso}T12:00` : iso,
+                })
+              }}
+              onMoveDate={(item, iso) => {
+                void onMoveDate(item, iso).catch((error) =>
+                  toast(error instanceof Error ? error.message : t('common.error'), 'err'),
+                )
+              }}
+              onMoveGroup={(item, value) => {
+                void onMoveGroup(item, value).catch((error) =>
+                  toast(error instanceof Error ? error.message : t('common.error'), 'err'),
+                )
+              }}
+              onCreateInGroup={(value) => {
+                if (!groupFieldId) return
+                startCreate({ [groupFieldId]: value })
+              }}
             />
           )}
         </>
@@ -660,16 +802,7 @@ function ListWorkspace({ id }: { id: string }) {
       ) : null}
 
       {tab === 'activity' ? (
-        <ul className="space-y-2">
-          {activity.map((a) => (
-            <li key={a.id} className="rounded-2xl bg-paper px-4 py-3 text-sm shadow-lift">
-              <span className="text-muted">{formatDateTime(a.created_at)}</span>
-              <span className="mx-2">·</span>
-              {a.actor?.username ?? t('list.someone')} — {a.event_type}
-            </li>
-          ))}
-          {!activity.length ? <p className="text-sm text-muted">{t('list.quiet')}</p> : null}
-        </ul>
+        <ActivityFeed events={activity} schema={schema} items={items} onOpen={setOpenItem} />
       ) : null}
 
       {creating || openItem ? (
@@ -682,8 +815,13 @@ function ListWorkspace({ id }: { id: string }) {
           initialValues={openItem ? undefined : draftValues ?? undefined}
           userId={user?.id}
           ratings={ratings}
+          notes={openItem ? (notesByItem[openItem.id] ?? []) : []}
           canEdit={canEdit}
           canPropose={canPropose}
+          canManageNotes={Boolean(perms?.owner)}
+          onNoteCreated={(row) => setItemNotes((prev) => [...prev, row])}
+          onNoteUpdated={(row) => setItemNotes((prev) => prev.map((note) => (note.id === row.id ? row : note)))}
+          onNoteDeleted={(noteId) => setItemNotes((prev) => prev.filter((note) => note.id !== noteId))}
           onNavigate={setOpenItem}
           onClose={() => {
             setCreating(false)
@@ -745,6 +883,16 @@ function ListWorkspace({ id }: { id: string }) {
 
       <ShortcutsHelp open={helpOpen} onClose={() => setHelpOpen(false)} />
 
+      {perms?.owner && user ? (
+        <ShareDialog
+          open={shareOpen}
+          list={list}
+          userId={user.id}
+          onClose={() => setShareOpen(false)}
+          onChange={setList}
+        />
+      ) : null}
+
       {perms?.owner ? (
         <SettingsModal
           open={settingsOpen}
@@ -769,8 +917,13 @@ function ItemModal({
   initialValues,
   userId,
   ratings,
+  notes,
   canEdit,
   canPropose,
+  canManageNotes,
+  onNoteCreated,
+  onNoteUpdated,
+  onNoteDeleted,
   onNavigate,
   onClose,
   onSaved,
@@ -783,8 +936,13 @@ function ItemModal({
   initialValues?: Record<string, unknown>
   userId?: string
   ratings: ItemRating[]
+  notes: ItemComment[]
   canEdit: boolean
   canPropose: boolean
+  canManageNotes?: boolean
+  onNoteCreated: (row: ItemComment) => void
+  onNoteUpdated: (row: ItemComment) => void
+  onNoteDeleted: (id: string) => void
   onNavigate: (item: ItemRow) => void
   onClose: () => void
   onSaved: () => Promise<void>
@@ -861,6 +1019,24 @@ function ItemModal({
           />
         ))}
       </div>
+      {item ? (
+        <p className="mt-4 text-xs text-muted">
+          {t('list.created')} {formatDateTime(item.created_at)}
+          {item.updated_at !== item.created_at ? ` · ${t('list.updated')} ${formatDateTime(item.updated_at)}` : ''}
+        </p>
+      ) : null}
+      {item ? (
+        <ItemNotesPanel
+          item={item}
+          notes={notes}
+          userId={userId}
+          canAdd={Boolean(userId)}
+          canManage={canManageNotes}
+          onCreated={onNoteCreated}
+          onUpdated={onNoteUpdated}
+          onDeleted={onNoteDeleted}
+        />
+      ) : null}
 
       {(list.settings?.transferActions ?? []).length && item && canEdit ? (
         <div className="mt-4 flex flex-wrap gap-2">
@@ -891,8 +1067,21 @@ function ItemModal({
             <Button
               variant="danger"
               onClick={async () => {
+                const snapshot = { ...item, values }
                 await deleteItem(item.id)
                 await onSaved()
+                toast(t('list.deleted'), 'ok', {
+                  label: t('common.undo'),
+                  onClick: () => {
+                    if (!userId) return
+                    void createItem({
+                      list_id: list.id,
+                      values: snapshot.values,
+                      position: snapshot.position,
+                      created_by: userId,
+                    }).catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
+                  },
+                })
               }}
             >
               <Trash2 size={14} /> {t('common.delete')}
@@ -1120,12 +1309,27 @@ function SettingsModal({
 }) {
   const { toast } = useToast()
   const { t } = usePrefs()
+  const { user } = useAuth()
   const [panel, setPanel] = useState<'general' | 'views' | 'fields' | 'share' | 'flow' | 'io'>('general')
   const [userQuery, setUserQuery] = useState('')
   const [found, setFound] = useState<Profile[]>([])
-  const [targetId, setTargetId] = useState('')
-  const [mapFrom, setMapFrom] = useState('')
-  const [mapTo, setMapTo] = useState('')
+  const [foundFor, setFoundFor] = useState('')
+  const debouncedUsers = useDebouncedValue(userQuery)
+  const userSearch = debouncedUsers.trim()
+  const visibleFound = userSearch.length < 2 || foundFor !== userSearch ? [] : found
+
+  useEffect(() => {
+    if (userSearch.length < 2) return
+    let cancelled = false
+    void searchProfiles(userSearch).then((rows) => {
+      if (cancelled) return
+      setFound(rows)
+      setFoundFor(userSearch)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [userSearch])
 
   const save = async (patch: Partial<ListRow>) => {
     const row = await updateList(list.id, patch)
@@ -1142,7 +1346,7 @@ function SettingsModal({
             ['views', t('settingsModal.views')],
             ['fields', t('settingsModal.fields')],
             ['share', t('settingsModal.share')],
-            ['flow', t('settingsModal.flow')],
+            ['flow', t('flow.tab')],
             ['io', t('settingsModal.io')],
           ] as const
         ).map(([id, label]) => (
@@ -1244,73 +1448,23 @@ function SettingsModal({
           members={members}
           proposals={proposals}
           userQuery={userQuery}
-          found={found}
+          found={visibleFound}
           onList={onChange}
-          onQuery={async (q) => {
-            setUserQuery(q)
-            setFound(await searchProfiles(q))
-          }}
-          onSave={() => void save({ visibility: list.visibility, edit_mode: list.edit_mode })}
+          onQuery={setUserQuery}
+          onSave={() =>
+            void save({ visibility: list.visibility, edit_mode: list.edit_mode, settings: list.settings })
+          }
           onReload={onReload}
         />
       ) : null}
 
-      {panel === 'flow' ? (
-        <div className="space-y-3">
-          <Hint title={t('settingsModal.flowHint')} example={t('settingsModal.flowEx')} />
-          <FieldWrap label={t('settingsModal.targetId')}>
-            <Input value={targetId} onChange={(e) => setTargetId(e.target.value)} placeholder="uuid" />
-          </FieldWrap>
-          <div className="grid grid-cols-2 gap-2">
-            <Input value={mapFrom} onChange={(e) => setMapFrom(e.target.value)} placeholder={t('settingsModal.fieldFrom')} />
-            <Input value={mapTo} onChange={(e) => setMapTo(e.target.value)} placeholder={t('settingsModal.fieldTo')} />
-          </div>
-          <Button
-            variant="soft"
-            onClick={() => {
-              if (!targetId) return
-              const action: TransferAction = {
-                id: crypto.randomUUID(),
-                label: t('settingsModal.move'),
-                targetListId: targetId,
-                fieldMap: mapFrom && mapTo ? { [mapFrom]: mapTo } : {},
-                deleteSource: true,
-              }
-              onChange({
-                ...list,
-                settings: {
-                  ...list.settings,
-                  transferActions: [...(list.settings?.transferActions ?? []), action],
-                },
-              })
-            }}
-          >
-            {t('settingsModal.addButton')}
-          </Button>
-          <ul className="text-sm">
-            {(list.settings?.transferActions ?? []).map((a) => (
-              <li key={a.id} className="flex justify-between py-1">
-                {a.label}
-                <button
-                  type="button"
-                  className="text-rose-700"
-                  onClick={() =>
-                    onChange({
-                      ...list,
-                      settings: {
-                        ...list.settings,
-                        transferActions: (list.settings?.transferActions ?? []).filter((x) => x.id !== a.id),
-                      },
-                    })
-                  }
-                >
-                  {t('settingsModal.remove')}
-                </button>
-              </li>
-            ))}
-          </ul>
-          <Button onClick={() => void save({ settings: list.settings })}>{t('settingsModal.saveFlows')}</Button>
-        </div>
+      {panel === 'flow' && user ? (
+        <FlowEditor
+          list={list}
+          userId={user.id}
+          onChange={onChange}
+          onSaveSettings={() => save({ settings: list.settings })}
+        />
       ) : null}
 
       {panel === 'io' ? (
@@ -1318,6 +1472,16 @@ function SettingsModal({
       ) : null}
     </Modal>
   )
+}
+
+function proposalPreview(proposal: ChangeProposal): string {
+  const values = proposal.payload?.values
+  if (!values || typeof values !== 'object' || Array.isArray(values)) return ''
+  return Object.values(values as Record<string, unknown>)
+    .filter((value) => value != null && value !== '')
+    .slice(0, 3)
+    .map(String)
+    .join(' · ')
 }
 
 function SharePanel({
@@ -1343,25 +1507,53 @@ function SharePanel({
 }) {
   const { user } = useAuth()
   const { t } = usePrefs()
+  const { toast } = useToast()
+  const [role, setRole] = useState<MemberRole>('viewer')
+  const access = listLinkAccess(list)
+  const copy = async (url: string) => {
+    await navigator.clipboard.writeText(url)
+    toast(t('common.copied'))
+  }
   return (
     <div className="space-y-4">
       <Hint title={t('settingsModal.shareHint')} example={t('settingsModal.shareEx')} />
       <FieldWrap label={t('settingsModal.whoSees')}>
-        <select
-          className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+        <Select
+          className="w-full"
           value={list.visibility}
-          onChange={(e) => onList({ ...list, visibility: e.target.value as ListRow['visibility'] })}
+          onChange={(e) => {
+            const visibility = e.target.value as ListRow['visibility']
+            const settings = { ...list.settings }
+            if (visibility === 'link' && !settings.linkAccess) settings.linkAccess = 'view'
+            if (visibility !== 'link' && visibility !== 'public') delete settings.linkAccess
+            onList({ ...list, visibility, settings })
+          }}
         >
-          {(['private', 'invite', 'friends', 'public'] as const).map((k) => (
+          {(['private', 'invite', 'friends', 'link', 'public'] as const).map((k) => (
             <option key={k} value={k}>
               {t(`visibility.${k}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </FieldWrap>
+      {list.visibility === 'link' || list.visibility === 'public' ? (
+        <FieldWrap label={t('share.linkAccess')}>
+          <Select
+            className="w-full"
+            value={access === 'off' ? 'view' : access}
+            onChange={(e) => onList({ ...list, ...applyLinkAccess(list, e.target.value as LinkAccess) })}
+          >
+            {(['view', 'propose', 'edit'] as const).map((k) => (
+              <option key={k} value={k}>
+                {t(`share.access.${k}`)}
+              </option>
+            ))}
+          </Select>
+        </FieldWrap>
+      ) : null}
       <FieldWrap label={t('settingsModal.whoEdits')}>
-        <select
-          className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+        <Select
+          className="w-full"
           value={list.edit_mode}
           onChange={(e) => onList({ ...list, edit_mode: e.target.value as ListRow['edit_mode'] })}
         >
@@ -1370,36 +1562,70 @@ function SharePanel({
               {t(`editMode.${k}`)}
             </option>
           ))}
-        </select>
+        </Select>
       </FieldWrap>
-      <Button onClick={onSave}>{t('settingsModal.saveAccess')}</Button>
+      <div className="flex flex-wrap gap-2">
+        <Button onClick={onSave}>{t('settingsModal.saveAccess')}</Button>
+        <Button variant="soft" onClick={() => void copy(listShareUrl(list.id))}>
+          <Link2 size={14} /> {t('share.copyList')}
+        </Button>
+      </div>
 
       <FieldWrap label={t('settingsModal.inviteByName')}>
-        <Input value={userQuery} onChange={(e) => void onQuery(e.target.value)} placeholder="username" />
+        <div className="flex flex-wrap gap-2">
+          <SearchField
+            className="min-w-0 flex-1"
+            value={userQuery}
+            onChange={(e) => void onQuery(e.target.value)}
+            placeholder={t('share.findUser')}
+          />
+          <Select value={role} onChange={(e) => setRole(e.target.value as MemberRole)}>
+            <option value="viewer">{t('settingsModal.viewer')}</option>
+            <option value="proposer">{t('settingsModal.proposer')}</option>
+            <option value="editor">{t('settingsModal.editor')}</option>
+          </Select>
+        </div>
       </FieldWrap>
-      <ul className="space-y-1">
+      <ul className="space-y-2">
         {found.map((p) => (
-          <li key={p.id} className="flex items-center justify-between text-sm">
-            @{p.username}
-            <Button
-              size="sm"
-              variant="soft"
-              onClick={async () => {
-                if (!user) return
-                await createInvite({
-                  list_id: list.id,
-                  inviter_id: user.id,
-                  invitee_id: p.id,
-                  role: list.edit_mode === 'proposals' ? 'proposer' : 'editor',
-                })
-                await onReload()
-              }}
-            >
-              {t('settingsModal.invite')}
-            </Button>
-          </li>
+          <PersonRow
+            key={p.id}
+            profile={p}
+            action={
+              <Button
+                size="sm"
+                variant="soft"
+                onClick={async () => {
+                  if (!user) return
+                  await createInvite({
+                    list_id: list.id,
+                    inviter_id: user.id,
+                    invitee_id: p.id,
+                    role,
+                  })
+                  toast(t('share.invited'))
+                  await onReload()
+                }}
+              >
+                {t('settingsModal.invite')}
+              </Button>
+            }
+          />
         ))}
       </ul>
+      {user ? (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            void createInvite({ list_id: list.id, inviter_id: user.id, role })
+              .then((row) => copy(joinShareUrl(row.token)))
+              .catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
+          }}
+        >
+          <Link2 size={14} /> {t('share.copyInvite')}
+        </Button>
+      ) : null}
 
       <h3 className="text-sm font-medium">{t('settingsModal.members')}</h3>
       <ul className="space-y-2 text-sm">
@@ -1407,16 +1633,16 @@ function SharePanel({
           <li key={m.user_id} className="flex items-center justify-between">
             @{m.profile?.username ?? m.user_id}
             <span className="flex gap-2">
-              <select
-                className="rounded-lg border border-line px-2 py-1"
+              <Select
+                className="px-2 py-1"
                 value={m.role}
                 onChange={(e) => void updateMemberRole(list.id, m.user_id, e.target.value as ListMember['role']).then(onReload)}
               >
                 <option value="viewer">{t('settingsModal.viewer')}</option>
                 <option value="editor">{t('settingsModal.editor')}</option>
                 <option value="proposer">{t('settingsModal.proposer')}</option>
-              </select>
-              <button type="button" onClick={() => void removeMember(list.id, m.user_id).then(onReload)}>
+              </Select>
+              <button type="button" className="text-sm text-muted hover:text-ink" onClick={() => void removeMember(list.id, m.user_id).then(onReload)}>
                 {t('settingsModal.remove')}
               </button>
             </span>
@@ -1430,7 +1656,12 @@ function SharePanel({
           .filter((p) => p.status === 'pending')
           .map((p) => (
             <li key={p.id} className="rounded-xl bg-ink/5 p-3 text-sm">
-              {p.profile?.username} · {p.action}
+              <p>
+                {p.profile?.username ?? t('list.someone')} · {t(`settingsModal.proposal.${p.action}`)}
+              </p>
+              {proposalPreview(p) ? (
+                <p className="mt-1 truncate text-xs text-muted">{proposalPreview(p)}</p>
+              ) : null}
               <div className="mt-2 flex gap-2">
                 <Button size="sm" onClick={() => void reviewProposal(p.id, true).then(onReload)}>
                   {t('settingsModal.approve')}

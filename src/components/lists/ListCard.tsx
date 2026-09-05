@@ -21,7 +21,7 @@ export default function ListCard({
   return (
     <li className="relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift transition-colors hover:border-accent">
       <Link to={`/lists/${list.id}`} className={`block p-4 ${favorite ? 'pr-12' : ''}`}>
-        <p className="text-lg">
+        <p className="truncate text-lg">
           {list.icon} {list.title}
         </p>
         {list.description ? <p className="mt-1 text-xs text-muted line-clamp-2">{list.description}</p> : null}

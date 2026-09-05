@@ -75,7 +75,8 @@
     "toLists": "Open app",
     "notifications": "Notifications",
     "menu": "Menu",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feed": "Feed"
   },
   "landing": {
     "kicker": "your chronology",
@@ -146,7 +147,9 @@
     "noSearchText": "Try another name or description.",
     "friendRequests": "{n} friend requests",
     "listInvites": "{n} list invites",
-    "shared": "Shared with me"
+    "shared": "Shared with me",
+    "following": "Following",
+    "feed": "Friends feed"
   },
   "lists": {
     "title": "Lists",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Public lists",
-    "lead": "What authors chose to share with everyone.",
+    "lead": "Ready-made examples of every type — views, charts, collaboration and transfers. The full feed is below.",
     "empty": "Nothing here yet — publish one of yours.",
     "author": "author",
     "find": "Search title, description or author",
-    "noSearch": "No public lists match"
+    "noSearch": "No public lists match",
+    "fork": "Copy to my lists",
+    "featured": "Examples to demo",
+    "all": "All public lists",
+    "topicAll": "All topics",
+    "topic": {
+      "views": "Views",
+      "charts": "Charts",
+      "collab": "Together",
+      "flow": "Transfers",
+      "ratings": "Ratings"
+    },
+    "demo": "Demo accounts anna, kirill, lena, oleg @ chroniqe.test · password Demo1234!"
   },
   "friends": {
     "title": "People",
@@ -219,7 +234,22 @@
     "readAll": "Mark all read",
     "openList": "Open list",
     "empty": "No activity yet.",
-    "openPage": "All notifications"
+    "openPage": "All notifications",
+    "unknown": "Notification",
+    "types": {
+      "item_created": "New item in a followed list",
+      "item_updated": "An item was edited",
+      "item_checked": "An item was checked off",
+      "item_unchecked": "An item was unchecked",
+      "item_deleted": "An item was deleted",
+      "proposal_created": "New suggested edit",
+      "proposal_reviewed": "Your suggestion was reviewed",
+      "proposal_approved": "Your suggestion was accepted",
+      "proposal_rejected": "Your suggestion was declined",
+      "friend_request": "Friend request",
+      "friend_accepted": "Friend request accepted",
+      "list_invite": "List invitation"
+    }
   },
   "profile": {
     "title": "Profile",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Entry duplicated",
     "created": "Created",
     "updated": "Updated",
-    "deleted": "Deleted"
+    "deleted": "Deleted",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "Add note",
@@ -453,7 +484,8 @@
       "delete": "wants to delete an item",
       "check": "wants to check off an item",
       "uncheck": "wants to uncheck an item"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Each chart picks its own fields. The axis can be a date, status, year, or any other field.",
@@ -469,6 +501,8 @@
     "groupField": "Group by",
     "aggregation": "Aggregation",
     "needDate": "Pick a field for the axis",
+    "needValue": "Pick a value field",
+    "needGroup": "Pick a field to group by",
     "agg": {
       "count": "Count",
       "avg": "Average",
@@ -520,7 +554,16 @@
     "groupField": "Board / grouping field",
     "placeholder": "Placeholder",
     "pattern": "Pattern",
-    "patternPh": "e.g. ^[A-Z].+"
+    "patternPh": "e.g. ^[A-Z].+",
+    "relatedList": "Related list",
+    "allowMultiple": "Allow multiple",
+    "relationDisplay": "Link appearance",
+    "relationDisplayModes": {
+      "title": "Title only",
+      "title_cover": "Title and cover",
+      "media": "Cover card"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Text",
@@ -578,7 +621,11 @@
     "untitled": "Untitled",
     "yes": "yes",
     "no": "no",
-    "unique": "“{name}” must be unique"
+    "unique": "“{name}” must be unique",
+    "pickItem": "Pick an item",
+    "pickUser": "Pick a person",
+    "noRelated": "Choose a related list in the schema first",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Cap the length if you need to.",
@@ -594,7 +641,13 @@
     "sublist": "An item can contain a mini-table.",
     "sublistEx": "a series season: episode, date, rating.",
     "select": "Options, comma-separated.",
-    "selectEx": "movie, series, anime."
+    "selectEx": "movie, series, anime.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours. Choose how it looks: title, title with cover, or a cover card.",
+    "relationEx": "film → director from a people list; watchlist → film with poster."
   },
   "tpl": {
     "blank": {
@@ -606,8 +659,8 @@
     "movies_watched": {
       "title": "Watched",
       "description": "Films and series you already watched. Anyone can rate.",
-      "hint": "“Ratings” is collective: each viewer scores, the average is computed.",
-      "example": "Dune, 2021, film, date 12.03.2024, scores 8 and 9 → average 8.5."
+      "hint": "“Ratings” is collective. For a series, the nested “Seasons” list holds number, episodes, date and a season score.",
+      "example": "Dune, 2021, film, date 12.03.2024, scores 8 and 9 → average 8.5. A series: season 1, 8 episodes, score 9."
     },
     "movies_watchlist": {
       "title": "Watchlist",
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Cinema",
       "description": "Three linked lists: queue, watched, dropped. Move buttons are ready.",
-      "hint": "Creates three lists at once. Watchlist gets “Watched” and “Won’t watch”."
+      "hint": "Creates three lists at once. Watchlist gets “Watched” and “Won’t watch”.",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Shopping",
       "description": "Current list, bought items, and deferred holiday buys.",
-      "hint": "Check an item off — or tap a button to send it to Bought / New Year."
+      "hint": "Check an item off — or tap a button to send it to Bought / New Year.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Home",
     "settings": "Settings",
     "explore": "Explore",
-    "friends": "People"
+    "friends": "People",
+    "itemsAll": "Items",
+    "feed": "Friends feed"
   },
   "activity": {
     "item_created": "added an item",
@@ -779,7 +848,13 @@
     "checked": "When an item is checked",
     "unchecked": "When an item is unchecked",
     "save": "Save automations",
-    "enabled": "Enabled"
+    "enabled": "Enabled",
+    "setFields": "Set on move",
+    "setNone": "Leave empty",
+    "button": "When a move button is used",
+    "fieldEquals": "When a field equals",
+    "pickButton": "Button",
+    "pickField": "Field"
   },
   "board": {
     "addInColumn": "Add here"
@@ -820,5 +895,24 @@
     "joinClosed": "This invitation is no longer active.",
     "joinLogin": "Log in to join",
     "linkAccess": "What the link allows"
+  },
+  "feed": {
+    "kicker": "social chronology",
+    "title": "Friends feed",
+    "lead": "What friends added, checked off, or moved — on lists you can see.",
+    "findPeople": "Find people",
+    "openFeed": "Open feed",
+    "seeAll": "Full feed",
+    "emptyFriends": "No friends yet",
+    "emptyFriendsText": "Add someone — their adds, check-offs and moves will show up here.",
+    "emptyTitle": "Quiet for now",
+    "emptyText": "When friends add or move items on lists you can see, it appears here.",
+    "emptyFilter": "Nothing in this filter",
+    "filter": {
+      "all": "All",
+      "added": "Added",
+      "checked": "Checked",
+      "moved": "Moved"
+    }
   }
 }

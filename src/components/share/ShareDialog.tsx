@@ -52,7 +52,10 @@ export default function ShareDialog({
 
   useEffect(() => {
     if (!open) return
+    setRole(roleForLinkAccess(listLinkAccess(list)))
     void fetchListInvites(list.id).then(setInvites).catch(() => setInvites([]))
+    // Reset invite role when the dialog opens, not on every list patch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, list.id])
 
   useEffect(() => {

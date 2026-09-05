@@ -16,13 +16,13 @@ export default function Avatar({
       alt=""
       width={size}
       height={size}
-      className="rounded-full object-cover"
+      className="shrink-0 rounded-full object-cover"
       style={{ width: size, height: size }}
     />
   ) : (
     <span
       className={cn(
-        'inline-flex items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-accent',
+        'inline-flex shrink-0 items-center justify-center rounded-full bg-accent-soft text-xs font-semibold text-accent',
       )}
       style={{ width: size, height: size }}
     >

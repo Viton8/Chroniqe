@@ -10,10 +10,11 @@ import Avatar from '../components/ui/Avatar'
 import Button from '../components/ui/Button'
 import { FieldWrap, Input, Textarea } from '../components/ui/Input'
 import PageHeader from '../components/ui/PageHeader'
+import { Spinner } from '../components/ui/EmptyState'
 
 export default function ProfilePage() {
-  const { profile, user, refreshProfile, signOut } = useAuth()
-  if (!user || !profile) return null
+  const { profile, user, loading, refreshProfile, signOut } = useAuth()
+  if (loading || !user || !profile) return <Spinner />
   return (
     <ProfileForm
       key={profile.updated_at}

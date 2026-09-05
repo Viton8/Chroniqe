@@ -79,10 +79,10 @@ export function AuthShell({
   children: ReactNode
 }) {
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-bg px-4 py-10">
-      <div className="absolute right-4 top-4 flex items-center gap-2">
-        <LanguageSwitch />
-        <ThemeSwitch />
+    <div className="relative flex min-h-screen items-center justify-center bg-bg px-4 py-10 pt-16">
+      <div className="absolute right-3 top-3 z-10 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center justify-end gap-1.5 sm:right-4 sm:top-4 sm:gap-2">
+        <LanguageSwitch compact />
+        <ThemeSwitch compact />
         <ColorPalettePicker compact />
       </div>
       <div className="w-full max-w-md rounded-3xl border border-line bg-paper p-8 shadow-lift">

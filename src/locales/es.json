@@ -75,7 +75,8 @@
     "toLists": "Abrir la app",
     "notifications": "Notificaciones",
     "menu": "Menú",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feed": "Feed"
   },
   "landing": {
     "kicker": "tu cronología",
@@ -146,7 +147,9 @@
     "noSearchText": "Prueba otro nombre o descripción.",
     "friendRequests": "{n} solicitudes de amistad",
     "listInvites": "{n} invitaciones a listas",
-    "shared": "Compartida conmigo"
+    "shared": "Compartida conmigo",
+    "following": "Siguiendo",
+    "feed": "Feed de amigos"
   },
   "lists": {
     "title": "Listas",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Listas públicas",
-    "lead": "Lo que los autores eligieron compartir con todos.",
+    "lead": "Ejemplos listos de cada tipo: vistas, gráficos, colaboración y traslados. Debajo está todo el feed.",
     "empty": "Aún no hay nada: publica una de las tuyas.",
     "author": "autor",
     "find": "Título, descripción o autor",
-    "noSearch": "Ninguna lista pública coincide"
+    "noSearch": "Ninguna lista pública coincide",
+    "fork": "Copiar a mis listas",
+    "featured": "Ejemplos para demostrar",
+    "all": "Todas las públicas",
+    "topicAll": "Todos los temas",
+    "topic": {
+      "views": "Vistas",
+      "charts": "Gráficos",
+      "collab": "Juntos",
+      "flow": "Traslados",
+      "ratings": "Notas"
+    },
+    "demo": "Cuentas demo anna, kirill, lena, oleg @ chroniqe.test · contraseña Demo1234!"
   },
   "friends": {
     "title": "Personas",
@@ -219,7 +234,22 @@
     "readAll": "Marcar todo como leído",
     "openList": "Abrir lista",
     "empty": "Sin actividad todavía.",
-    "openPage": "Todas las notificaciones"
+    "openPage": "Todas las notificaciones",
+    "unknown": "Notificación",
+    "types": {
+      "item_created": "Nuevo elemento en una lista seguida",
+      "item_updated": "Se editó un elemento",
+      "item_checked": "Se marcó un elemento",
+      "item_unchecked": "Se desmarcó un elemento",
+      "item_deleted": "Se eliminó un elemento",
+      "proposal_created": "Nueva propuesta de cambio",
+      "proposal_reviewed": "Tu propuesta fue revisada",
+      "proposal_approved": "Propuesta aceptada",
+      "proposal_rejected": "Propuesta rechazada",
+      "friend_request": "Solicitud de amistad",
+      "friend_accepted": "Solicitud aceptada",
+      "list_invite": "Invitación a una lista"
+    }
   },
   "profile": {
     "title": "Perfil",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Entrada duplicada",
     "created": "Creado",
     "updated": "Actualizado",
-    "deleted": "Eliminado"
+    "deleted": "Eliminado",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "Añadir nota",
@@ -453,7 +484,8 @@
       "delete": "quiere eliminar un ítem",
       "check": "quiere marcar un ítem",
       "uncheck": "quiere desmarcar un ítem"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Cada gráfico elige sus campos. El eje puede ser fecha, estado, año u otro campo.",
@@ -469,6 +501,8 @@
     "groupField": "Agrupar por",
     "aggregation": "Agregación",
     "needDate": "Elige un campo para el eje",
+    "needValue": "Elige un campo de valor",
+    "needGroup": "Elige un campo para agrupar",
     "agg": {
       "count": "Recuento",
       "avg": "Media",
@@ -520,7 +554,16 @@
     "groupField": "Campo de tablero / grupo",
     "placeholder": "Marcador",
     "pattern": "Patrón",
-    "patternPh": "p. ej. ^[A-Z].+"
+    "patternPh": "p. ej. ^[A-Z].+",
+    "relatedList": "Lista relacionada",
+    "allowMultiple": "Varios valores",
+    "relationDisplay": "Apariencia del enlace",
+    "relationDisplayModes": {
+      "title": "Solo título",
+      "title_cover": "Título y portada",
+      "media": "Tarjeta con portada"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Texto",
@@ -578,7 +621,11 @@
     "untitled": "Sin título",
     "yes": "sí",
     "no": "no",
-    "unique": "“{name}” debe ser único"
+    "unique": "“{name}” debe ser único",
+    "pickItem": "Elige un elemento",
+    "pickUser": "Elige una persona",
+    "noRelated": "Elige primero una lista relacionada en el esquema",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Limita la longitud si lo necesitas.",
@@ -594,7 +641,13 @@
     "sublist": "Un elemento puede incluir una minitabla.",
     "sublistEx": "temporada de una serie: capítulo, fecha, nota.",
     "select": "Opciones, separadas por comas.",
-    "selectEx": "película, serie, anime."
+    "selectEx": "película, serie, anime.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Cine",
       "description": "Tres listas enlazadas: cola, vistos, abandonados. Los botones de mover ya están listos.",
-      "hint": "Crea tres listas a la vez. Por ver recibe «Vistos» y «No veré»."
+      "hint": "Crea tres listas a la vez. Por ver recibe «Vistos» y «No veré».",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Compras",
       "description": "Lista actual, comprado y compras aplazadas para fiestas.",
-      "hint": "Marca un elemento o pulsa un botón para enviarlo a Comprado / Año Nuevo."
+      "hint": "Marca un elemento o pulsa un botón para enviarlo a Comprado / Año Nuevo.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Inicio",
     "settings": "Ajustes",
     "explore": "Explorar",
-    "friends": "Personas"
+    "friends": "Personas",
+    "itemsAll": "Elementos",
+    "feed": "Feed de amigos"
   },
   "activity": {
     "item_created": "añadió un ítem",
@@ -779,7 +848,13 @@
     "checked": "Cuando se marca un ítem",
     "unchecked": "Cuando se desmarca un ítem",
     "save": "Guardar automatizaciones",
-    "enabled": "Activo"
+    "enabled": "Activo",
+    "setFields": "Completar al mover",
+    "setNone": "No cambiar",
+    "button": "Al usar un botón de mover",
+    "fieldEquals": "Cuando un campo vale",
+    "pickButton": "Botón",
+    "pickField": "Campo"
   },
   "board": {
     "addInColumn": "Añadir aquí"
@@ -820,5 +895,24 @@
     "joinClosed": "Esta invitación ya no está activa.",
     "joinLogin": "Inicia sesión para unirte",
     "linkAccess": "Qué permite el enlace"
+  },
+  "feed": {
+    "kicker": "cronología social",
+    "title": "Feed de amigos",
+    "lead": "Lo que tus amigos añadieron, marcaron o movieron — en listas que puedes ver.",
+    "findPeople": "Buscar gente",
+    "openFeed": "Abrir feed",
+    "seeAll": "Feed completo",
+    "emptyFriends": "Aún no hay amigos",
+    "emptyFriendsText": "Añade a alguien — sus altas, marcas y traslados aparecerán aquí.",
+    "emptyTitle": "Por ahora en silencio",
+    "emptyText": "Cuando amigos añadan o muevan algo en una lista visible, aparecerá aquí.",
+    "emptyFilter": "Nada en este filtro",
+    "filter": {
+      "all": "Todo",
+      "added": "Añadido",
+      "checked": "Marcado",
+      "moved": "Movido"
+    }
   }
 }

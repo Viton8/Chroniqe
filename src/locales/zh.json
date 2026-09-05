@@ -75,7 +75,8 @@
     "toLists": "打开应用",
     "notifications": "通知",
     "menu": "菜单",
-    "admin": "管理"
+    "admin": "管理",
+    "feed": "动态"
   },
   "landing": {
     "kicker": "你的编年",
@@ -146,7 +147,9 @@
     "noSearchText": "换个名称或描述试试。",
     "friendRequests": "{n} 条好友请求",
     "listInvites": "{n} 条列表邀请",
-    "shared": "与我共享"
+    "shared": "与我共享",
+    "following": "正在关注",
+    "feed": "好友动态"
   },
   "lists": {
     "title": "列表",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "公开列表",
-    "lead": "作者选择向所有人公开的内容。",
+    "lead": "各类现成示例：视图、图表、协作和转移。下方是完整动态。",
     "empty": "这里还是空的——发布你的一个列表吧。",
     "author": "作者",
     "find": "搜索标题、描述或作者",
-    "noSearch": "没有匹配的公开列表"
+    "noSearch": "没有匹配的公开列表",
+    "fork": "复制到我的列表",
+    "featured": "演示示例",
+    "all": "全部公开列表",
+    "topicAll": "全部主题",
+    "topic": {
+      "views": "视图",
+      "charts": "图表",
+      "collab": "协作",
+      "flow": "转移",
+      "ratings": "评分"
+    },
+    "demo": "演示账号 anna、kirill、lena、oleg @ chroniqe.test · 密码 Demo1234!"
   },
   "friends": {
     "title": "好友",
@@ -219,7 +234,22 @@
     "readAll": "全部标为已读",
     "openList": "打开列表",
     "empty": "暂无动态。",
-    "openPage": "全部通知"
+    "openPage": "全部通知",
+    "unknown": "通知",
+    "types": {
+      "item_created": "关注的列表有新条目",
+      "item_updated": "条目已更新",
+      "item_checked": "条目已勾选",
+      "item_unchecked": "条目已取消勾选",
+      "item_deleted": "条目已删除",
+      "proposal_created": "新的修改建议",
+      "proposal_reviewed": "你的建议已审阅",
+      "proposal_approved": "建议已通过",
+      "proposal_rejected": "建议已拒绝",
+      "friend_request": "好友请求",
+      "friend_accepted": "好友请求已接受",
+      "list_invite": "列表邀请"
+    }
   },
   "profile": {
     "title": "个人资料",
@@ -311,7 +341,8 @@
     "duplicatedItem": "已复制条目",
     "created": "创建于",
     "updated": "更新于",
-    "deleted": "已删除"
+    "deleted": "已删除",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "添加备注",
@@ -453,7 +484,8 @@
       "delete": "想删除一条记录",
       "check": "想勾选一条记录",
       "uncheck": "想取消勾选"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "每张图表选择自己的字段。坐标轴可以是日期、状态、年份或任何其他字段。",
@@ -469,6 +501,8 @@
     "groupField": "分组依据",
     "aggregation": "聚合",
     "needDate": "请选择轴字段",
+    "needValue": "请选择数值字段",
+    "needGroup": "请选择分组字段",
     "agg": {
       "count": "计数",
       "avg": "平均",
@@ -520,7 +554,16 @@
     "groupField": "看板 / 分组字段",
     "placeholder": "占位符",
     "pattern": "正则",
-    "patternPh": "例如 ^[A-Z].+"
+    "patternPh": "例如 ^[A-Z].+",
+    "relatedList": "关联列表",
+    "allowMultiple": "允许多个值",
+    "relationDisplay": "链接外观",
+    "relationDisplayModes": {
+      "title": "仅标题",
+      "title_cover": "标题与封面",
+      "media": "封面卡片"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "文本",
@@ -578,7 +621,11 @@
     "untitled": "未命名",
     "yes": "是",
     "no": "否",
-    "unique": "“{name}”必须唯一"
+    "unique": "“{name}”必须唯一",
+    "pickItem": "选择条目",
+    "pickUser": "选择用户",
+    "noRelated": "请先在架构中选择关联列表",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "需要时可以限制长度。",
@@ -594,7 +641,13 @@
     "sublist": "一个条目可以包含小表格。",
     "sublistEx": "剧集的一季：集数、日期、评分。",
     "select": "选项，用逗号分隔。",
-    "selectEx": "电影、剧集、动画。"
+    "selectEx": "电影、剧集、动画。",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "影视",
       "description": "三个相连的列表：队列、已看、弃看。转移按钮已就绪。",
-      "hint": "一次创建三个列表。待看会有「已看」和「不看」。"
+      "hint": "一次创建三个列表。待看会有「已看」和「不看」。",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "购物",
       "description": "当前清单、已买，以及延后的节日采购。",
-      "hint": "勾选一条——或点按钮送到已买 / 新年。"
+      "hint": "勾选一条——或点按钮送到已买 / 新年。",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "首页",
     "settings": "设置",
     "explore": "发现",
-    "friends": "好友"
+    "friends": "好友",
+    "itemsAll": "条目",
+    "feed": "好友动态"
   },
   "activity": {
     "item_created": "添加了一条记录",
@@ -779,7 +848,13 @@
     "checked": "当条目被勾选",
     "unchecked": "当取消勾选",
     "save": "保存自动化",
-    "enabled": "已启用"
+    "enabled": "已启用",
+    "setFields": "移动时填写",
+    "setNone": "不更改",
+    "button": "使用移动按钮时",
+    "fieldEquals": "当字段等于",
+    "pickButton": "按钮",
+    "pickField": "字段"
   },
   "board": {
     "addInColumn": "添加到此列"
@@ -820,5 +895,24 @@
     "joinClosed": "此邀请已失效。",
     "joinLogin": "登录后加入",
     "linkAccess": "链接允许做什么"
+  },
+  "feed": {
+    "kicker": "社交时间线",
+    "title": "好友动态",
+    "lead": "好友在你可见的列表中新增、勾选或转移的内容。",
+    "findPeople": "找人",
+    "openFeed": "打开动态",
+    "seeAll": "全部动态",
+    "emptyFriends": "还没有好友",
+    "emptyFriendsText": "添加好友后，他们的新增、勾选和转移会出现在这里。",
+    "emptyTitle": "暂时安静",
+    "emptyText": "好友在你可见的列表中有动作时，会出现在这里。",
+    "emptyFilter": "此筛选下没有内容",
+    "filter": {
+      "all": "全部",
+      "added": "新增",
+      "checked": "勾选",
+      "moved": "转移"
+    }
   }
 }

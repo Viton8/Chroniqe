@@ -10,6 +10,7 @@ import type { ListSchema } from '../types/domain'
 import Button from '../components/ui/Button'
 import { FieldWrap, Input, Textarea } from '../components/ui/Input'
 import SchemaEditor from '../components/lists/SchemaEditor'
+import Hint from '../components/ui/Hint'
 
 export default function NewCustomListPage() {
   const { user } = useAuth()
@@ -29,6 +30,9 @@ export default function NewCustomListPage() {
       </Link>
       <h1 className="mt-3 font-serif text-3xl">{t('newList.custom')}</h1>
       <p className="mt-1 text-sm text-muted">{t('newList.customLead')}</p>
+      <div className="mt-4">
+        <Hint title={t('schema.hint')} example={t('schema.hintEx')} />
+      </div>
 
       <div className="mt-6 grid gap-3 sm:grid-cols-[1fr_5rem]">
         <FieldWrap label={t('newList.listTitle')}>
@@ -53,11 +57,15 @@ export default function NewCustomListPage() {
       </div>
       <Button
         className="mt-5"
-        disabled={busy || !title.trim()}
+        disabled={busy || !title.trim() || !schema.fields.length}
         onClick={async () => {
           if (!user) return
           const name = title.trim()
-          if (!name || !schema.fields.length) return
+          if (!name) return
+          if (!schema.fields.length) {
+            toast(t('schema.addField'), 'err')
+            return
+          }
           setBusy(true)
           try {
             const list = await createList({

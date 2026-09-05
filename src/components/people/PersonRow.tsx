@@ -14,7 +14,7 @@ export default function PersonRow({
 }) {
   const name = profile.display_name || profile.username
   return (
-    <li className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 py-3 transition-colors hover:border-accent">
+    <li className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 py-3 transition-colors hover:border-accent">
       <Link to={`/u/${profile.username}`} className="flex min-w-0 items-center gap-3">
         <Avatar name={name} url={profile.avatar_url} size={36} />
         <span className="min-w-0">
@@ -23,7 +23,7 @@ export default function PersonRow({
           {meta ? <span className="mt-0.5 block text-xs text-muted">{meta}</span> : null}
         </span>
       </Link>
-      {action ? <div className="shrink-0">{action}</div> : null}
+      {action ? <div className="flex shrink-0 flex-wrap justify-end gap-2">{action}</div> : null}
     </li>
   )
 }

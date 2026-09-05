@@ -46,7 +46,7 @@ export default function Modal({
     <div className="fixed inset-0 z-[70] flex items-end justify-center sm:items-center">
       <button
         type="button"
-        className="absolute inset-0 bg-ink/40"
+        className="chroniqe-backdrop absolute inset-0 bg-ink/40"
         aria-label={t('common.close')}
         onClick={onClose}
       />
@@ -57,7 +57,7 @@ export default function Modal({
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
-        className={`relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-paper p-5 shadow-lift outline-none sm:rounded-3xl sm:p-6 ${
+        className={`chroniqe-panel relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-paper p-5 shadow-lift outline-none sm:rounded-3xl sm:p-6 ${
           wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'
         }`}
       >

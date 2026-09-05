@@ -75,7 +75,8 @@
     "toLists": "Apri l’app",
     "notifications": "Notifiche",
     "menu": "Menu",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feed": "Feed"
   },
   "landing": {
     "kicker": "la tua cronologia",
@@ -146,7 +147,9 @@
     "noSearchText": "Prova un altro nome o una descrizione.",
     "friendRequests": "{n} richieste di amicizia",
     "listInvites": "{n} inviti alle liste",
-    "shared": "Condivisa con me"
+    "shared": "Condivisa con me",
+    "following": "Seguiti",
+    "feed": "Feed amici"
   },
   "lists": {
     "title": "Liste",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Liste pubbliche",
-    "lead": "Ciò che gli autori hanno scelto di condividere con tutti.",
+    "lead": "Esempi pronti di ogni tipo: viste, grafici, collaborazione e trasferimenti. Sotto c’è tutto il feed.",
     "empty": "Ancora niente — pubblica una delle tue.",
     "author": "autore",
     "find": "Titolo, descrizione o autore",
-    "noSearch": "Nessuna lista pubblica corrisponde"
+    "noSearch": "Nessuna lista pubblica corrisponde",
+    "fork": "Copia nelle mie liste",
+    "featured": "Esempi da mostrare",
+    "all": "Tutte le pubbliche",
+    "topicAll": "Tutti i temi",
+    "topic": {
+      "views": "Viste",
+      "charts": "Grafici",
+      "collab": "Insieme",
+      "flow": "Trasferimenti",
+      "ratings": "Voti"
+    },
+    "demo": "Account demo anna, kirill, lena, oleg @ chroniqe.test · password Demo1234!"
   },
   "friends": {
     "title": "Persone",
@@ -219,7 +234,22 @@
     "readAll": "Segna tutto come letto",
     "openList": "Apri lista",
     "empty": "Nessuna attività ancora.",
-    "openPage": "Tutte le notifiche"
+    "openPage": "Tutte le notifiche",
+    "unknown": "Notifica",
+    "types": {
+      "item_created": "Nuovo elemento in una lista seguita",
+      "item_updated": "Un elemento è stato modificato",
+      "item_checked": "Un elemento è stato spuntato",
+      "item_unchecked": "Un elemento è stato deselezionato",
+      "item_deleted": "Un elemento è stato eliminato",
+      "proposal_created": "Nuova proposta di modifica",
+      "proposal_reviewed": "La tua proposta è stata esaminata",
+      "proposal_approved": "Proposta accettata",
+      "proposal_rejected": "Proposta rifiutata",
+      "friend_request": "Richiesta di amicizia",
+      "friend_accepted": "Richiesta di amicizia accettata",
+      "list_invite": "Invito a una lista"
+    }
   },
   "profile": {
     "title": "Profilo",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Voce duplicata",
     "created": "Creato",
     "updated": "Aggiornato",
-    "deleted": "Eliminato"
+    "deleted": "Eliminato",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "Aggiungi nota",
@@ -453,7 +484,8 @@
       "delete": "vuole eliminare una voce",
       "check": "vuole spuntare una voce",
       "uncheck": "vuole togliere lo spunto"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Ogni grafico sceglie i propri campi. L’asse può essere una data, uno stato, un anno o qualsiasi altro campo.",
@@ -469,6 +501,8 @@
     "groupField": "Raggruppa per",
     "aggregation": "Aggregazione",
     "needDate": "Scegli un campo per l’asse",
+    "needValue": "Scegli un campo valore",
+    "needGroup": "Scegli un campo per raggruppare",
     "agg": {
       "count": "Conteggio",
       "avg": "Media",
@@ -520,7 +554,16 @@
     "groupField": "Campo bacheca / gruppo",
     "placeholder": "Segnaposto",
     "pattern": "Modello",
-    "patternPh": "es. ^[A-Z].+"
+    "patternPh": "es. ^[A-Z].+",
+    "relatedList": "Lista collegata",
+    "allowMultiple": "Più valori",
+    "relationDisplay": "Aspetto del collegamento",
+    "relationDisplayModes": {
+      "title": "Solo titolo",
+      "title_cover": "Titolo e copertina",
+      "media": "Scheda con copertina"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Testo",
@@ -578,7 +621,11 @@
     "untitled": "Senza titolo",
     "yes": "sì",
     "no": "no",
-    "unique": "“{name}” deve essere unico"
+    "unique": "“{name}” deve essere unico",
+    "pickItem": "Scegli un elemento",
+    "pickUser": "Scegli una persona",
+    "noRelated": "Scegli prima una lista collegata nello schema",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Limita la lunghezza se serve.",
@@ -594,7 +641,13 @@
     "sublist": "Un elemento può contenere una mini-tabella.",
     "sublistEx": "stagione di una serie: episodio, data, voto.",
     "select": "Opzioni, separate da virgola.",
-    "selectEx": "film, serie, anime."
+    "selectEx": "film, serie, anime.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Cinema",
       "description": "Tre liste collegate: coda, visti, abbandonati. I pulsanti di spostamento sono pronti.",
-      "hint": "Crea tre liste in una volta. Da vedere ottiene «Visti» e «Non lo guardo»."
+      "hint": "Crea tre liste in una volta. Da vedere ottiene «Visti» e «Non lo guardo».",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Spesa",
       "description": "Lista attuale, comprati e acquisti festivi rimandati.",
-      "hint": "Spunta un elemento — o tocca un pulsante per mandarlo in Comprati / Capodanno."
+      "hint": "Spunta un elemento — o tocca un pulsante per mandarlo in Comprati / Capodanno.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Home",
     "settings": "Impostazioni",
     "explore": "Esplora",
-    "friends": "Persone"
+    "friends": "Persone",
+    "itemsAll": "Elementi",
+    "feed": "Feed amici"
   },
   "activity": {
     "item_created": "ha aggiunto una voce",
@@ -779,7 +848,13 @@
     "checked": "Quando una voce viene spuntata",
     "unchecked": "Quando lo spunto viene rimosso",
     "save": "Salva automazioni",
-    "enabled": "Attiva"
+    "enabled": "Attiva",
+    "setFields": "Compila nello spostamento",
+    "setNone": "Non cambiare",
+    "button": "Quando usi un pulsante di spostamento",
+    "fieldEquals": "Quando un campo vale",
+    "pickButton": "Pulsante",
+    "pickField": "Campo"
   },
   "board": {
     "addInColumn": "Aggiungi qui"
@@ -820,5 +895,24 @@
     "joinClosed": "Questo invito non è più attivo.",
     "joinLogin": "Accedi per unirti",
     "linkAccess": "Cosa permette il link"
+  },
+  "feed": {
+    "kicker": "cronologia sociale",
+    "title": "Feed amici",
+    "lead": "Cosa gli amici hanno aggiunto, spuntato o spostato — nelle liste che puoi vedere.",
+    "findPeople": "Trova persone",
+    "openFeed": "Apri feed",
+    "seeAll": "Feed completo",
+    "emptyFriends": "Ancora nessun amico",
+    "emptyFriendsText": "Aggiungi qualcuno — aggiunte, spunte e spostamenti appariranno qui.",
+    "emptyTitle": "Per ora silenzio",
+    "emptyText": "Quando gli amici aggiungono o spostano voci su liste visibili, compare qui.",
+    "emptyFilter": "Niente in questo filtro",
+    "filter": {
+      "all": "Tutto",
+      "added": "Aggiunto",
+      "checked": "Spuntato",
+      "moved": "Spostato"
+    }
   }
 }

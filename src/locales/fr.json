@@ -75,7 +75,8 @@
     "toLists": "Ouvrir l’app",
     "notifications": "Notifications",
     "menu": "Menu",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feed": "Fil"
   },
   "landing": {
     "kicker": "votre chronologie",
@@ -146,7 +147,9 @@
     "noSearchText": "Essayez un autre nom ou une autre description.",
     "friendRequests": "{n} demandes d’amis",
     "listInvites": "{n} invitations à des listes",
-    "shared": "Partagée avec moi"
+    "shared": "Partagée avec moi",
+    "following": "Suivis",
+    "feed": "Fil d’amis"
   },
   "lists": {
     "title": "Listes",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Listes publiques",
-    "lead": "Ce que les auteurs ont choisi de partager avec tout le monde.",
+    "lead": "Exemples prêts de chaque type — vues, graphiques, collaboration et transferts. Le fil complet est en dessous.",
     "empty": "Rien ici pour l’instant — publiez l’une des vôtres.",
     "author": "auteur",
     "find": "Titre, description ou auteur",
-    "noSearch": "Aucune liste publique ne correspond"
+    "noSearch": "Aucune liste publique ne correspond",
+    "fork": "Copier dans mes listes",
+    "featured": "Exemples à présenter",
+    "all": "Toutes les listes publiques",
+    "topicAll": "Tous les thèmes",
+    "topic": {
+      "views": "Vues",
+      "charts": "Graphiques",
+      "collab": "Ensemble",
+      "flow": "Transferts",
+      "ratings": "Notes"
+    },
+    "demo": "Comptes démo anna, kirill, lena, oleg @ chroniqe.test · mot de passe Demo1234!"
   },
   "friends": {
     "title": "Personnes",
@@ -219,7 +234,22 @@
     "readAll": "Tout marquer comme lu",
     "openList": "Ouvrir la liste",
     "empty": "Pas encore d’activité.",
-    "openPage": "Toutes les notifications"
+    "openPage": "Toutes les notifications",
+    "unknown": "Notification",
+    "types": {
+      "item_created": "Nouvel élément dans une liste suivie",
+      "item_updated": "Un élément a été modifié",
+      "item_checked": "Un élément a été coché",
+      "item_unchecked": "Un élément a été décoché",
+      "item_deleted": "Un élément a été supprimé",
+      "proposal_created": "Nouvelle proposition",
+      "proposal_reviewed": "Votre proposition a été examinée",
+      "proposal_approved": "Proposition acceptée",
+      "proposal_rejected": "Proposition refusée",
+      "friend_request": "Demande d’ami",
+      "friend_accepted": "Demande d’ami acceptée",
+      "list_invite": "Invitation à une liste"
+    }
   },
   "profile": {
     "title": "Profil",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Entrée dupliquée",
     "created": "Créé",
     "updated": "Mis à jour",
-    "deleted": "Supprimé"
+    "deleted": "Supprimé",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "Ajouter une note",
@@ -453,7 +484,8 @@
       "delete": "veut supprimer une fiche",
       "check": "veut cocher une fiche",
       "uncheck": "veut décocher une fiche"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Chaque graphique choisit ses champs. L’axe peut être une date, un statut, une année ou tout autre champ.",
@@ -469,6 +501,8 @@
     "groupField": "Grouper par",
     "aggregation": "Agrégation",
     "needDate": "Choisissez un champ pour l’axe",
+    "needValue": "Choisissez un champ de valeur",
+    "needGroup": "Choisissez un champ de regroupement",
     "agg": {
       "count": "Nombre",
       "avg": "Moyenne",
@@ -520,7 +554,16 @@
     "groupField": "Champ de tableau / groupe",
     "placeholder": "Placeholder",
     "pattern": "Motif",
-    "patternPh": "ex. ^[A-Z].+"
+    "patternPh": "ex. ^[A-Z].+",
+    "relatedList": "Liste liée",
+    "allowMultiple": "Plusieurs valeurs",
+    "relationDisplay": "Apparence du lien",
+    "relationDisplayModes": {
+      "title": "Titre seul",
+      "title_cover": "Titre et couverture",
+      "media": "Carte couverture"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Texte",
@@ -578,7 +621,11 @@
     "untitled": "Sans titre",
     "yes": "oui",
     "no": "non",
-    "unique": "« {name} » doit être unique"
+    "unique": "« {name} » doit être unique",
+    "pickItem": "Choisir un élément",
+    "pickUser": "Choisir une personne",
+    "noRelated": "Choisissez d’abord une liste liée dans le schéma",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Limitez la longueur si besoin.",
@@ -594,7 +641,13 @@
     "sublist": "Un élément peut contenir un mini-tableau.",
     "sublistEx": "saison d’une série : épisode, date, note.",
     "select": "Options, séparées par des virgules.",
-    "selectEx": "film, série, anime."
+    "selectEx": "film, série, anime.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Cinéma",
       "description": "Trois listes liées : file, vus, abandonnés. Les boutons de déplacement sont prêts.",
-      "hint": "Crée trois listes d’un coup. À voir reçoit « Vus » et « Je ne regarderai pas »."
+      "hint": "Crée trois listes d’un coup. À voir reçoit « Vus » et « Je ne regarderai pas ».",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Courses",
       "description": "Liste du moment, achetés, et achats de fêtes reportés.",
-      "hint": "Cochez un élément — ou envoyez-le vers Achetés / Nouvel An d’un bouton."
+      "hint": "Cochez un élément — ou envoyez-le vers Achetés / Nouvel An d’un bouton.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Accueil",
     "settings": "Réglages",
     "explore": "Explorer",
-    "friends": "Personnes"
+    "friends": "Personnes",
+    "itemsAll": "Éléments",
+    "feed": "Fil d’amis"
   },
   "activity": {
     "item_created": "a ajouté une fiche",
@@ -779,7 +848,13 @@
     "checked": "Quand une fiche est cochée",
     "unchecked": "Quand une fiche est décochée",
     "save": "Enregistrer les automatisations",
-    "enabled": "Activé"
+    "enabled": "Activé",
+    "setFields": "Renseigner au déplacement",
+    "setNone": "Ne pas changer",
+    "button": "Lors d’un bouton de déplacement",
+    "fieldEquals": "Quand un champ vaut",
+    "pickButton": "Bouton",
+    "pickField": "Champ"
   },
   "board": {
     "addInColumn": "Ajouter ici"
@@ -820,5 +895,24 @@
     "joinClosed": "Cette invitation n’est plus active.",
     "joinLogin": "Connectez-vous pour rejoindre",
     "linkAccess": "Ce que le lien autorise"
+  },
+  "feed": {
+    "kicker": "chronologie sociale",
+    "title": "Fil d’amis",
+    "lead": "Ce que vos amis ont ajouté, coché ou déplacé — sur les listes visibles pour vous.",
+    "findPeople": "Trouver des gens",
+    "openFeed": "Ouvrir le fil",
+    "seeAll": "Fil complet",
+    "emptyFriends": "Pas encore d’amis",
+    "emptyFriendsText": "Ajoutez quelqu’un — ses ajouts, coches et déplacements apparaîtront ici.",
+    "emptyTitle": "Calme pour l’instant",
+    "emptyText": "Quand des amis ajoutent ou déplacent un élément sur une liste visible, c’est ici.",
+    "emptyFilter": "Rien dans ce filtre",
+    "filter": {
+      "all": "Tout",
+      "added": "Ajouté",
+      "checked": "Coché",
+      "moved": "Déplacé"
+    }
   }
 }

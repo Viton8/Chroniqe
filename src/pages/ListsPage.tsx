@@ -28,7 +28,10 @@ export default function ListsPage() {
   useEffect(() => {
     if (!user) return
     void (async () => {
-      const [a, b] = await Promise.all([fetchMyLists(user.id), fetchSharedLists().catch(() => [] as ListRow[])])
+      const [a, b] = await Promise.all([
+        fetchMyLists(user.id),
+        fetchSharedLists(user.id).catch(() => [] as ListRow[]),
+      ])
       setMine(a)
       setShared(b)
       setCounts(await countItems([...a, ...b].map((l) => l.id)))

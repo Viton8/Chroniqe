@@ -13,6 +13,7 @@ export default function JoinPage() {
   const { t } = usePrefs()
   const navigate = useNavigate()
   const [info, setInfo] = useState<{
+    list_id: string
     list_title: string
     list_icon: string | null
     role: MemberRole
@@ -70,7 +71,11 @@ export default function JoinPage() {
       title={`${info.list_icon ?? ''} ${info.list_title}`.trim()}
       subtitle={t(`share.joinRole.${info.role}`)}
     >
-      {info.status !== 'pending' && info.status !== 'accepted' ? (
+      {info.status === 'accepted' ? (
+        <Button className="w-full" onClick={() => navigate(`/lists/${info.list_id}`)}>
+          {t('notes.openList')}
+        </Button>
+      ) : info.status !== 'pending' ? (
         <p className="text-sm text-rose-700">{t('share.joinClosed')}</p>
       ) : (
         <Button className="w-full" disabled={busy} onClick={() => void join()}>

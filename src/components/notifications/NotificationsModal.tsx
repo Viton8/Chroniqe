@@ -6,6 +6,7 @@ import { usePrefs } from '../../context/PrefsContext'
 import { fetchNotifications, markNotificationsRead } from '../../services/api'
 import type { AppNotification } from '../../types/domain'
 import { formatDateTime } from '../../lib/cn'
+import { notificationBody, notificationTitle } from '../../lib/notifications'
 import Button from '../ui/Button'
 import EmptyState from '../ui/EmptyState'
 
@@ -26,10 +27,11 @@ export function NotificationsFeed({
     <ul className="space-y-2">
       {rows.map((n) => {
         const listId = typeof n.payload.list_id === 'string' ? n.payload.list_id : null
+        const body = notificationBody(n, t)
         return (
           <li key={n.id} className={`rounded-2xl px-4 py-3 text-sm ${n.read_at ? 'bg-bg' : 'bg-accent-soft'}`}>
-            <p className="font-medium">{n.title}</p>
-            {n.body ? <p className="mt-0.5 text-sm text-muted">{n.body}</p> : null}
+            <p className="font-medium">{notificationTitle(n, t)}</p>
+            {body ? <p className="mt-0.5 text-sm text-muted">{body}</p> : null}
             <p className="text-xs text-muted">{formatDateTime(n.created_at)}</p>
             {listId ? (
               <Link to={`/lists/${listId}`} className="text-xs text-accent" onClick={onNavigate}>
@@ -43,7 +45,15 @@ export function NotificationsFeed({
   )
 }
 
-function NotificationsBody({ userId, onNavigate }: { userId: string; onNavigate: () => void }) {
+function NotificationsBody({
+  userId,
+  onNavigate,
+  onUnreadChange,
+}: {
+  userId: string
+  onNavigate: () => void
+  onUnreadChange?: (count: number) => void
+}) {
   const { t } = usePrefs()
   const [rows, setRows] = useState<AppNotification[]>([])
   const [loading, setLoading] = useState(true)
@@ -70,9 +80,10 @@ function NotificationsBody({ userId, onNavigate }: { userId: string; onNavigate:
             variant="ghost"
             size="sm"
             onClick={() =>
-              void markNotificationsRead(userId).then(() =>
-                setRows((prev) => prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() }))),
-              )
+              void markNotificationsRead(userId).then(() => {
+                setRows((prev) => prev.map((n) => ({ ...n, read_at: n.read_at ?? new Date().toISOString() })))
+                onUnreadChange?.(0)
+              })
             }
           >
             {t('notes.readAll')}
@@ -106,10 +117,12 @@ export default function NotificationsModal({
   open,
   onClose,
   anchorEl,
+  onUnreadChange,
 }: {
   open: boolean
   onClose: () => void
   anchorEl: HTMLElement | null
+  onUnreadChange?: (count: number) => void
 }) {
   const { user } = useAuth()
   const { t } = usePrefs()
@@ -146,7 +159,7 @@ export default function NotificationsModal({
         role="dialog"
         aria-modal="true"
         aria-label={t('notes.title')}
-        className="absolute z-10 flex flex-col overflow-hidden rounded-2xl border border-line bg-paper p-4 shadow-lift"
+        className="chroniqe-panel absolute z-10 flex flex-col overflow-hidden rounded-2xl border border-line bg-paper p-4 shadow-lift"
         style={{
           ...style,
           visibility: style.top != null || style.bottom != null ? 'visible' : 'hidden',
@@ -159,7 +172,14 @@ export default function NotificationsModal({
           </Button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto">
-          {user ? <NotificationsBody key={user.id} userId={user.id} onNavigate={onClose} /> : null}
+          {user ? (
+            <NotificationsBody
+              key={user.id}
+              userId={user.id}
+              onNavigate={onClose}
+              onUnreadChange={onUnreadChange}
+            />
+          ) : null}
         </div>
         <Button
           variant="soft"

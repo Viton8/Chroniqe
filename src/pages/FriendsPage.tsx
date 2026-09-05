@@ -97,7 +97,14 @@ export default function FriendsPage() {
 
   return (
     <div>
-      <PageHeader title={t('friends.title')} />
+      <PageHeader
+        title={t('friends.title')}
+        action={
+          <Link to="/feed" className="text-sm text-accent hover:underline">
+            {t('feed.openFeed')}
+          </Link>
+        }
+      />
       <Hint className="mt-3" title={t('friends.hint')} example={t('friends.hintEx')} />
       <SearchField
         className="mt-4"
@@ -191,7 +198,7 @@ export default function FriendsPage() {
         {invites.map((i) => (
               <li
                 key={i.id}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 py-3 text-sm transition-colors hover:border-accent"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 py-3 text-sm transition-colors hover:border-accent"
               >
                 <span className="min-w-0">
                   {i.list ? (
@@ -206,7 +213,7 @@ export default function FriendsPage() {
                     {i.inviter?.username ? ` · ${t('friends.invitedBy', { name: i.inviter.username })}` : ''}
                   </span>
                 </span>
-                <span className="flex shrink-0 gap-2">
+                <span className="flex shrink-0 flex-wrap gap-2">
                   <Button size="sm" onClick={() => void respondInvite(i, true).then(reload)}>
                     {t('friends.join')}
                   </Button>

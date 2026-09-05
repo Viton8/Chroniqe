@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Star } from 'lucide-react'
 import { isFavorite, toggleFavorite } from '../../lib/favorites'
 import { cn } from '../../lib/cn'
@@ -15,6 +15,13 @@ export default function FavoriteButton({
 }) {
   const { t } = usePrefs()
   const [on, setOn] = useState(() => isFavorite(id))
+
+  useEffect(() => {
+    const sync = () => setOn(isFavorite(id))
+    sync()
+    window.addEventListener('chroniqe-favorites', sync)
+    return () => window.removeEventListener('chroniqe-favorites', sync)
+  }, [id])
 
   return (
     <button

@@ -75,7 +75,8 @@
     "toLists": "Да спісаў",
     "notifications": "Апавяшчэнні",
     "menu": "Меню",
-    "admin": "Адмін"
+    "admin": "Адмін",
+    "feed": "Стужка"
   },
   "landing": {
     "kicker": "ваша хроніка",
@@ -146,7 +147,9 @@
     "noSearchText": "Паспрабуйце іншую назву або апісанне.",
     "friendRequests": "Заявак у сябры: {n}",
     "listInvites": "Запрашэнняў у спісы: {n}",
-    "shared": "Даступны мне"
+    "shared": "Даступны мне",
+    "following": "Сачу",
+    "feed": "Стужка сяброў"
   },
   "lists": {
     "title": "Спісы",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Публічныя спісы",
-    "lead": "Тое, чым аўтары падзяліліся з усімі.",
+    "lead": "Гатовыя прыклады розных тыпаў — выгляды, графікі, сумесная праца і пераносы. Ніжэй уся стужка.",
     "empty": "Пакуль пуста — апублікуйце адзін са сваіх.",
     "author": "аўтар",
     "find": "Назва, апісанне або аўтар",
-    "noSearch": "Публічных спісаў не знайшлося"
+    "noSearch": "Публічных спісаў не знайшлося",
+    "fork": "Скапіяваць сабе",
+    "featured": "Прыклады для дэманстрацыі",
+    "all": "Усе публічныя",
+    "topicAll": "Усе тэмы",
+    "topic": {
+      "views": "Выгляды",
+      "charts": "Графікі",
+      "collab": "Разам",
+      "flow": "Пераносы",
+      "ratings": "Ацэнкі"
+    },
+    "demo": "Дэма-акаўнты anna, kirill, lena, oleg @ chroniqe.test · пароль Demo1234!"
   },
   "friends": {
     "title": "Людзі",
@@ -219,7 +234,22 @@
     "readAll": "Пазначыць усё прачытаным",
     "openList": "Адкрыць спіс",
     "empty": "Пакуль няма падзей.",
-    "openPage": "Усе апавяшчэнні"
+    "openPage": "Усе апавяшчэнні",
+    "unknown": "Апавяшчэнне",
+    "types": {
+      "item_created": "Новы запіс у спісе, за якім сочыце",
+      "item_updated": "Запіс зменены",
+      "item_checked": "Запіс адзначаны",
+      "item_unchecked": "З запісу знялі адзнаку",
+      "item_deleted": "Запіс выдалены",
+      "proposal_created": "Новая прапанова зменаў",
+      "proposal_reviewed": "Вашу прапанову разгледзелі",
+      "proposal_approved": "Прапанову прынялі",
+      "proposal_rejected": "Прапанову адхілілі",
+      "friend_request": "Запыт у сябры",
+      "friend_accepted": "Запыт у сябры прыняты",
+      "list_invite": "Запрашэнне ў спіс"
+    }
   },
   "profile": {
     "title": "Профіль",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Запіс скапіяваны",
     "created": "Створана",
     "updated": "Абноўлена",
-    "deleted": "Выдалена"
+    "deleted": "Выдалена",
+    "moreActions": "Яшчэ"
   },
   "itemNotes": {
     "add": "Дадаць нататку",
@@ -453,7 +484,8 @@
       "delete": "хоча выдаліць запіс",
       "check": "хоча выкрасліць запіс",
       "uncheck": "хоча зняць выкрэсліванне"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Кожны графік абірае ўласныя палі. Вось можа быць датай, статусам, годам або любым іншым полем.",
@@ -469,6 +501,8 @@
     "groupField": "Групаваць па",
     "aggregation": "Агрэгацыя",
     "needDate": "Абярыце поле для восі",
+    "needValue": "Абярыце поле значэння",
+    "needGroup": "Абярыце поле групоўкі",
     "agg": {
       "count": "Колькасць",
       "avg": "Сярэдняе",
@@ -520,7 +554,16 @@
     "groupField": "Поле для дошкі / груп",
     "placeholder": "Падказка ў полі",
     "pattern": "Шаблон",
-    "patternPh": "напр. ^[A-Z].+"
+    "patternPh": "напр. ^[A-Z].+",
+    "relatedList": "Звязаны спіс",
+    "allowMultiple": "Некалькі значэнняў",
+    "relationDisplay": "Выгляд спасылкі",
+    "relationDisplayModes": {
+      "title": "Толькі назва",
+      "title_cover": "Назва і вокладка",
+      "media": "Картка з вокладкай"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Тэкст",
@@ -578,7 +621,11 @@
     "untitled": "Без назвы",
     "yes": "так",
     "no": "не",
-    "unique": "«{name}» павінна быць унікальным"
+    "unique": "«{name}» павінна быць унікальным",
+    "pickItem": "Выберыце запіс",
+    "pickUser": "Выберыце чалавека",
+    "noRelated": "Спачатку выберыце звязаны спіс у схеме",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Пры патрэбе абмяжуйце даўжыню.",
@@ -594,7 +641,13 @@
     "sublist": "Запіс можа ўтрымліваць мінітабліцу.",
     "sublistEx": "сезон серыяла: серыя, дата, ацэнка.",
     "select": "Варыянты праз коску.",
-    "selectEx": "фільм, серыял, анімэ."
+    "selectEx": "фільм, серыял, анімэ.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Кіно",
       "description": "Тры звязаныя спісы: чарга, прагледжанае, адкладзенае. Кнопкі пераносу гатовыя.",
-      "hint": "Стварае тры спісы адразу. Да прагляду атрымлівае «Прагледжанае» і «Не буду глядзець»."
+      "hint": "Стварае тры спісы адразу. Да прагляду атрымлівае «Прагледжанае» і «Не буду глядзець».",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Пакупкі",
       "description": "Бягучы спіс, купленае і адкладзеныя святочныя пакупкі.",
-      "hint": "Адзначце пазіцыю — або націсніце кнопку, каб даслаць у Купленае / на Новы год."
+      "hint": "Адзначце пазіцыю — або націсніце кнопку, каб даслаць у Купленае / на Новы год.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Галоўная",
     "settings": "Налады",
     "explore": "Агляд",
-    "friends": "Людзі"
+    "friends": "Людзі",
+    "itemsAll": "Запісы",
+    "feed": "Стужка сяброў"
   },
   "activity": {
     "item_created": "дадаў запіс",
@@ -779,7 +848,13 @@
     "checked": "Калі запіс выкраслілі",
     "unchecked": "Калі знялі птушку",
     "save": "Захаваць аўтаматызацыі",
-    "enabled": "Уключана"
+    "enabled": "Уключана",
+    "setFields": "Праставіць пры пераносе",
+    "setNone": "Не змяняць",
+    "button": "Па кнопцы пераносу",
+    "fieldEquals": "Калі поле стала роўным",
+    "pickButton": "Кнопка",
+    "pickField": "Поле"
   },
   "board": {
     "addInColumn": "Дадаць сюды"
@@ -820,5 +895,24 @@
     "joinClosed": "Гэтае запрашэнне больш не дзейнічае.",
     "joinLogin": "Увайсці, каб далучыцца",
     "linkAccess": "Што можна па спасылцы"
+  },
+  "feed": {
+    "kicker": "сацыяльная хроніка",
+    "title": "Стужка сяброў",
+    "lead": "Што сябры дадалі, адзначылі ці перанеслі — у спісах, якія вам бачныя.",
+    "findPeople": "Знайсці людзей",
+    "openFeed": "Адкрыць стужку",
+    "seeAll": "Уся стужка",
+    "emptyFriends": "Пакуль няма сяброў",
+    "emptyFriendsText": "Дадайце каго-небудзь — іх даданні, адзнакі і пераносы з’явяцца тут.",
+    "emptyTitle": "Пакуль ціха",
+    "emptyText": "Калі сябры дададуць або перанесуць запіс у бачным вам спісе, гэта з’явіцца тут.",
+    "emptyFilter": "У гэтым фільтры пуста",
+    "filter": {
+      "all": "Усё",
+      "added": "Дадалі",
+      "checked": "Адзначылі",
+      "moved": "Перанеслі"
+    }
   }
 }

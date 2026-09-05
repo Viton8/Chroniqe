@@ -9,6 +9,7 @@ import Avatar from '../components/ui/Avatar'
 import Button from '../components/ui/Button'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import ListCard from '../components/lists/ListCard'
+import ForkListButton from '../components/lists/ForkListButton'
 import { friendRelation } from '../lib/friends'
 import { appUrl } from '../lib/share'
 
@@ -30,6 +31,9 @@ export default function PublicUserPage() {
   useEffect(() => {
     if (!username) return
     let cancelled = false
+    setLoading(true)
+    setProfile(null)
+    setLists([])
     void (async () => {
       const row = await fetchProfileByUsername(username)
       if (cancelled) return
@@ -56,10 +60,10 @@ export default function PublicUserPage() {
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-line bg-paper p-5 shadow-lift">
-        <div className="flex items-center gap-4">
+        <div className="flex min-w-0 items-center gap-4">
           <Avatar name={profile.display_name || profile.username} url={profile.avatar_url} size={64} />
-          <div>
-            <h1 className="font-serif text-3xl">{profile.display_name || profile.username}</h1>
+          <div className="min-w-0">
+            <h1 className="break-words font-serif text-3xl">{profile.display_name || profile.username}</h1>
             <p className="text-sm text-muted">@{profile.username}</p>
             <p className="mt-1 text-xs text-muted">{t('profile.listsCount', { n: lists.length })}</p>
           </div>
@@ -119,7 +123,12 @@ export default function PublicUserPage() {
       {lists.length ? (
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {lists.map((l) => (
-            <ListCard key={l.id} list={l} favorite={Boolean(user)} />
+            <ListCard
+              key={l.id}
+              list={l}
+              favorite={Boolean(user)}
+              aside={<ForkListButton list={l} />}
+            />
           ))}
         </ul>
       ) : (

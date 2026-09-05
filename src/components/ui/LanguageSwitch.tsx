@@ -6,7 +6,7 @@ export default function LanguageSwitch({ compact }: { compact?: boolean }) {
   const { locale, setLocale, t } = usePrefs()
 
   return (
-    <label className={cn('inline-flex items-center', compact && 'scale-95')}>
+    <label className="inline-flex items-center">
       <span className="sr-only">{t('lang.label')}</span>
       <select
         value={locale}
@@ -14,11 +14,14 @@ export default function LanguageSwitch({ compact }: { compact?: boolean }) {
         onChange={(event) => {
           if (isLocale(event.target.value)) setLocale(event.target.value)
         }}
-        className="max-w-[9.5rem] cursor-pointer rounded-xl bg-paper/80 px-2 py-1.5 text-xs font-semibold text-ink ring-1 ring-line"
+        className={cn(
+          'cursor-pointer rounded-xl bg-paper/80 py-1.5 text-xs font-semibold text-ink ring-1 ring-line',
+          compact ? 'max-w-[4.25rem] px-1.5' : 'max-w-[9.5rem] px-2',
+        )}
       >
         {LOCALES.map((code) => (
           <option key={code} value={code}>
-            {t(`lang.${code}`)}
+            {compact ? code.toUpperCase() : t(`lang.${code}`)}
           </option>
         ))}
       </select>

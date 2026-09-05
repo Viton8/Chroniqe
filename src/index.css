@@ -15,6 +15,7 @@ html[data-palette='violet'] {
   --c-accent-hover: #5b21b6;
   --c-on-accent: #ffffff;
   --c-good: #0f766e;
+  --c-danger: #be123c;
   --c-shadow: 0 1px 0 rgba(28, 23, 36, 0.04), 0 12px 32px -18px rgba(28, 23, 36, 0.28);
 }
 
@@ -31,6 +32,7 @@ html.dark[data-palette='violet'] {
   --c-accent-hover: #c4b5fd;
   --c-on-accent: #1c1724;
   --c-good: #5eead4;
+  --c-danger: #fb7185;
   --c-shadow: 0 1px 0 rgba(0, 0, 0, 0.22), 0 16px 40px -16px rgba(0, 0, 0, 0.55);
 }
 
@@ -207,10 +209,32 @@ select {
   @apply outline-none;
 }
 
-input:focus,
+input:not([type='checkbox']):not([type='file']):not([type='color']):not([type='radio']):focus,
 textarea:focus,
 select:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-accent) 20%, transparent);
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--c-accent);
+  width: 1rem;
+  height: 1rem;
+}
+
+input[type='color'] {
+  height: 2.5rem;
+  width: 3.25rem;
+  padding: 0.2rem;
+  cursor: pointer;
+}
+
+input[type='file'] {
+  @apply w-full cursor-pointer text-sm text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-accent;
+}
+
+.text-rose-700 {
+  color: var(--c-danger);
 }
 
 ::-webkit-scrollbar {
@@ -233,4 +257,40 @@ select:focus {
   stroke-dasharray: 12.6 37.67;
   stroke-dashoffset: 0;
   animation: chroniqe-spinner 0.75s linear infinite;
+}
+
+@keyframes chroniqe-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes chroniqe-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chroniqe-backdrop {
+  animation: chroniqe-fade 0.16s ease-out;
+}
+
+.chroniqe-panel {
+  animation: chroniqe-rise 0.2s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chroniqe-spinner-arc,
+  .chroniqe-backdrop,
+  .chroniqe-panel {
+    animation: none;
+  }
 }

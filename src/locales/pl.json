@@ -75,7 +75,8 @@
     "toLists": "Otwórz aplikację",
     "notifications": "Powiadomienia",
     "menu": "Menu",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feed": "Aktualności"
   },
   "landing": {
     "kicker": "twoja chronologia",
@@ -146,7 +147,9 @@
     "noSearchText": "Spróbuj innej nazwy lub opisu.",
     "friendRequests": "Zaproszenia do znajomych: {n}",
     "listInvites": "Zaproszenia do list: {n}",
-    "shared": "Udostępnione mi"
+    "shared": "Udostępnione mi",
+    "following": "Obserwowane",
+    "feed": "Aktualności znajomych"
   },
   "lists": {
     "title": "Listy",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Listy publiczne",
-    "lead": "To, czym autorzy podzielili się ze wszystkimi.",
+    "lead": "Gotowe przykłady różnych typów — widoki, wykresy, współpraca i przenoszenie. Poniżej cała lista.",
     "empty": "Na razie pusto — opublikuj jedną ze swoich.",
     "author": "autor",
     "find": "Tytuł, opis lub autor",
-    "noSearch": "Brak pasujących list publicznych"
+    "noSearch": "Brak pasujących list publicznych",
+    "fork": "Skopiuj do siebie",
+    "featured": "Przykłady do demonstracji",
+    "all": "Wszystkie publiczne",
+    "topicAll": "Wszystkie tematy",
+    "topic": {
+      "views": "Widoki",
+      "charts": "Wykresy",
+      "collab": "Razem",
+      "flow": "Przenoszenie",
+      "ratings": "Oceny"
+    },
+    "demo": "Konta demo anna, kirill, lena, oleg @ chroniqe.test · hasło Demo1234!"
   },
   "friends": {
     "title": "Ludzie",
@@ -219,7 +234,22 @@
     "readAll": "Oznacz wszystkie jako przeczytane",
     "openList": "Otwórz listę",
     "empty": "Brak aktywności.",
-    "openPage": "Wszystkie powiadomienia"
+    "openPage": "Wszystkie powiadomienia",
+    "unknown": "Powiadomienie",
+    "types": {
+      "item_created": "Nowy wpis na obserwowanej liście",
+      "item_updated": "Wpis został zmieniony",
+      "item_checked": "Wpis został odhaczony",
+      "item_unchecked": "Odznaczono wpis",
+      "item_deleted": "Wpis został usunięty",
+      "proposal_created": "Nowa propozycja zmian",
+      "proposal_reviewed": "Twoja propozycja została rozpatrzona",
+      "proposal_approved": "Propozycja zaakceptowana",
+      "proposal_rejected": "Propozycja odrzucona",
+      "friend_request": "Zaproszenie do znajomych",
+      "friend_accepted": "Zaproszenie przyjęte",
+      "list_invite": "Zaproszenie do listy"
+    }
   },
   "profile": {
     "title": "Profil",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Wpis skopiowany",
     "created": "Utworzono",
     "updated": "Zaktualizowano",
-    "deleted": "Usunięto"
+    "deleted": "Usunięto",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "Dodaj notatkę",
@@ -453,7 +484,8 @@
       "delete": "chce usunąć wpis",
       "check": "chce odhaczyć wpis",
       "uncheck": "chce cofnąć odhaczenie"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Każdy wykres wybiera własne pola. Oś może być datą, statusem, rokiem albo dowolnym innym polem.",
@@ -469,6 +501,8 @@
     "groupField": "Grupuj według",
     "aggregation": "Agregacja",
     "needDate": "Wybierz pole dla osi",
+    "needValue": "Wybierz pole wartości",
+    "needGroup": "Wybierz pole grupowania",
     "agg": {
       "count": "Liczba",
       "avg": "Średnia",
@@ -520,7 +554,16 @@
     "groupField": "Pole tablicy / grupowania",
     "placeholder": "Tekst zastępczy",
     "pattern": "Wzorzec",
-    "patternPh": "np. ^[A-Z].+"
+    "patternPh": "np. ^[A-Z].+",
+    "relatedList": "Powiązana lista",
+    "allowMultiple": "Wiele wartości",
+    "relationDisplay": "Wygląd linku",
+    "relationDisplayModes": {
+      "title": "Tylko tytuł",
+      "title_cover": "Tytuł i okładka",
+      "media": "Karta z okładką"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Tekst",
@@ -578,7 +621,11 @@
     "untitled": "Bez tytułu",
     "yes": "tak",
     "no": "nie",
-    "unique": "„{name}” musi być unikalne"
+    "unique": "„{name}” musi być unikalne",
+    "pickItem": "Wybierz wpis",
+    "pickUser": "Wybierz osobę",
+    "noRelated": "Najpierw wybierz powiązaną listę w schemacie",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Ogranicz długość, jeśli trzeba.",
@@ -594,7 +641,13 @@
     "sublist": "Pozycja może zawierać mini-tabelę.",
     "sublistEx": "sezon serialu: odcinek, data, ocena.",
     "select": "Opcje oddzielone przecinkami.",
-    "selectEx": "film, serial, anime."
+    "selectEx": "film, serial, anime.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Kino",
       "description": "Trzy połączone listy: kolejka, obejrzane, porzucone. Przyciski przenoszenia są gotowe.",
-      "hint": "Tworzy trzy listy naraz. Do obejrzenia dostaje „Obejrzane” i „Nie oglądam”."
+      "hint": "Tworzy trzy listy naraz. Do obejrzenia dostaje „Obejrzane” i „Nie oglądam”.",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Zakupy",
       "description": "Bieżąca lista, kupione rzeczy i odłożone świąteczne zakupy.",
-      "hint": "Odhacz pozycję — albo stuknij przycisk, by wysłać ją do Kupionych / na Sylwestra."
+      "hint": "Odhacz pozycję — albo stuknij przycisk, by wysłać ją do Kupionych / na Sylwestra.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Start",
     "settings": "Ustawienia",
     "explore": "Odkrywaj",
-    "friends": "Ludzie"
+    "friends": "Ludzie",
+    "itemsAll": "Wpisy",
+    "feed": "Aktualności znajomych"
   },
   "activity": {
     "item_created": "dodał wpis",
@@ -779,7 +848,13 @@
     "checked": "Gdy wpis zostanie odhaczony",
     "unchecked": "Gdy odhaczenie zostanie cofnięte",
     "save": "Zapisz automatyzacje",
-    "enabled": "Włączone"
+    "enabled": "Włączone",
+    "setFields": "Ustaw przy przeniesieniu",
+    "setNone": "Nie zmieniaj",
+    "button": "Po przycisku przeniesienia",
+    "fieldEquals": "Gdy pole ma wartość",
+    "pickButton": "Przycisk",
+    "pickField": "Pole"
   },
   "board": {
     "addInColumn": "Dodaj tutaj"
@@ -820,5 +895,24 @@
     "joinClosed": "To zaproszenie nie jest już aktywne.",
     "joinLogin": "Zaloguj się, aby dołączyć",
     "linkAccess": "Co pozwala link"
+  },
+  "feed": {
+    "kicker": "społeczna chronologia",
+    "title": "Aktualności znajomych",
+    "lead": "Co znajomi dodali, odhaczyli lub przenieśli — na listach, które widzisz.",
+    "findPeople": "Znajdź ludzi",
+    "openFeed": "Otwórz aktualności",
+    "seeAll": "Cała lista",
+    "emptyFriends": "Brak znajomych",
+    "emptyFriendsText": "Dodaj kogoś — ich dodania, odhaczenia i przeniesienia pojawią się tutaj.",
+    "emptyTitle": "Na razie cicho",
+    "emptyText": "Gdy znajomi dodadzą lub przeniosą wpis na liście, którą widzisz, pojawi się tu.",
+    "emptyFilter": "Nic w tym filtrze",
+    "filter": {
+      "all": "Wszystko",
+      "added": "Dodane",
+      "checked": "Odhaczone",
+      "moved": "Przeniesione"
+    }
   }
 }

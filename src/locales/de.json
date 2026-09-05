@@ -75,7 +75,8 @@
     "toLists": "App öffnen",
     "notifications": "Benachrichtigungen",
     "menu": "Menü",
-    "admin": "Admin"
+    "admin": "Admin",
+    "feed": "Feed"
   },
   "landing": {
     "kicker": "deine Chronik",
@@ -146,7 +147,9 @@
     "noSearchText": "Probiere einen anderen Namen oder eine andere Beschreibung.",
     "friendRequests": "{n} Freundschaftsanfragen",
     "listInvites": "{n} Listeneinladungen",
-    "shared": "Mit mir geteilt"
+    "shared": "Mit mir geteilt",
+    "following": "Gefolgt",
+    "feed": "Freundes-Feed"
   },
   "lists": {
     "title": "Listen",
@@ -178,11 +181,23 @@
   },
   "explore": {
     "title": "Öffentliche Listen",
-    "lead": "Was Autorinnen und Autoren mit allen teilen.",
+    "lead": "Fertige Beispiele jeder Art — Ansichten, Diagramme, Zusammenarbeit und Überträge. Darunter die ganze Übersicht.",
     "empty": "Noch nichts hier — veröffentliche eine deiner Listen.",
     "author": "Autor",
     "find": "Titel, Beschreibung oder Autor",
-    "noSearch": "Keine öffentlichen Listen passen"
+    "noSearch": "Keine öffentlichen Listen passen",
+    "fork": "In meine Listen kopieren",
+    "featured": "Beispiele zum Vorführen",
+    "all": "Alle öffentlichen Listen",
+    "topicAll": "Alle Themen",
+    "topic": {
+      "views": "Ansichten",
+      "charts": "Diagramme",
+      "collab": "Zusammen",
+      "flow": "Überträge",
+      "ratings": "Bewertungen"
+    },
+    "demo": "Demo-Konten anna, kirill, lena, oleg @ chroniqe.test · Passwort Demo1234!"
   },
   "friends": {
     "title": "Personen",
@@ -219,7 +234,22 @@
     "readAll": "Alle als gelesen markieren",
     "openList": "Liste öffnen",
     "empty": "Noch keine Aktivität.",
-    "openPage": "Alle Benachrichtigungen"
+    "openPage": "Alle Benachrichtigungen",
+    "unknown": "Benachrichtigung",
+    "types": {
+      "item_created": "Neuer Eintrag in einer beobachteten Liste",
+      "item_updated": "Ein Eintrag wurde geändert",
+      "item_checked": "Ein Eintrag wurde abgehakt",
+      "item_unchecked": "Ein Eintrag wurde wieder geöffnet",
+      "item_deleted": "Ein Eintrag wurde gelöscht",
+      "proposal_created": "Neuer Änderungsvorschlag",
+      "proposal_reviewed": "Dein Vorschlag wurde geprüft",
+      "proposal_approved": "Vorschlag angenommen",
+      "proposal_rejected": "Vorschlag abgelehnt",
+      "friend_request": "Freundschaftsanfrage",
+      "friend_accepted": "Freundschaftsanfrage angenommen",
+      "list_invite": "Listeneinladung"
+    }
   },
   "profile": {
     "title": "Profil",
@@ -311,7 +341,8 @@
     "duplicatedItem": "Eintrag dupliziert",
     "created": "Erstellt",
     "updated": "Aktualisiert",
-    "deleted": "Gelöscht"
+    "deleted": "Gelöscht",
+    "moreActions": "More"
   },
   "itemNotes": {
     "add": "Notiz hinzufügen",
@@ -453,7 +484,8 @@
       "delete": "möchte einen Eintrag löschen",
       "check": "möchte einen Eintrag abhaken",
       "uncheck": "möchte das Häkchen entfernen"
-    }
+    },
+    "importSchema": "Apply schema and views from the file"
   },
   "charts": {
     "hint": "Jedes Diagramm wählt eigene Felder. Die Achse kann Datum, Status, Jahr oder ein anderes Feld sein.",
@@ -469,6 +501,8 @@
     "groupField": "Gruppieren nach",
     "aggregation": "Aggregation",
     "needDate": "Wähle ein Feld für die Achse",
+    "needValue": "Wähle ein Wertefeld",
+    "needGroup": "Wähle ein Feld zum Gruppieren",
     "agg": {
       "count": "Anzahl",
       "avg": "Durchschnitt",
@@ -520,7 +554,16 @@
     "groupField": "Board- / Gruppierungsfeld",
     "placeholder": "Platzhalter",
     "pattern": "Muster",
-    "patternPh": "z. B. ^[A-Z].+"
+    "patternPh": "z. B. ^[A-Z].+",
+    "relatedList": "Verknüpfte Liste",
+    "allowMultiple": "Mehrere Werte",
+    "relationDisplay": "Darstellung des Links",
+    "relationDisplayModes": {
+      "title": "Nur Titel",
+      "title_cover": "Titel und Cover",
+      "media": "Cover-Karte"
+    },
+    "nestedLead": "Each nested-list row has its own fields and constraints."
   },
   "fieldTypes": {
     "text": "Text",
@@ -578,7 +621,11 @@
     "untitled": "Ohne Titel",
     "yes": "ja",
     "no": "nein",
-    "unique": "„{name}“ muss eindeutig sein"
+    "unique": "„{name}“ muss eindeutig sein",
+    "pickItem": "Eintrag wählen",
+    "pickUser": "Person wählen",
+    "noRelated": "Wähle zuerst eine verknüpfte Liste im Schema",
+    "nestedRow": "Row {n}: {error}"
   },
   "typeHint": {
     "text": "Begrenze die Länge, wenn nötig.",
@@ -594,7 +641,13 @@
     "sublist": "Ein Eintrag kann eine Mini-Tabelle enthalten.",
     "sublistEx": "Staffel einer Serie: Folge, Datum, Bewertung.",
     "select": "Optionen, kommagetrennt.",
-    "selectEx": "Film, Serie, Anime."
+    "selectEx": "Film, Serie, Anime.",
+    "date": "A date or date-time — for the timeline and calendar.",
+    "dateEx": "watch date, task due date.",
+    "file": "Type, size, and contents are checked on upload.",
+    "fileEx": "PDF or CSV up to 10 MB. SVG and exe are rejected.",
+    "relation": "Link to a row from another list of yours.",
+    "relationEx": "film → director from a people list."
   },
   "tpl": {
     "blank": {
@@ -660,12 +713,26 @@
     "pack_cinema": {
       "title": "Kino",
       "description": "Drei verknüpfte Listen: Merkliste, gesehen, abgebrochen. Verschiebe-Buttons sind bereit.",
-      "hint": "Legt drei Listen auf einmal an. Die Merkliste bekommt „Gesehen“ und „Schaue ich nicht“."
+      "hint": "Legt drei Listen auf einmal an. Die Merkliste bekommt „Gesehen“ und „Schaue ich nicht“.",
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
     },
     "pack_groceries": {
       "title": "Einkauf",
       "description": "Aktuelle Liste, Gekauftes und aufgeschobene Festtagskäufe.",
-      "hint": "Hake einen Eintrag ab — oder sende ihn per Button nach Gekauft / Silvester."
+      "hint": "Hake einen Eintrag ab — oder sende ihn per Button nach Gekauft / Silvester.",
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+    },
+    "games_backlog": {
+      "title": "To play",
+      "description": "A game queue. Move titles to Finished with a button.",
+      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+    },
+    "pack_games": {
+      "title": "Games",
+      "description": "Queue and finished catalogue. The move button is ready.",
+      "hint": "To play gets a Finished button — the finish date is set to today.",
+      "example": "Tap Finished → the game is in the catalogue, dated today."
     }
   },
   "filters": {
@@ -742,7 +809,9 @@
     "home": "Start",
     "settings": "Einstellungen",
     "explore": "Entdecken",
-    "friends": "Personen"
+    "friends": "Personen",
+    "itemsAll": "Einträge",
+    "feed": "Freundes-Feed"
   },
   "activity": {
     "item_created": "hat einen Eintrag hinzugefügt",
@@ -779,7 +848,13 @@
     "checked": "Wenn ein Eintrag abgehakt wird",
     "unchecked": "Wenn das Häkchen entfernt wird",
     "save": "Automationen speichern",
-    "enabled": "Aktiv"
+    "enabled": "Aktiv",
+    "setFields": "Beim Verschieben setzen",
+    "setNone": "Nicht ändern",
+    "button": "Bei einem Verschieben-Button",
+    "fieldEquals": "Wenn ein Feld den Wert hat",
+    "pickButton": "Button",
+    "pickField": "Feld"
   },
   "board": {
     "addInColumn": "Hier hinzufügen"
@@ -820,5 +895,24 @@
     "joinClosed": "Diese Einladung ist nicht mehr aktiv.",
     "joinLogin": "Anmelden, um beizutreten",
     "linkAccess": "Was der Link erlaubt"
+  },
+  "feed": {
+    "kicker": "soziale Chronik",
+    "title": "Freundes-Feed",
+    "lead": "Was Freunde hinzugefügt, abgehakt oder verschoben haben — auf Listen, die du siehst.",
+    "findPeople": "Leute finden",
+    "openFeed": "Feed öffnen",
+    "seeAll": "Ganzer Feed",
+    "emptyFriends": "Noch keine Freunde",
+    "emptyFriendsText": "Füge jemanden hinzu — ihre Einträge, Haken und Verschiebungen erscheinen hier.",
+    "emptyTitle": "Noch ruhig",
+    "emptyText": "Wenn Freunde auf für dich sichtbaren Listen etwas tun, erscheint es hier.",
+    "emptyFilter": "Nichts in diesem Filter",
+    "filter": {
+      "all": "Alles",
+      "added": "Hinzugefügt",
+      "checked": "Abgehakt",
+      "moved": "Verschoben"
+    }
   }
 }

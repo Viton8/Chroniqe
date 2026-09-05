@@ -14,7 +14,7 @@ export default function ThemeSwitch({ compact }: { compact?: boolean }) {
 
   return (
     <div
-      className={cn('inline-flex items-center rounded-xl bg-paper/80 p-0.5 ring-1 ring-line', compact && 'scale-95')}
+      className="inline-flex items-center rounded-xl bg-paper/80 p-0.5 ring-1 ring-line"
       role="group"
       aria-label={t('theme.label')}
     >

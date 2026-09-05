@@ -154,7 +154,7 @@ function CompactPaletteMenu() {
         <div
           role="dialog"
           aria-label={t('theme.palette')}
-          className="absolute right-0 z-50 mt-2 w-[17.5rem] rounded-2xl border border-line bg-paper p-3 shadow-lift"
+          className="chroniqe-panel absolute right-0 z-50 mt-2 max-h-[min(28rem,70vh)] w-[min(17.5rem,calc(100vw-1.5rem))] overflow-y-auto rounded-2xl border border-line bg-paper p-3 shadow-lift"
         >
           <ThemeGrid compact onPicked={() => setOpen(false)} />
         </div>

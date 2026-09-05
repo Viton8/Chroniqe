@@ -8,6 +8,8 @@ import Button from '../ui/Button'
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0]
 
+const ITEM_MIME = 'text/chroniqe-item'
+
 export default function CalendarMonth({
   schema,
   items,
@@ -16,8 +18,11 @@ export default function CalendarMonth({
   highlightedId,
   selectedIds,
   selectMode,
+  canEdit,
   onOpen,
   onToggleSelect,
+  onCreateOnDate,
+  onMoveDate,
 }: {
   schema: ListSchema
   items: ItemRow[]
@@ -26,8 +31,11 @@ export default function CalendarMonth({
   highlightedId?: string
   selectedIds?: Set<string>
   selectMode?: boolean
+  canEdit?: boolean
   onOpen: (item: ItemRow) => void
   onToggleSelect?: (item: ItemRow) => void
+  onCreateOnDate?: (iso: string) => void
+  onMoveDate?: (item: ItemRow, iso: string) => void
 }) {
   const { t, locale } = usePrefs()
   const [cursor, setCursor] = useState(() => {
@@ -67,7 +75,19 @@ export default function CalendarMonth({
         >
           <ChevronLeft size={16} />
         </Button>
-        <h3 className="font-serif text-xl capitalize">{label}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-serif text-xl capitalize">{label}</h3>
+          <Button
+            variant="soft"
+            size="sm"
+            onClick={() => {
+              const now = new Date()
+              setCursor(new Date(now.getFullYear(), now.getMonth(), 1))
+            }}
+          >
+            {t('calendar.today')}
+          </Button>
+        </div>
         <Button
           variant="ghost"
           size="sm"
@@ -94,7 +114,21 @@ export default function CalendarMonth({
               className={cn(
                 'min-h-24 rounded-xl border border-line bg-paper p-1.5',
                 today && 'ring-1 ring-accent',
+                canEdit && onCreateOnDate && 'cursor-pointer',
               )}
+              onDragOver={(event) => {
+                if (canEdit && onMoveDate) event.preventDefault()
+              }}
+              onDrop={(event) => {
+                event.preventDefault()
+                const id = event.dataTransfer.getData(ITEM_MIME)
+                const item = items.find((row) => row.id === id)
+                if (item && onMoveDate) onMoveDate(item, iso)
+              }}
+              onClick={(event) => {
+                if ((event.target as HTMLElement).closest('button')) return
+                if (canEdit && onCreateOnDate) onCreateOnDate(iso)
+              }}
             >
               <p className={cn('text-xs', today ? 'font-semibold text-accent' : 'text-muted')}>{cell}</p>
               <div className="mt-1 space-y-1">
@@ -102,12 +136,17 @@ export default function CalendarMonth({
                   <button
                     key={item.id}
                     type="button"
+                    draggable={Boolean(canEdit && onMoveDate)}
                     className={cn(
                       'block w-full truncate rounded-md px-1 py-0.5 text-left text-[11px] hover:bg-ink/5',
                       item.is_checked && 'checked-out',
                       highlightedId === item.id && 'bg-accent-soft',
                       selectedIds?.has(item.id) && 'ring-1 ring-accent',
                     )}
+                    onDragStart={(event) => {
+                      event.dataTransfer.setData(ITEM_MIME, item.id)
+                      event.dataTransfer.effectAllowed = 'move'
+                    }}
                     onClick={() => {
                       if (selectMode && onToggleSelect) onToggleSelect(item)
                       else onOpen(item)
@@ -117,7 +156,7 @@ export default function CalendarMonth({
                   </button>
                 ))}
                 {dayItems.length > 3 ? (
-                  <p className="px-1 text-[10px] text-muted">+{dayItems.length - 3}</p>
+                  <p className="px-1 text-[10px] text-muted">{t('calendar.more', { n: dayItems.length - 3 })}</p>
                 ) : null}
               </div>
             </div>
@@ -135,6 +174,11 @@ export default function CalendarMonth({
                 key={item.id}
                 type="button"
                 className="rounded-full bg-ink/5 px-3 py-1 text-xs hover:bg-ink/10"
+                draggable={Boolean(canEdit && onMoveDate)}
+                onDragStart={(event) => {
+                  event.dataTransfer.setData(ITEM_MIME, item.id)
+                  event.dataTransfer.effectAllowed = 'move'
+                }}
                 onClick={() => onOpen(item)}
               >
                 {titleFromValues(item.values, schema.titleFieldId)}

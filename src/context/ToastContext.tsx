@@ -7,14 +7,20 @@ import {
   type ReactNode,
 } from 'react'
 
+interface ToastAction {
+  label: string
+  onClick: () => void
+}
+
 interface Toast {
   id: number
   message: string
   tone: 'ok' | 'err'
+  action?: ToastAction
 }
 
 interface ToastContextValue {
-  toast: (message: string, tone?: 'ok' | 'err') => void
+  toast: (message: string, tone?: 'ok' | 'err', action?: ToastAction) => void
 }
 
 const ToastContext = createContext<ToastContextValue | null>(null)
@@ -22,12 +28,12 @@ const ToastContext = createContext<ToastContextValue | null>(null)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<Toast[]>([])
 
-  const toast = useCallback((message: string, tone: 'ok' | 'err' = 'ok') => {
+  const toast = useCallback((message: string, tone: 'ok' | 'err' = 'ok', action?: ToastAction) => {
     const id = Date.now() + Math.random()
-    setItems((prev) => [...prev, { id, message, tone }])
+    setItems((prev) => [...prev, { id, message, tone, action }])
     window.setTimeout(() => {
-      setItems((prev) => prev.filter((t) => t.id !== id))
-    }, 3800)
+      setItems((prev) => prev.filter((row) => row.id !== id))
+    }, action ? 8000 : 3800)
   }, [])
 
   const value = useMemo(() => ({ toast }), [toast])
@@ -45,7 +51,21 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 : 'bg-ink text-paper'
             }`}
           >
-            {t.message}
+            <div className="flex items-center justify-between gap-3">
+              <span>{t.message}</span>
+              {t.action ? (
+                <button
+                  type="button"
+                  className="shrink-0 font-medium underline decoration-white/50 underline-offset-2"
+                  onClick={() => {
+                    t.action?.onClick()
+                    setItems((prev) => prev.filter((row) => row.id !== t.id))
+                  }}
+                >
+                  {t.action.label}
+                </button>
+              ) : null}
+            </div>
           </div>
         ))}
       </div>

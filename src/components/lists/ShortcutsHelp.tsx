@@ -8,6 +8,7 @@ export default function ShortcutsHelp({ open, onClose }: { open: boolean; onClos
       <ul className="space-y-2 text-sm">
         {(
           [
+            ['⌘K', t('shortcuts.palette')],
             ['/', t('shortcuts.search')],
             ['n', t('shortcuts.new')],
             ['j / k', t('shortcuts.move')],

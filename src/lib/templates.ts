@@ -236,8 +236,10 @@ export const TEMPLATES: TemplateSpec[] = [
           },
         }),
         f('note', 'Заметка', 'text', { config: { maxLength: 200 } }),
+        f('bought_at', 'Куплено', 'date', { hidden: true }),
       ],
       titleFieldId: 'name',
+      dateFieldId: 'bought_at',
       groupFieldId: 'category',
     },
     settings: {

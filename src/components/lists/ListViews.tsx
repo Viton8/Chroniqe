@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react'
-import { CalendarDays, Check, Columns3, LayoutGrid, Table2, Waypoints } from 'lucide-react'
+import type { DragEvent, ReactNode } from 'react'
+import { CalendarDays, Check, Columns3, LayoutGrid, Plus, Table2, Waypoints } from 'lucide-react'
 import CalendarMonth from './CalendarMonth'
 import type {
   FieldDef,
@@ -79,6 +79,11 @@ export default function ListViews({
   selectedIds,
   highlightedId,
   onToggleSelect,
+  canEdit,
+  onCreateOnDate,
+  onMoveDate,
+  onMoveGroup,
+  onCreateInGroup,
 }: {
   schema: ListSchema
   items: ItemRow[]
@@ -98,6 +103,11 @@ export default function ListViews({
   selectedIds?: Set<string>
   highlightedId?: string
   onToggleSelect?: (item: ItemRow) => void
+  canEdit?: boolean
+  onCreateOnDate?: (iso: string) => void
+  onMoveDate?: (item: ItemRow, iso: string) => void
+  onMoveGroup?: (item: ItemRow, value: string) => void
+  onCreateInGroup?: (value: string) => void
 }) {
   const { t } = usePrefs()
   const slots = resolveViewSlots(schema, view)
@@ -148,36 +158,54 @@ export default function ListViews({
     return (
       <div className="flex gap-3 overflow-x-auto pb-2">
         {groups.map((g) => (
-          <div key={g.value} className="w-72 shrink-0 rounded-2xl bg-black/[0.03] p-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{g.label}</h3>
-            <div className="space-y-2">
-              {items
-                .filter((i) => String(i.values[groupId] ?? '') === g.value)
-                .map((item) => (
-                  <ConfiguredCard
-                    key={item.id}
-                    item={item}
-                    schema={schema}
-                    view={{ ...view, cardLayout: 'compact' }}
-                    titleId={titleId}
-                    coverId={coverId}
-                    enableCheck={enableCheck}
-                    notes={notesOf(item, 'overlay')}
-                    renderField={renderField}
-                    onOpen={onOpen}
-                    onToggle={onToggle}
-                    selectMode={selectMode}
-                    selected={selectedIds?.has(item.id)}
-                    highlighted={highlightedId === item.id}
-                    onToggleSelect={onToggleSelect}
-                  />
-                ))}
-            </div>
-          </div>
+          <BoardColumn
+            key={g.value}
+            title={g.label}
+            color={g.color}
+            onDropItem={(item) => onMoveGroup?.(item, g.value)}
+            canDrop={Boolean(canEdit && onMoveGroup)}
+            items={items}
+          >
+            {items
+              .filter((i) => String(i.values[groupId] ?? '') === g.value)
+              .map((item) => (
+                <ConfiguredCard
+                  key={item.id}
+                  item={item}
+                  schema={schema}
+                  view={{ ...view, cardLayout: 'compact' }}
+                  titleId={titleId}
+                  coverId={coverId}
+                  enableCheck={enableCheck}
+                  notes={notesOf(item, 'overlay')}
+                  renderField={renderField}
+                  onOpen={onOpen}
+                  onToggle={onToggle}
+                  selectMode={selectMode}
+                  selected={selectedIds?.has(item.id)}
+                  highlighted={highlightedId === item.id}
+                  onToggleSelect={onToggleSelect}
+                  draggable={Boolean(canEdit && onMoveGroup)}
+                />
+              ))}
+            {canEdit && onCreateInGroup ? (
+              <button
+                type="button"
+                className="flex w-full items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-xs text-muted hover:bg-ink/5 hover:text-ink"
+                onClick={() => onCreateInGroup(g.value)}
+              >
+                <Plus size={12} /> {t('board.addInColumn')}
+              </button>
+            ) : null}
+          </BoardColumn>
         ))}
-        {rest.length ? (
-          <div className="w-72 shrink-0 rounded-2xl bg-black/[0.03] p-3">
-            <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('views.ungrouped')}</h3>
+        {rest.length || (canEdit && onCreateInGroup) ? (
+          <BoardColumn
+            title={t('views.ungrouped')}
+            onDropItem={(item) => onMoveGroup?.(item, '')}
+            canDrop={Boolean(canEdit && onMoveGroup)}
+            items={items}
+          >
             {rest.map((item) => (
               <ConfiguredCard
                 key={item.id}
@@ -195,9 +223,10 @@ export default function ListViews({
                 selected={selectedIds?.has(item.id)}
                 highlighted={highlightedId === item.id}
                 onToggleSelect={onToggleSelect}
+                draggable={Boolean(canEdit && onMoveGroup)}
               />
             ))}
-          </div>
+          </BoardColumn>
         ) : null}
       </div>
     )
@@ -271,8 +300,11 @@ export default function ListViews({
         highlightedId={highlightedId}
         selectedIds={selectedIds}
         selectMode={selectMode}
+        canEdit={canEdit}
         onOpen={onOpen}
         onToggleSelect={onToggleSelect}
+        onCreateOnDate={onCreateOnDate}
+        onMoveDate={onMoveDate}
       />
     )
   }
@@ -481,6 +513,7 @@ function ConfiguredCard({
   selected,
   highlighted,
   onToggleSelect,
+  draggable,
 }: {
   item: ItemRow
   schema: ListSchema
@@ -496,6 +529,7 @@ function ConfiguredCard({
   selected?: boolean
   highlighted?: boolean
   onToggleSelect?: (item: ItemRow) => void
+  draggable?: boolean
 }) {
   const layout = view.cardLayout ?? 'grid'
   const cover = coverId ? item.values[coverId] : undefined
@@ -525,9 +559,22 @@ function ConfiguredCard({
 
   const ring = cn(highlighted && 'ring-2 ring-accent', selected && 'ring-1 ring-accent')
 
+  const dragProps = draggable
+    ? {
+        draggable: true,
+        onDragStart: (event: DragEvent) => {
+          event.dataTransfer.setData('text/chroniqe-item', item.id)
+          event.dataTransfer.effectAllowed = 'move'
+        },
+      }
+    : {}
+
   if (layout === 'compact') {
     return (
-      <article className={cn('group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift', ring)}>
+      <article
+        {...dragProps}
+        className={cn('group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift', ring)}
+      >
         {selectMode && onToggleSelect ? (
           <SelectBox selected={Boolean(selected)} onChange={() => onToggleSelect(item)} />
         ) : null}
@@ -683,6 +730,45 @@ function BadgeRow({
           </span>
         )
       })}
+    </div>
+  )
+}
+
+function BoardColumn({
+  title,
+  color,
+  children,
+  items,
+  canDrop,
+  onDropItem,
+}: {
+  title: string
+  color?: string
+  children: ReactNode
+  items: ItemRow[]
+  canDrop?: boolean
+  onDropItem?: (item: ItemRow) => void
+}) {
+  return (
+    <div
+      className="w-72 shrink-0 rounded-2xl bg-black/[0.03] p-3"
+      onDragOver={(event) => {
+        if (canDrop) event.preventDefault()
+      }}
+      onDrop={(event) => {
+        event.preventDefault()
+        const id = event.dataTransfer.getData('text/chroniqe-item')
+        const item = items.find((row) => row.id === id)
+        if (item && onDropItem) onDropItem(item)
+      }}
+    >
+      <h3
+        className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted"
+        style={color ? { color } : undefined}
+      >
+        {title}
+      </h3>
+      <div className="space-y-2">{children}</div>
     </div>
   )
 }

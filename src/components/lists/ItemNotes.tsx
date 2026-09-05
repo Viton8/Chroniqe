@@ -611,3 +611,99 @@ function NoteFormModal({
     </Modal>
   )
 }
+
+export function ItemNotesPanel({
+  item,
+  notes,
+  userId,
+  canAdd,
+  canManage,
+  onCreated,
+  onUpdated,
+  onDeleted,
+}: {
+  item: ItemRow
+  notes: ItemComment[]
+  userId?: string
+  canAdd?: boolean
+  canManage?: boolean
+  onCreated: (row: ItemComment) => void
+  onUpdated: (row: ItemComment) => void
+  onDeleted: (id: string) => void
+}) {
+  const { t } = usePrefs()
+  const { toast } = useToast()
+  const [adding, setAdding] = useState(false)
+  const [editing, setEditing] = useState<ItemComment | null>(null)
+
+  return (
+    <section className="mt-5 border-t border-line pt-4">
+      <div className="mb-2 flex items-center justify-between">
+        <h3 className="text-sm font-medium">{t('itemNotes.title')}</h3>
+        {canAdd && userId ? (
+          <Button variant="ghost" size="sm" onClick={() => setAdding(true)}>
+            <Notebook size={14} /> {t('itemNotes.add')}
+          </Button>
+        ) : null}
+      </div>
+      {notes.length ? (
+        <div className="space-y-2">
+          {notes.map((note) => (
+            <NoteCard
+              key={note.id}
+              note={note}
+              someone={t('list.someone')}
+              canEdit={note.user_id === userId}
+              canDelete={Boolean(canManage || note.user_id === userId)}
+              onEdit={() => setEditing(note)}
+              onDelete={() => {
+                void deleteComment(note.id)
+                  .then(() => onDeleted(note.id))
+                  .catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
+              }}
+            />
+          ))}
+        </div>
+      ) : (
+        <p className="text-sm text-muted">{t('itemNotes.empty')}</p>
+      )}
+      {adding && userId ? (
+        <NoteFormModal
+          title={t('itemNotes.add')}
+          submitLabel={t('itemNotes.add')}
+          onClose={() => setAdding(false)}
+          onSave={async (draft) => {
+            const row = await addComment({
+              item_id: item.id,
+              user_id: userId,
+              body: draft.body,
+              color: draft.color,
+              show_author: draft.showAuthor,
+              show_time: draft.showTime,
+            })
+            onCreated(row)
+            setAdding(false)
+          }}
+        />
+      ) : null}
+      {editing ? (
+        <NoteFormModal
+          title={t('itemNotes.edit')}
+          submitLabel={t('common.save')}
+          initial={editing}
+          onClose={() => setEditing(null)}
+          onSave={async (draft) => {
+            const row = await updateComment(editing.id, {
+              body: draft.body,
+              color: draft.color,
+              show_author: draft.showAuthor,
+              show_time: draft.showTime,
+            })
+            onUpdated(row)
+            setEditing(null)
+          }}
+        />
+      ) : null}
+    </section>
+  )
+}

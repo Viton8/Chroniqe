@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom'
 import { PrefsProvider } from './context/PrefsContext.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { ToastProvider } from './context/ToastContext.tsx'
+import { CommandProvider } from './context/CommandContext.tsx'
+import CommandPalette from './components/app/CommandPalette.tsx'
 import './index.css'
 import App from './App.tsx'
 
@@ -23,7 +25,10 @@ createRoot(document.getElementById('root')!).render(
       <PrefsProvider>
         <AuthProvider>
           <ToastProvider>
-            <App />
+            <CommandProvider>
+              <App />
+              <CommandPalette />
+            </CommandProvider>
           </ToastProvider>
         </AuthProvider>
       </PrefsProvider>

@@ -35,6 +35,40 @@ export const VIEW_MODES = [
 
 export type ViewMode = (typeof VIEW_MODES)[number]
 
+export const VIEW_KINDS = ['table', 'cards', 'board', 'timeline'] as const
+export type ViewKind = (typeof VIEW_KINDS)[number]
+
+export const CARD_LAYOUTS = ['grid', 'media', 'compact'] as const
+export type CardLayout = (typeof CARD_LAYOUTS)[number]
+
+export const TABLE_DENSITIES = ['comfortable', 'compact'] as const
+export type TableDensity = (typeof TABLE_DENSITIES)[number]
+
+export const FIELD_VIEW_ROLES = ['hidden', 'column', 'cover', 'title', 'subtitle', 'badge', 'meta'] as const
+export type FieldViewRole = (typeof FIELD_VIEW_ROLES)[number]
+
+export interface FieldViewStyle {
+  fieldId: string
+  role: FieldViewRole
+  formula?: string
+  prefix?: string
+  suffix?: string
+  decimals?: number
+}
+
+export interface NamedView {
+  id: string
+  name: string
+  kind: ViewKind
+  cardLayout?: CardLayout
+  density?: TableDensity
+  groupFieldId?: string
+  dateFieldId?: string
+  coverFieldId?: string
+  titleFieldId?: string
+  fields: FieldViewStyle[]
+}
+
 export const VISIBILITY = ['private', 'invite', 'friends', 'public'] as const
 export type Visibility = (typeof VISIBILITY)[number]
 
@@ -135,7 +169,10 @@ export interface ListSettings {
 }
 
 export interface ViewConfig {
-  mode: ViewMode
+  mode?: ViewMode
+  activeViewId?: string
+  allowedKinds?: ViewKind[]
+  views?: NamedView[]
   sortFieldId?: string
   sortDir?: 'asc' | 'desc'
   groupFieldId?: string

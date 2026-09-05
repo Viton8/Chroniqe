@@ -1,38 +1,58 @@
 import type { ReactNode } from 'react'
-import { Check } from 'lucide-react'
-import type { FieldDef, ItemComment, ItemRating, ItemRow, ListSchema, ViewConfig, ViewMode } from '../../types/domain'
-import { displayValue } from '../../lib/display'
-import { fileMeta, isImageFile, resolveCoverFieldId } from '../../lib/files'
+import { Check, Columns3, LayoutGrid, Table2, Waypoints } from 'lucide-react'
+import type {
+  FieldDef,
+  FieldViewStyle,
+  ItemComment,
+  ItemRating,
+  ItemRow,
+  ListSchema,
+  NamedView,
+} from '../../types/domain'
+import { displayStyledValue, displayValue } from '../../lib/display'
+import { fileMeta, isImageFile } from '../../lib/files'
+import { fieldsWithRole, styleForField } from '../../lib/views'
 import { cn, formatDate, titleFromValues } from '../../lib/cn'
 import { usePrefs } from '../../context/PrefsContext'
 import FileThumb from './FileThumb'
 import ItemNotesMarker from './ItemNotes'
 
-const MODE_IDS: ViewMode[] = ['table', 'cards', 'board', 'gallery', 'timeline', 'compact']
+const KIND_ICON = {
+  table: Table2,
+  cards: LayoutGrid,
+  board: Columns3,
+  timeline: Waypoints,
+} as const
 
 export function ViewSwitcher({
-  mode,
+  views,
+  activeId,
   onChange,
 }: {
-  mode: ViewMode
-  onChange: (mode: ViewMode) => void
+  views: NamedView[]
+  activeId: string
+  onChange: (id: string) => void
 }) {
-  const { t } = usePrefs()
+  if (views.length < 2) return null
   return (
-    <div className="flex gap-1 overflow-x-auto rounded-2xl bg-ink/5 p-1">
-      {MODE_IDS.map((id) => (
-        <button
-          key={id}
-          type="button"
-          onClick={() => onChange(id)}
-          className={cn(
-            'whitespace-nowrap rounded-xl px-3 py-1.5 text-xs',
-            mode === id ? 'bg-paper font-medium shadow-sm' : 'text-muted',
-          )}
-        >
-          {t(`views.${id}`)}
-        </button>
-      ))}
+    <div className="flex min-w-0 flex-1 flex-wrap gap-1 rounded-2xl bg-ink/5 p-1">
+      {views.map((view) => {
+        const Icon = KIND_ICON[view.kind]
+        return (
+          <button
+            key={view.id}
+            type="button"
+            onClick={() => onChange(view.id)}
+            className={cn(
+              'inline-flex min-w-0 max-w-full items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs',
+              view.id === activeId ? 'bg-paper font-medium shadow-sm' : 'text-muted hover:text-ink',
+            )}
+          >
+            <Icon size={13} className="shrink-0" />
+            <span className="truncate">{view.name}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -56,7 +76,7 @@ export default function ListViews({
   schema: ListSchema
   items: ItemRow[]
   ratings: ItemRating[]
-  view: ViewConfig
+  view: NamedView
   enableCheck?: boolean
   notesByItem?: Record<string, ItemComment[]>
   userId?: string
@@ -69,12 +89,13 @@ export default function ListViews({
   onNoteDeleted?: (id: string) => void
 }) {
   const { t } = usePrefs()
-  const fields = visibleFields(schema, view)
-  const titleId = schema.titleFieldId
+  const titleId = view.titleFieldId ?? schema.titleFieldId
+  const coverId =
+    view.coverFieldId ??
+    fieldsWithRole(view, 'cover')[0]?.fieldId ??
+    schema.imageFieldId
   const groupId = view.groupFieldId ?? schema.groupFieldId
   const dateId = view.dateFieldId ?? schema.dateFieldId
-  const imageId = resolveCoverFieldId(schema, view)
-  const coverExtra = Boolean(imageId && !fields.some((f) => f.id === imageId))
 
   const notesOf = (item: ItemRow, variant: 'plain' | 'overlay' = 'plain') => (
     <ItemNotesMarker
@@ -90,27 +111,39 @@ export default function ListViews({
     />
   )
 
-  if (view.mode === 'board' && groupId) {
+  const renderField = (item: ItemRow, style: FieldViewStyle) => {
+    const field = schema.fields.find((f) => f.id === style.fieldId)
+    if (!field) return '—'
+    return displayStyledValue(field, item.values[field.id], style, ratings, item.id, item.values, schema)
+  }
+
+  if (view.kind === 'board' && !groupId) {
+    return <p className="text-sm text-muted">{t('viewEditor.groupField')}</p>
+  }
+
+  if (view.kind === 'board' && groupId) {
     const field = schema.fields.find((f) => f.id === groupId)
     const groups = field?.config?.options ?? []
     const rest = items.filter((i) => !groups.some((g) => g.value === String(i.values[groupId] ?? '')))
     return (
       <div className="flex gap-3 overflow-x-auto pb-2">
         {groups.map((g) => (
-          <div key={g.value} className="w-64 shrink-0 rounded-2xl bg-black/[0.03] p-3">
+          <div key={g.value} className="w-72 shrink-0 rounded-2xl bg-black/[0.03] p-3">
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{g.label}</h3>
             <div className="space-y-2">
               {items
                 .filter((i) => String(i.values[groupId] ?? '') === g.value)
                 .map((item) => (
-                  <ItemCard
+                  <ConfiguredCard
                     key={item.id}
                     item={item}
                     schema={schema}
-                    ratings={ratings}
-                    cover={imageId ? item.values[imageId] : undefined}
+                    view={{ ...view, cardLayout: 'compact' }}
+                    titleId={titleId}
+                    coverId={coverId}
                     enableCheck={enableCheck}
                     notes={notesOf(item, 'overlay')}
+                    renderField={renderField}
                     onOpen={onOpen}
                     onToggle={onToggle}
                   />
@@ -119,17 +152,19 @@ export default function ListViews({
           </div>
         ))}
         {rest.length ? (
-          <div className="w-64 shrink-0 rounded-2xl bg-black/[0.03] p-3">
+          <div className="w-72 shrink-0 rounded-2xl bg-black/[0.03] p-3">
             <h3 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">{t('views.ungrouped')}</h3>
             {rest.map((item) => (
-              <ItemCard
+              <ConfiguredCard
                 key={item.id}
                 item={item}
                 schema={schema}
-                ratings={ratings}
-                cover={imageId ? item.values[imageId] : undefined}
+                view={{ ...view, cardLayout: 'compact' }}
+                titleId={titleId}
+                coverId={coverId}
                 enableCheck={enableCheck}
                 notes={notesOf(item, 'overlay')}
+                renderField={renderField}
                 onOpen={onOpen}
                 onToggle={onToggle}
               />
@@ -140,10 +175,15 @@ export default function ListViews({
     )
   }
 
-  if (view.mode === 'timeline' && dateId) {
+  if (view.kind === 'timeline' && !dateId) {
+    return <p className="text-sm text-muted">{t('viewEditor.dateField')}</p>
+  }
+
+  if (view.kind === 'timeline' && dateId) {
     const sorted = [...items].sort((a, b) =>
       String(b.values[dateId] ?? '').localeCompare(String(a.values[dateId] ?? '')),
     )
+    const meta = [...fieldsWithRole(view, 'badge'), ...fieldsWithRole(view, 'meta')]
     return (
       <ol className="relative ml-3 border-l border-line">
         {sorted.map((item) => (
@@ -151,13 +191,18 @@ export default function ListViews({
             <span className="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full bg-accent" />
             <p className="text-xs text-muted">{formatDate(String(item.values[dateId] ?? ''))}</p>
             <div className="mt-1 flex items-start gap-2">
-              {imageId && fileMeta(item.values[imageId]) ? (
-                <FileThumb value={item.values[imageId]} className="h-12 w-9 shrink-0 rounded-lg" alt="" />
+              {coverId && fileMeta(item.values[coverId]) ? (
+                <FileThumb value={item.values[coverId]} className="h-12 w-9 shrink-0 rounded-lg" alt="" />
               ) : null}
               <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
                 <span className={cn('font-medium', item.is_checked && 'checked-out')}>
                   {titleFromValues(item.values, titleId)}
                 </span>
+                {meta.length ? (
+                  <p className="mt-1 text-xs text-muted">
+                    {meta.map((s) => renderField(item, s)).join(' · ')}
+                  </p>
+                ) : null}
               </button>
               <div className="relative h-7 w-7 shrink-0">{notesOf(item)}</div>
             </div>
@@ -167,45 +212,27 @@ export default function ListViews({
     )
   }
 
-  if (view.mode === 'gallery') {
+  if (view.kind === 'cards') {
+    const layout = view.cardLayout ?? 'grid'
+    const cols =
+      layout === 'media'
+        ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4'
+        : layout === 'compact'
+          ? 'grid-cols-1'
+          : 'grid-cols-1 sm:grid-cols-2'
     return (
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      <div className={cn('grid gap-3', cols)}>
         {items.map((item) => (
-          <article
-            key={item.id}
-            className="group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift"
-          >
-            <button type="button" className="block w-full text-left" onClick={() => onOpen(item)}>
-              <FileThumb
-                value={imageId ? item.values[imageId] : undefined}
-                className="aspect-[3/4] w-full"
-                alt={titleFromValues(item.values, titleId)}
-              />
-              <div className="p-3">
-                <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>
-                  {titleFromValues(item.values, titleId)}
-                </p>
-              </div>
-            </button>
-            <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notesOf(item, 'overlay')}</div>
-          </article>
-        ))}
-      </div>
-    )
-  }
-
-  if (view.mode === 'cards') {
-    return (
-      <div className="grid gap-3 sm:grid-cols-2">
-        {items.map((item) => (
-          <ItemCard
+          <ConfiguredCard
             key={item.id}
             item={item}
             schema={schema}
-            ratings={ratings}
-            cover={imageId ? item.values[imageId] : undefined}
+            view={view}
+            titleId={titleId}
+            coverId={coverId}
             enableCheck={enableCheck}
             notes={notesOf(item, 'overlay')}
+            renderField={renderField}
             onOpen={onOpen}
             onToggle={onToggle}
           />
@@ -214,42 +241,25 @@ export default function ListViews({
     )
   }
 
-  if (view.mode === 'compact') {
-    return (
-      <ul className="divide-y divide-line overflow-hidden rounded-2xl border border-line bg-paper">
-        {items.map((item) => (
-          <li key={item.id} className="group flex items-center gap-3 px-3 py-2.5">
-            {enableCheck && onToggle ? (
-              <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
-            ) : null}
-            {imageId && fileMeta(item.values[imageId]) ? (
-              <FileThumb value={item.values[imageId]} className="h-10 w-8 shrink-0 rounded-md" alt="" />
-            ) : null}
-            <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
-              <span className={cn('text-sm', item.is_checked && 'checked-out')}>
-                {titleFromValues(item.values, titleId)}
-              </span>
-            </button>
-            <div className="relative h-7 w-7 shrink-0">{notesOf(item)}</div>
-          </li>
-        ))}
-      </ul>
-    )
-  }
+  const columns = view.fields
+    .filter((s) => s.role === 'column')
+    .map((s) => schema.fields.find((f) => f.id === s.fieldId))
+    .filter((f): f is FieldDef => Boolean(f))
+  const dense = view.density === 'compact'
+  const pad = dense ? 'px-2 py-1.5' : 'px-3 py-2'
 
   return (
     <div className="overflow-x-auto rounded-2xl border border-line bg-paper">
-      <table className="w-full min-w-[640px] text-left text-sm">
+      <table className="w-full text-left text-sm">
         <thead className="border-b border-line text-xs uppercase tracking-wide text-muted">
           <tr>
-            {enableCheck ? <th className="w-10 px-3 py-2" /> : null}
-            {coverExtra ? <th className="w-14 px-3 py-2" /> : null}
-            {fields.map((f) => (
-              <th key={f.id} className="px-3 py-2 font-medium">
+            {enableCheck ? <th className={cn('w-10', pad)} /> : null}
+            {columns.map((f) => (
+              <th key={f.id} className={cn(pad, 'font-medium')}>
                 {f.name}
               </th>
             ))}
-            <th className="w-16 px-3 py-2" />
+            <th className={cn('w-16', pad)} />
           </tr>
         </thead>
         <tbody>
@@ -260,21 +270,23 @@ export default function ListViews({
               onClick={() => onOpen(item)}
             >
               {enableCheck && onToggle ? (
-                <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
+                <td className={pad} onClick={(e) => e.stopPropagation()}>
                   <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
                 </td>
               ) : null}
-              {coverExtra && imageId ? (
-                <td className="px-3 py-2">
-                  <FileThumb value={item.values[imageId]} className="h-14 w-10 rounded-lg" alt="" />
-                </td>
-              ) : null}
-              {fields.map((f) => (
-                <td key={f.id} className={cn('px-3 py-2', item.is_checked && 'checked-out')}>
-                  <FieldCell field={f} value={item.values[f.id]} ratings={ratings} itemId={item.id} />
+              {columns.map((f) => (
+                <td key={f.id} className={cn(pad, item.is_checked && 'checked-out')}>
+                  <FieldCell
+                    field={f}
+                    value={item.values[f.id]}
+                    style={styleForField(view, f.id)}
+                    ratings={ratings}
+                    item={item}
+                    schema={schema}
+                  />
                 </td>
               ))}
-              <td className="relative w-16 px-3 py-2" onClick={(e) => e.stopPropagation()}>
+              <td className={cn('relative w-16', pad)} onClick={(e) => e.stopPropagation()}>
                 <div className="h-7 w-7" aria-hidden />
                 {notesOf(item)}
               </td>
@@ -289,24 +301,36 @@ export default function ListViews({
 function FieldCell({
   field,
   value,
+  style,
   ratings,
-  itemId,
+  item,
+  schema,
 }: {
   field: FieldDef
   value: unknown
+  style?: FieldViewStyle
   ratings: ItemRating[]
-  itemId: string
+  item: ItemRow
+  schema: ListSchema
 }) {
   const meta = fileMeta(value)
   if (meta && (field.type === 'image' || (field.type === 'file' && isImageFile(meta)))) {
     return <FileThumb value={value} className="h-14 w-10 rounded-lg" alt="" />
   }
-  return <>{displayValue(field, value, ratings, itemId)}</>
-}
-
-function visibleFields(schema: ListSchema, view: ViewConfig): FieldDef[] {
-  const hidden = new Set(view.hiddenFieldIds ?? [])
-  return schema.fields.filter((f) => !f.hidden && !hidden.has(f.id))
+  if (field.type === 'select') {
+    const opt = field.config?.options?.find((o) => o.value === String(value ?? ''))
+    if (opt) {
+      return (
+        <span className="inline-flex items-center gap-1.5">
+          {opt.color ? (
+            <span className="h-2 w-2 rounded-full" style={{ background: opt.color }} />
+          ) : null}
+          {opt.label}
+        </span>
+      )
+    }
+  }
+  return <>{displayStyledValue(field, value, style, ratings, item.id, item.values, schema)}</>
 }
 
 function CheckToggle({
@@ -331,56 +355,141 @@ function CheckToggle({
   )
 }
 
-function ItemCard({
+function ConfiguredCard({
   item,
   schema,
-  ratings,
-  cover,
+  view,
+  titleId,
+  coverId,
   enableCheck,
   notes,
+  renderField,
   onOpen,
   onToggle,
 }: {
   item: ItemRow
   schema: ListSchema
-  ratings: ItemRating[]
-  cover?: unknown
+  view: NamedView
+  titleId?: string
+  coverId?: string
   enableCheck?: boolean
   notes: ReactNode
+  renderField: (item: ItemRow, style: FieldViewStyle) => string
   onOpen: (item: ItemRow) => void
   onToggle?: (item: ItemRow, next: boolean) => void
 }) {
-  const coverMeta = fileMeta(cover)
-  const hasCover = Boolean(coverMeta)
-  const preview = schema.fields
-    .filter((f) => f.id !== schema.titleFieldId && f.type !== 'image' && f.type !== 'file')
-    .slice(0, 3)
+  const layout = view.cardLayout ?? 'grid'
+  const cover = coverId ? item.values[coverId] : undefined
+  const hasCover = Boolean(fileMeta(cover))
+  const subtitle = fieldsWithRole(view, 'subtitle')
+  const badges = fieldsWithRole(view, 'badge')
+  const meta = fieldsWithRole(view, 'meta')
+  const title = titleFromValues(item.values, titleId)
+
+  if (layout === 'compact') {
+    return (
+      <article className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift">
+        {enableCheck && onToggle ? (
+          <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
+        ) : null}
+        {hasCover ? <FileThumb value={cover} className="h-10 w-8 shrink-0 rounded-md" alt="" /> : null}
+        <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
+          <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>{title}</p>
+          {subtitle[0] || meta[0] ? (
+            <p className="truncate text-xs text-muted">
+              {[...subtitle, ...meta].slice(0, 2).map((s) => renderField(item, s)).join(' · ')}
+            </p>
+          ) : null}
+        </button>
+        <BadgeRow item={item} badges={badges} schema={schema} />
+        <div className="relative h-7 w-7 shrink-0">{notes}</div>
+      </article>
+    )
+  }
+
+  if (layout === 'media') {
+    return (
+      <article className="group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift">
+        <button type="button" className="block w-full text-left" onClick={() => onOpen(item)}>
+          <FileThumb value={cover} className="aspect-[3/4] w-full" alt={title} />
+          <div className="p-3">
+            <p className={cn('text-sm font-medium', item.is_checked && 'checked-out')}>{title}</p>
+            {subtitle[0] ? <p className="mt-0.5 text-xs text-muted">{renderField(item, subtitle[0])}</p> : null}
+            <BadgeRow item={item} badges={badges} schema={schema} className="mt-2" />
+          </div>
+        </button>
+        <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notes}</div>
+      </article>
+    )
+  }
+
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift">
       <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notes}</div>
-      {hasCover ? (
-        <FileThumb value={cover} className="aspect-[16/10] w-full" alt="" />
-      ) : null}
+      {hasCover ? <FileThumb value={cover} className="aspect-[16/10] w-full" alt="" /> : null}
       <div className={hasCover ? 'p-3' : 'p-3 pr-12'}>
         <div className="flex items-start gap-2">
           {enableCheck && onToggle ? (
             <CheckToggle checked={item.is_checked} onChange={(n) => onToggle(item, n)} />
           ) : null}
           <button type="button" className="min-w-0 flex-1 text-left" onClick={() => onOpen(item)}>
-            <h3 className={cn('font-medium', item.is_checked && 'checked-out')}>
-              {titleFromValues(item.values, schema.titleFieldId)}
-            </h3>
-            <dl className="mt-2 space-y-1 text-xs text-muted">
-              {preview.map((f) => (
-                <div key={f.id} className="flex justify-between gap-2">
-                  <dt>{f.name}</dt>
-                  <dd className="text-ink/80">{displayValue(f, item.values[f.id], ratings, item.id)}</dd>
-                </div>
-              ))}
-            </dl>
+            <h3 className={cn('font-medium', item.is_checked && 'checked-out')}>{title}</h3>
+            {subtitle.map((s) => (
+              <p key={s.fieldId} className="mt-0.5 text-sm text-muted">
+                {renderField(item, s)}
+              </p>
+            ))}
+            <BadgeRow item={item} badges={badges} schema={schema} className="mt-2" />
+            {meta.length ? (
+              <dl className="mt-2 space-y-1 text-xs text-muted">
+                {meta.map((s) => {
+                  const field = schema.fields.find((f) => f.id === s.fieldId)
+                  if (!field) return null
+                  return (
+                    <div key={s.fieldId} className="flex justify-between gap-2">
+                      <dt>{field.name}</dt>
+                      <dd className="text-ink/80">{renderField(item, s)}</dd>
+                    </div>
+                  )
+                })}
+              </dl>
+            ) : null}
           </button>
         </div>
       </div>
     </article>
+  )
+}
+
+function BadgeRow({
+  item,
+  badges,
+  schema,
+  className,
+}: {
+  item: ItemRow
+  badges: FieldViewStyle[]
+  schema: ListSchema
+  className?: string
+}) {
+  if (!badges.length) return null
+  return (
+    <div className={cn('flex flex-wrap gap-1', className)}>
+      {badges.map((s) => {
+        const field = schema.fields.find((f) => f.id === s.fieldId)
+        if (!field) return null
+        const raw = item.values[field.id]
+        const opt = field.config?.options?.find((o) => o.value === String(raw ?? ''))
+        return (
+          <span
+            key={s.fieldId}
+            className="rounded-full bg-ink/5 px-2 py-0.5 text-[11px] text-ink/80"
+            style={opt?.color ? { background: `${opt.color}22`, color: opt.color } : undefined}
+          >
+            {opt?.label ?? displayValue(field, raw)}
+          </span>
+        )
+      })}
+    </div>
   )
 }

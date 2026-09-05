@@ -8,6 +8,7 @@ import {
   Link2,
   Plus,
   Settings2,
+  SlidersHorizontal,
   Trash2,
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
@@ -57,8 +58,7 @@ import type {
   ListRow,
   Profile,
   TransferAction,
-  ViewConfig,
-  ViewMode,
+  NamedView,
 } from '../types/domain'
 import Button from '../components/ui/Button'
 import Hint from '../components/ui/Hint'
@@ -67,6 +67,8 @@ import { FieldWrap, Input, Textarea } from '../components/ui/Input'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import SchemaEditor from '../components/lists/SchemaEditor'
 import ListViews, { ViewSwitcher } from '../components/lists/ListViews'
+import ViewEditor, { ViewsManager } from '../components/lists/ViewEditor'
+import { normalizeViewConfig, toViewConfig } from '../lib/views'
 import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
 import { emptyValues, itemMatchesQuery, validateItem } from '../lib/validation'
@@ -112,6 +114,8 @@ function ListWorkspace({ id }: { id: string }) {
   const [openItem, setOpenItem] = useState<ItemRow | null>(null)
   const [creating, setCreating] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [customizeOpen, setCustomizeOpen] = useState(false)
+  const [activeViewId, setActiveViewId] = useState<string>()
   const [hideChecked, setHideChecked] = useState(false)
   const [sort, setSort] = useState<'new' | 'old' | 'az' | 'za'>('new')
 
@@ -206,14 +210,31 @@ function ListWorkspace({ id }: { id: string }) {
     return <EmptyState icon="?" title={t('list.notFoundTitle')} text={t('list.notFoundText')} />
   }
 
-  const view = list.view_config ?? { mode: 'table' as ViewMode }
+  const resolved = normalizeViewConfig(list.view_config, schema)
+  const currentViewId =
+    (activeViewId && resolved.views.some((v) => v.id === activeViewId) ? activeViewId : null) ??
+    resolved.activeViewId
+  const view = resolved.views.find((v) => v.id === currentViewId) ?? resolved.active
   const canEdit = Boolean(perms?.edit)
   const canPropose = Boolean(perms?.propose)
+  const canConfigureViews = Boolean(perms?.owner || perms?.edit)
 
-  const saveView = async (patch: Partial<ViewConfig>) => {
-    const next = { ...view, ...patch }
-    setList({ ...list, view_config: next })
-    if (perms?.owner) await updateList(list.id, { view_config: next })
+  const saveViews = async (next: {
+    views: NamedView[]
+    allowedKinds: typeof resolved.allowedKinds
+    activeViewId: string
+  }) => {
+    const config = toViewConfig(next, list.view_config)
+    setList({ ...list, view_config: config })
+    setActiveViewId(next.activeViewId)
+    if (perms?.owner || perms?.edit) await updateList(list.id, { view_config: config })
+  }
+
+  const switchView = (id: string) => {
+    setActiveViewId(id)
+    if (perms?.owner) {
+      void saveViews({ ...resolved, activeViewId: id })
+    }
   }
 
   const onToggle = async (item: ItemRow, next: boolean) => {
@@ -319,50 +340,42 @@ function ListWorkspace({ id }: { id: string }) {
 
       {tab === 'items' ? (
         <>
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <ViewSwitcher mode={view.mode} onChange={(m) => void saveView({ mode: m })} />
-            {view.mode === 'timeline' ? (
+          <div className="mb-4 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <ViewSwitcher views={resolved.views} activeId={view.id} onChange={switchView} />
+              {canConfigureViews ? (
+                <Button variant="soft" size="sm" onClick={() => setCustomizeOpen(true)}>
+                  <SlidersHorizontal size={14} /> {t('viewEditor.customize')}
+                </Button>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Input
+                className="min-w-0 flex-1 sm:max-w-xs"
+                placeholder={t('list.searchItems')}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <label className="flex items-center gap-2 text-xs text-muted">
+                <input
+                  type="checkbox"
+                  checked={hideChecked}
+                  onChange={(e) => setHideChecked(e.target.checked)}
+                />
+                {t('common.hideChecked')}
+              </label>
               <select
                 className="rounded-xl border border-line bg-paper px-3 py-2 text-sm"
-                value={view.dateFieldId ?? ''}
-                aria-label={t('charts.dateField')}
-                onChange={(e) => void saveView({ dateFieldId: e.target.value || undefined })}
+                value={sort}
+                aria-label={t('common.sort')}
+                onChange={(e) => setSort(e.target.value as typeof sort)}
               >
-                <option value="">—</option>
-                {schema.fields
-                  .filter((f) => f.type === 'date' || f.type === 'datetime')
-                  .map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
+                <option value="new">{t('common.sortNew')}</option>
+                <option value="old">{t('common.sortOld')}</option>
+                <option value="az">{t('common.sortAz')}</option>
+                <option value="za">{t('common.sortZa')}</option>
               </select>
-            ) : null}
-            <Input
-              className="sm:max-w-xs"
-              placeholder={t('list.searchItems')}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <label className="flex items-center gap-2 text-xs text-muted">
-              <input
-                type="checkbox"
-                checked={hideChecked}
-                onChange={(e) => setHideChecked(e.target.checked)}
-              />
-              {t('common.hideChecked')}
-            </label>
-            <select
-              className="rounded-xl border border-line bg-paper px-3 py-2 text-sm"
-              value={sort}
-              aria-label={t('common.sort')}
-              onChange={(e) => setSort(e.target.value as typeof sort)}
-            >
-              <option value="new">{t('common.sortNew')}</option>
-              <option value="old">{t('common.sortOld')}</option>
-              <option value="az">{t('common.sortAz')}</option>
-              <option value="za">{t('common.sortZa')}</option>
-            </select>
+            </div>
           </div>
           {filtered.length === 0 ? (
             <EmptyState
@@ -459,6 +472,36 @@ function ListWorkspace({ id }: { id: string }) {
             setOpenItem(null)
           }}
         />
+      ) : null}
+
+      {customizeOpen && canConfigureViews ? (
+        <Modal open title={t('viewEditor.edit')} onClose={() => setCustomizeOpen(false)} wide>
+          <ViewEditor
+            schema={schema}
+            view={view}
+            allowedKinds={resolved.allowedKinds}
+            onChange={(next) => {
+              const views = resolved.views.map((v) => (v.id === next.id ? next : v))
+              setList({
+                ...list,
+                view_config: toViewConfig({ ...resolved, views, activeViewId: view.id }, list.view_config),
+              })
+            }}
+          />
+          <Button
+            className="mt-4"
+            onClick={() => {
+              void saveViews({
+                views: normalizeViewConfig(list.view_config, schema).views,
+                allowedKinds: resolved.allowedKinds,
+                activeViewId: view.id,
+              })
+              setCustomizeOpen(false)
+            }}
+          >
+            {t('common.save')}
+          </Button>
+        </Modal>
       ) : null}
 
       {perms?.owner ? (
@@ -790,7 +833,7 @@ function SettingsModal({
 }) {
   const { toast } = useToast()
   const { t } = usePrefs()
-  const [panel, setPanel] = useState<'general' | 'fields' | 'share' | 'flow' | 'io'>('general')
+  const [panel, setPanel] = useState<'general' | 'views' | 'fields' | 'share' | 'flow' | 'io'>('general')
   const [userQuery, setUserQuery] = useState('')
   const [found, setFound] = useState<Profile[]>([])
   const [targetId, setTargetId] = useState('')
@@ -809,6 +852,7 @@ function SettingsModal({
         {(
           [
             ['general', t('settingsModal.general')],
+            ['views', t('settingsModal.views')],
             ['fields', t('settingsModal.fields')],
             ['share', t('settingsModal.share')],
             ['flow', t('settingsModal.flow')],
@@ -874,6 +918,26 @@ function SettingsModal({
             }}
           >
             {t('settingsModal.deleteList')}
+          </Button>
+        </div>
+      ) : null}
+
+      {panel === 'views' ? (
+        <div>
+          <ViewsManager
+            schema={list.schema}
+            views={normalizeViewConfig(list.view_config, list.schema).views}
+            allowedKinds={normalizeViewConfig(list.view_config, list.schema).allowedKinds}
+            activeViewId={normalizeViewConfig(list.view_config, list.schema).activeViewId}
+            onChange={(next) =>
+              onChange({
+                ...list,
+                view_config: toViewConfig(next, list.view_config),
+              })
+            }
+          />
+          <Button className="mt-4" onClick={() => void save({ view_config: list.view_config })}>
+            {t('common.save')}
           </Button>
         </div>
       ) : null}

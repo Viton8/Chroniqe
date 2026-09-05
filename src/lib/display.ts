@@ -1,4 +1,5 @@
-import type { FieldDef, ItemRating } from '../types/domain'
+import type { FieldDef, FieldViewStyle, ItemRating, ListSchema } from '../types/domain'
+import { evalFormula } from './formula'
 import { msg } from './i18n'
 
 export function displayValue(
@@ -25,4 +26,25 @@ export function displayValue(
     return value ? msg('fields.yes') : msg('fields.no')
   }
   return String(value)
+}
+
+export function displayStyledValue(
+  field: FieldDef,
+  value: unknown,
+  style?: FieldViewStyle,
+  ratings?: ItemRating[],
+  itemId?: string,
+  values?: Record<string, unknown>,
+  schema?: ListSchema,
+): string {
+  if (style?.formula && values && schema) {
+    const n = evalFormula(style.formula, values, schema)
+    if (n != null) {
+      const text = style.decimals != null ? n.toFixed(style.decimals) : String(n)
+      return `${style.prefix ?? ''}${text}${style.suffix ?? ''}`
+    }
+  }
+  const base = displayValue(field, value, ratings, itemId)
+  if (base === '—' || (!style?.prefix && !style?.suffix)) return base
+  return `${style?.prefix ?? ''}${base}${style?.suffix ?? ''}`
 }

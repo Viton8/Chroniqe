@@ -37,8 +37,14 @@ export function isImageFile(meta: FileMeta | null): boolean {
   return IMAGE_EXT.test(meta.name ?? meta.path)
 }
 
-export function resolveCoverFieldId(schema: ListSchema, view?: ViewConfig): string | undefined {
-  const hinted = view?.imageFieldId ?? schema.imageFieldId
+export function resolveCoverFieldId(
+  schema: ListSchema,
+  view?: ViewConfig | { coverFieldId?: string; imageFieldId?: string },
+): string | undefined {
+  const hinted =
+    (view && 'coverFieldId' in view ? view.coverFieldId : undefined) ??
+    (view && 'imageFieldId' in view ? view.imageFieldId : undefined) ??
+    schema.imageFieldId
   if (hinted && schema.fields.some((f) => f.id === hinted)) return hinted
   return schema.fields.find((f) => f.type === 'image')?.id
 }

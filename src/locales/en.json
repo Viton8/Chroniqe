@@ -59,7 +59,9 @@
     "example": "Example",
     "cancel": "Cancel",
     "pin": "Pin",
-    "unpin": "Unpin"
+    "unpin": "Unpin",
+    "undo": "Undo",
+    "today": "Today"
   },
   "nav": {
     "overview": "Home",
@@ -93,8 +95,12 @@
     "featInsightsText": "Completion, averages, overdue and upcoming dates on the list and on the home screen.",
     "featEditor": "Stronger field editor",
     "featEditorText": "Reorder, duplicate, defaults, unique values and hints for every field.",
-    "featShare": "Sharing you already have",
-    "featShareText": "Visibility, proposals, friends, ratings and transfers stay in place — we only added more power."
+    "featShare": "Share by link",
+    "featShareText": "The owner chooses what the link allows: view, propose changes, or edit. Public lists stay on Explore; link-only lists stay off it.",
+    "featCommand": "Jump anywhere",
+    "featCommandText": "⌘K opens a command palette — lists, items and actions, like Linear or Notion.",
+    "featFlow": "Automations you can edit",
+    "featFlowText": "Check-off stamps a date, fills a field or moves a row — no UUID pasting."
   },
   "auth": {
     "loginTitle": "Log in",
@@ -133,7 +139,14 @@
     "events": "Activity",
     "pinned": "Pinned",
     "upcoming": "Coming up",
-    "noUpcoming": "No upcoming dates"
+    "noUpcoming": "No upcoming dates",
+    "openNotes": "Inbox",
+    "search": "Search your lists",
+    "noSearch": "No matching lists",
+    "noSearchText": "Try another name or description.",
+    "friendRequests": "{n} friend requests",
+    "listInvites": "{n} list invites",
+    "shared": "Shared with me"
   },
   "lists": {
     "title": "Lists",
@@ -143,7 +156,10 @@
     "emptyText": "Build fields from scratch or start from a pack.",
     "templates": "Open templates",
     "find": "Find",
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "noSearch": "No matching lists",
+    "noSearchText": "Try another title or description.",
+    "lead": "Yours, shared with you, and the ones you pin."
   },
   "newList": {
     "title": "New list",
@@ -164,7 +180,9 @@
     "title": "Public lists",
     "lead": "What authors chose to share with everyone.",
     "empty": "Nothing here yet — publish one of yours.",
-    "author": "author"
+    "author": "author",
+    "find": "Search title, description or author",
+    "noSearch": "No public lists match"
   },
   "friends": {
     "title": "People",
@@ -181,7 +199,20 @@
     "friends": "Friends",
     "remove": "Remove",
     "sent": "Request sent",
-    "listInvite": "list"
+    "listInvite": "list",
+    "inviteUnknown": "List invitation",
+    "invitedBy": "from @{name}",
+    "outgoing": "Sent requests",
+    "pending": "Pending",
+    "already": "Friends",
+    "emptyFriends": "No friends yet",
+    "emptyFriendsText": "Find someone by username and send a request.",
+    "emptyRequests": "No incoming requests",
+    "emptyInvites": "No list invitations",
+    "emptyOutgoing": "No sent requests",
+    "emptySearch": "Type at least two characters",
+    "you": "This is you",
+    "noUsers": "No one found"
   },
   "notes": {
     "title": "Activity",
@@ -199,7 +230,14 @@
     "saved": "Saved",
     "publicLists": "Public lists",
     "noPublic": "No public lists.",
-    "notFound": "User not found"
+    "notFound": "User not found",
+    "edit": "Edit profile",
+    "addFriend": "Add friend",
+    "pending": "Request sent",
+    "listsCount": "{n} public lists",
+    "viewPublic": "View public page",
+    "copyLink": "Copy profile link",
+    "lead": "How you appear to others, and the public page they can open."
   },
   "settings": {
     "title": "Settings",
@@ -270,7 +308,10 @@
     "insights": "Insights",
     "prev": "Previous",
     "next": "Next",
-    "duplicatedItem": "Entry duplicated"
+    "duplicatedItem": "Entry duplicated",
+    "created": "Created",
+    "updated": "Updated",
+    "deleted": "Deleted"
   },
   "itemNotes": {
     "add": "Add note",
@@ -290,7 +331,8 @@
     "private": "Only you",
     "invite": "Invite only",
     "friends": "Friends",
-    "public": "Public"
+    "public": "Public",
+    "link": "Anyone with the link"
   },
   "editMode": {
     "owner": "Owner only",
@@ -395,8 +437,8 @@
     "addButton": "Add button",
     "move": "Move",
     "saveFlows": "Save moves",
-    "shareHint": "Visibility and edit rights are separate.",
-    "shareEx": "Public + “via proposals”: everyone can see, edits wait for your approval.",
+    "shareHint": "Visibility, link access and edit rights are separate.",
+    "shareEx": "Anyone with the link can view, while people you invite can edit.",
     "flowHint": "A button copies the row to another list of yours and can remove it here.",
     "flowEx": "Watchlist → Watched. Map fields: title→title.",
     "ioHint": "JSON keeps schema and rows. CSV is values only.",
@@ -404,7 +446,14 @@
     "imported": "Imported",
     "importFail": "Import failed",
     "jsonCsv": "Import JSON or CSV",
-    "saved": "Saved"
+    "saved": "Saved",
+    "proposal": {
+      "create": "wants to add an item",
+      "update": "wants to edit an item",
+      "delete": "wants to delete an item",
+      "check": "wants to check off an item",
+      "uncheck": "wants to uncheck an item"
+    }
   },
   "charts": {
     "hint": "Each chart picks its own fields. The axis can be a date, status, year, or any other field.",
@@ -666,7 +715,9 @@
   },
   "calendar": {
     "prev": "Previous month",
-    "next": "Next month"
+    "next": "Next month",
+    "today": "Today",
+    "more": "+{n} more"
   },
   "shortcuts": {
     "title": "Keyboard shortcuts",
@@ -676,6 +727,98 @@
     "open": "Open highlighted",
     "selectAll": "Select all",
     "help": "This help",
-    "close": "Close"
+    "close": "Close",
+    "palette": "Command palette"
+  },
+  "command": {
+    "title": "Jump to…",
+    "placeholder": "Search lists, items, actions…",
+    "actions": "Actions",
+    "lists": "Lists",
+    "items": "Items in this list",
+    "empty": "Nothing matches",
+    "newItem": "New item",
+    "newList": "New list",
+    "home": "Home",
+    "settings": "Settings",
+    "explore": "Explore",
+    "friends": "People"
+  },
+  "activity": {
+    "item_created": "added an item",
+    "item_updated": "edited an item",
+    "item_checked": "checked off an item",
+    "item_unchecked": "unchecked an item",
+    "item_deleted": "deleted an item",
+    "item_moved": "moved an item",
+    "unknown": "updated the list",
+    "open": "Open item"
+  },
+  "flow": {
+    "tab": "Automations",
+    "moves": "Move buttons",
+    "movesHint": "A button on the item copies it to another of your lists.",
+    "automationsHint": "Stamp a date, fill a field, or restore the snapshot when checking.",
+    "automationsEx": "Shopping list: check → set “Bought on” to today.",
+    "onCheck": "When checked",
+    "onUncheck": "When unchecked",
+    "named": "Named rules",
+    "addRule": "Add rule",
+    "trigger": "Trigger",
+    "addAction": "Add action",
+    "setNow": "Set date to now",
+    "setField": "Set field",
+    "restore": "Restore snapshot",
+    "valueNow": "Now (date & time)",
+    "valueToday": "Today",
+    "targetList": "Target list",
+    "deleteSource": "Remove from this list",
+    "mapFields": "Map fields",
+    "noLists": "Create another list first",
+    "ruleName": "New rule",
+    "checked": "When an item is checked",
+    "unchecked": "When an item is unchecked",
+    "save": "Save automations",
+    "enabled": "Enabled"
+  },
+  "board": {
+    "addInColumn": "Add here"
+  },
+  "share": {
+    "title": "Share list",
+    "lead": "Choose what people with the link can do, or invite someone by name.",
+    "anyone": "Anyone with the link",
+    "anyoneHint": "A link-only list is not shown on Explore. A public list stays public and also uses this access.",
+    "access": {
+      "off": "No open link",
+      "view": "View only",
+      "propose": "Propose changes",
+      "edit": "Can edit"
+    },
+    "accessHint": {
+      "off": "Only people you invite or who already have access.",
+      "view": "They can open the list, not change it.",
+      "propose": "They can suggest edits. You approve them.",
+      "edit": "They can change items like an editor."
+    },
+    "copyList": "Copy list link",
+    "copyOffHint": "Without open access the link works only for you, members and people already allowed.",
+    "invite": "Invite a person",
+    "findUser": "Username or name",
+    "invited": "Invitation sent",
+    "copyInvite": "Copy invite link with a role",
+    "pending": "Pending invitations",
+    "openLink": "Open invite link",
+    "joinMissing": "Invitation not found",
+    "joinMissingText": "The link is invalid or the invitation was withdrawn.",
+    "joinKicker": "You are invited",
+    "joinRole": {
+      "viewer": "You will be able to view this list.",
+      "proposer": "You will be able to propose changes.",
+      "editor": "You will be able to edit this list."
+    },
+    "joinClosed": "This invitation is no longer active.",
+    "joinLogin": "Log in to join",
+    "linkAccess": "What the link allows"
   }
 }

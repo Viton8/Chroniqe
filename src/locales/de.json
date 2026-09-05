@@ -59,7 +59,9 @@
     "example": "Beispiel",
     "cancel": "Abbrechen",
     "pin": "Anheften",
-    "unpin": "Lösen"
+    "unpin": "Lösen",
+    "undo": "Rückgängig",
+    "today": "Heute"
   },
   "nav": {
     "overview": "Start",
@@ -93,8 +95,12 @@
     "featInsightsText": "Fortschritt, Durchschnitte, Überfälliges und Termine — in der Liste und auf der Startseite.",
     "featEditor": "Stärkerer Feld-Editor",
     "featEditorText": "Reihenfolge, Duplikate, Standardwerte, Eindeutigkeit und Hinweise für jedes Feld.",
-    "featShare": "Teilen wie bisher",
-    "featShareText": "Sichtbarkeit, Vorschläge, Freunde, Bewertungen und Transfers bleiben — wir haben nur mehr Kraft ergänzt."
+    "featShare": "Per Link teilen",
+    "featShareText": "Der Eigentümer wählt, was der Link erlaubt: ansehen, Änderungen vorschlagen oder bearbeiten. Öffentliche Listen bleiben im Entdecken, Nur-Link-Listen nicht.",
+    "featCommand": "Überall hinspringen",
+    "featCommandText": "⌘K öffnet eine Befehlspalette — Listen, Einträge und Aktionen wie in Linear oder Notion.",
+    "featFlow": "Automationen zum Bearbeiten",
+    "featFlowText": "Abhaken setzt ein Datum, füllt ein Feld oder verschiebt die Zeile — ohne UUIDs."
   },
   "auth": {
     "loginTitle": "Anmelden",
@@ -133,7 +139,14 @@
     "events": "Aktivität",
     "pinned": "Angeheftet",
     "upcoming": "Demnächst",
-    "noUpcoming": "Keine nahen Termine"
+    "noUpcoming": "Keine nahen Termine",
+    "openNotes": "Posteingang",
+    "search": "Deine Listen suchen",
+    "noSearch": "Keine passenden Listen",
+    "noSearchText": "Probiere einen anderen Namen oder eine andere Beschreibung.",
+    "friendRequests": "{n} Freundschaftsanfragen",
+    "listInvites": "{n} Listeneinladungen",
+    "shared": "Mit mir geteilt"
   },
   "lists": {
     "title": "Listen",
@@ -143,7 +156,10 @@
     "emptyText": "Baue Felder selbst oder starte mit einem Paket.",
     "templates": "Vorlagen öffnen",
     "find": "Suchen",
-    "pinned": "Angeheftet"
+    "pinned": "Angeheftet",
+    "noSearch": "Keine passenden Listen",
+    "noSearchText": "Probiere einen anderen Titel oder eine andere Beschreibung.",
+    "lead": "Deine, mit dir geteilte und angepinnte Listen."
   },
   "newList": {
     "title": "Neue Liste",
@@ -164,7 +180,9 @@
     "title": "Öffentliche Listen",
     "lead": "Was Autorinnen und Autoren mit allen teilen.",
     "empty": "Noch nichts hier — veröffentliche eine deiner Listen.",
-    "author": "Autor"
+    "author": "Autor",
+    "find": "Titel, Beschreibung oder Autor",
+    "noSearch": "Keine öffentlichen Listen passen"
   },
   "friends": {
     "title": "Personen",
@@ -181,7 +199,20 @@
     "friends": "Freunde",
     "remove": "Entfernen",
     "sent": "Anfrage gesendet",
-    "listInvite": "Liste"
+    "listInvite": "Liste",
+    "inviteUnknown": "Listeneinladung",
+    "invitedBy": "von @{name}",
+    "outgoing": "Gesendete Anfragen",
+    "pending": "Ausstehend",
+    "already": "Freunde",
+    "emptyFriends": "Noch keine Freunde",
+    "emptyFriendsText": "Suche einen Nutzernamen und sende eine Anfrage.",
+    "emptyRequests": "Keine eingehenden Anfragen",
+    "emptyInvites": "Keine Listeneinladungen",
+    "emptyOutgoing": "Keine gesendeten Anfragen",
+    "emptySearch": "Mindestens zwei Zeichen eingeben",
+    "you": "Das bist du",
+    "noUsers": "Niemand gefunden"
   },
   "notes": {
     "title": "Aktivität",
@@ -199,7 +230,14 @@
     "saved": "Gespeichert",
     "publicLists": "Öffentliche Listen",
     "noPublic": "Keine öffentlichen Listen.",
-    "notFound": "Benutzer nicht gefunden"
+    "notFound": "Benutzer nicht gefunden",
+    "edit": "Profil bearbeiten",
+    "addFriend": "Freund hinzufügen",
+    "pending": "Anfrage gesendet",
+    "listsCount": "{n} öffentliche Listen",
+    "viewPublic": "Öffentliche Seite ansehen",
+    "copyLink": "Profillink kopieren",
+    "lead": "Wie andere dich sehen und die öffentliche Seite, die sie öffnen können."
   },
   "settings": {
     "title": "Einstellungen",
@@ -270,7 +308,10 @@
     "insights": "Überblick",
     "prev": "Zurück",
     "next": "Weiter",
-    "duplicatedItem": "Eintrag dupliziert"
+    "duplicatedItem": "Eintrag dupliziert",
+    "created": "Erstellt",
+    "updated": "Aktualisiert",
+    "deleted": "Gelöscht"
   },
   "itemNotes": {
     "add": "Notiz hinzufügen",
@@ -290,7 +331,8 @@
     "private": "Nur du",
     "invite": "Nur Eingeladene",
     "friends": "Freunde",
-    "public": "Öffentlich"
+    "public": "Öffentlich",
+    "link": "Wer den Link hat"
   },
   "editMode": {
     "owner": "Nur Besitzende",
@@ -395,8 +437,8 @@
     "addButton": "Button hinzufügen",
     "move": "Verschieben",
     "saveFlows": "Verschieben speichern",
-    "shareHint": "Sichtbarkeit und Bearbeitungsrecht sind getrennt.",
-    "shareEx": "Öffentlich + „über Vorschläge“: alle sehen, Änderungen warten auf deine Freigabe.",
+    "shareHint": "Sichtbarkeit, Linkzugriff und Bearbeitungsrecht sind getrennt.",
+    "shareEx": "Mit dem Link nur ansehen, eingeladene Personen dürfen bearbeiten.",
     "flowHint": "Ein Button kopiert die Zeile in eine andere deiner Listen und kann sie hier entfernen.",
     "flowEx": "Merkliste → Gesehen. Felder zuordnen: Titel→Titel.",
     "ioHint": "JSON behält Schema und Zeilen. CSV sind nur Werte.",
@@ -404,7 +446,14 @@
     "imported": "Importiert",
     "importFail": "Import fehlgeschlagen",
     "jsonCsv": "JSON oder CSV importieren",
-    "saved": "Gespeichert"
+    "saved": "Gespeichert",
+    "proposal": {
+      "create": "möchte einen Eintrag hinzufügen",
+      "update": "möchte einen Eintrag ändern",
+      "delete": "möchte einen Eintrag löschen",
+      "check": "möchte einen Eintrag abhaken",
+      "uncheck": "möchte das Häkchen entfernen"
+    }
   },
   "charts": {
     "hint": "Jedes Diagramm wählt eigene Felder. Die Achse kann Datum, Status, Jahr oder ein anderes Feld sein.",
@@ -666,7 +715,9 @@
   },
   "calendar": {
     "prev": "Vorheriger Monat",
-    "next": "Nächster Monat"
+    "next": "Nächster Monat",
+    "today": "Heute",
+    "more": "+{n} weitere"
   },
   "shortcuts": {
     "title": "Tastenkürzel",
@@ -676,6 +727,98 @@
     "open": "Markierten öffnen",
     "selectAll": "Alle auswählen",
     "help": "Diese Hilfe",
-    "close": "Schließen"
+    "close": "Schließen",
+    "palette": "Befehlspalette"
+  },
+  "command": {
+    "title": "Springen zu…",
+    "placeholder": "Listen, Einträge, Aktionen…",
+    "actions": "Aktionen",
+    "lists": "Listen",
+    "items": "Einträge in dieser Liste",
+    "empty": "Nichts gefunden",
+    "newItem": "Neuer Eintrag",
+    "newList": "Neue Liste",
+    "home": "Start",
+    "settings": "Einstellungen",
+    "explore": "Entdecken",
+    "friends": "Personen"
+  },
+  "activity": {
+    "item_created": "hat einen Eintrag hinzugefügt",
+    "item_updated": "hat einen Eintrag bearbeitet",
+    "item_checked": "hat einen Eintrag abgehakt",
+    "item_unchecked": "hat das Häkchen entfernt",
+    "item_deleted": "hat einen Eintrag gelöscht",
+    "item_moved": "hat einen Eintrag verschoben",
+    "unknown": "hat die Liste aktualisiert",
+    "open": "Öffnen"
+  },
+  "flow": {
+    "tab": "Automationen",
+    "moves": "Verschieben-Buttons",
+    "movesHint": "Ein Button kopiert den Eintrag in eine andere deiner Listen.",
+    "automationsHint": "Beim Abhaken Datum setzen, Feld füllen oder Snapshot wiederherstellen.",
+    "automationsEx": "Einkauf: abhaken → „Gekauft am“ = heute.",
+    "onCheck": "Beim Abhaken",
+    "onUncheck": "Beim Zurücksetzen",
+    "named": "Benannte Regeln",
+    "addRule": "Regel hinzufügen",
+    "trigger": "Auslöser",
+    "addAction": "Aktion hinzufügen",
+    "setNow": "Datum jetzt setzen",
+    "setField": "Feld setzen",
+    "restore": "Snapshot wiederherstellen",
+    "valueNow": "Jetzt (Datum & Zeit)",
+    "valueToday": "Heute",
+    "targetList": "Zielliste",
+    "deleteSource": "Aus dieser Liste entfernen",
+    "mapFields": "Felder zuordnen",
+    "noLists": "Lege zuerst eine weitere Liste an",
+    "ruleName": "Neue Regel",
+    "checked": "Wenn ein Eintrag abgehakt wird",
+    "unchecked": "Wenn das Häkchen entfernt wird",
+    "save": "Automationen speichern",
+    "enabled": "Aktiv"
+  },
+  "board": {
+    "addInColumn": "Hier hinzufügen"
+  },
+  "share": {
+    "title": "Liste teilen",
+    "lead": "Wähle, was Personen mit dem Link tun dürfen, oder lade jemanden namentlich ein.",
+    "anyone": "Wer den Link hat",
+    "anyoneHint": "Eine Nur-Link-Liste erscheint nicht unter Entdecken. Eine öffentliche bleibt öffentlich und nutzt denselben Zugriff.",
+    "access": {
+      "off": "Kein offener Link",
+      "view": "Nur ansehen",
+      "propose": "Änderungen vorschlagen",
+      "edit": "Kann bearbeiten"
+    },
+    "accessHint": {
+      "off": "Nur Eingeladene oder Personen mit bestehendem Zugriff.",
+      "view": "Sie können die Liste öffnen, nicht ändern.",
+      "propose": "Sie können Änderungen vorschlagen. Du bestätigst sie.",
+      "edit": "Sie können Einträge wie ein Editor ändern."
+    },
+    "copyList": "Listenlink kopieren",
+    "copyOffHint": "Ohne offenen Zugriff gilt der Link nur für dich, Mitglieder und bereits Berechtigte.",
+    "invite": "Person einladen",
+    "findUser": "Nutzername oder Name",
+    "invited": "Einladung gesendet",
+    "copyInvite": "Einladungslink mit Rolle kopieren",
+    "pending": "Offene Einladungen",
+    "openLink": "Offener Einladungslink",
+    "joinMissing": "Einladung nicht gefunden",
+    "joinMissingText": "Der Link ist ungültig oder die Einladung wurde zurückgezogen.",
+    "joinKicker": "Du bist eingeladen",
+    "joinRole": {
+      "viewer": "Du kannst diese Liste ansehen.",
+      "proposer": "Du kannst Änderungen vorschlagen.",
+      "editor": "Du kannst diese Liste bearbeiten."
+    },
+    "joinClosed": "Diese Einladung ist nicht mehr aktiv.",
+    "joinLogin": "Anmelden, um beizutreten",
+    "linkAccess": "Was der Link erlaubt"
   }
 }

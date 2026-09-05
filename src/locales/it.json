@@ -59,7 +59,9 @@
     "example": "Esempio",
     "cancel": "Annulla",
     "pin": "Fissa",
-    "unpin": "Togli"
+    "unpin": "Togli",
+    "undo": "Annulla",
+    "today": "Oggi"
   },
   "nav": {
     "overview": "Home",
@@ -93,8 +95,12 @@
     "featInsightsText": "Completamento, medie, scaduti e date vicine — nella lista e in home.",
     "featEditor": "Editor campi più potente",
     "featEditorText": "Ordine, duplicati, valori predefiniti, unicità e suggerimenti per ogni campo.",
-    "featShare": "Condivisione com’era",
-    "featShareText": "Visibilità, proposte, amici, voti e trasferimenti restano — abbiamo solo aggiunto potenza."
+    "featShare": "Condividi con link",
+    "featShareText": "Il proprietario sceglie cosa permette il link: vedere, proporre modifiche o modificare. Le liste pubbliche restano in Esplora; quelle solo-link no.",
+    "featCommand": "Salta ovunque",
+    "featCommandText": "⌘K apre una palette comandi — liste, voci e azioni, come Linear o Notion.",
+    "featFlow": "Automazioni modificabili",
+    "featFlowText": "Spuntare imposta una data, riempie un campo o sposta la riga — senza UUID."
   },
   "auth": {
     "loginTitle": "Accedi",
@@ -133,7 +139,14 @@
     "events": "Attività",
     "pinned": "Fissate",
     "upcoming": "In arrivo",
-    "noUpcoming": "Nessuna data vicina"
+    "noUpcoming": "Nessuna data vicina",
+    "openNotes": "Posta",
+    "search": "Cerca le tue liste",
+    "noSearch": "Nessuna lista corrispondente",
+    "noSearchText": "Prova un altro nome o una descrizione.",
+    "friendRequests": "{n} richieste di amicizia",
+    "listInvites": "{n} inviti alle liste",
+    "shared": "Condivisa con me"
   },
   "lists": {
     "title": "Liste",
@@ -143,7 +156,10 @@
     "emptyText": "Crea i campi da zero o parti da un pacchetto.",
     "templates": "Apri i modelli",
     "find": "Cerca",
-    "pinned": "Fissate"
+    "pinned": "Fissate",
+    "noSearch": "Nessuna lista corrispondente",
+    "noSearchText": "Prova un altro titolo o una descrizione.",
+    "lead": "Le tue, quelle condivise con te e quelle che fissi."
   },
   "newList": {
     "title": "Nuova lista",
@@ -164,7 +180,9 @@
     "title": "Liste pubbliche",
     "lead": "Ciò che gli autori hanno scelto di condividere con tutti.",
     "empty": "Ancora niente — pubblica una delle tue.",
-    "author": "autore"
+    "author": "autore",
+    "find": "Titolo, descrizione o autore",
+    "noSearch": "Nessuna lista pubblica corrisponde"
   },
   "friends": {
     "title": "Persone",
@@ -181,7 +199,20 @@
     "friends": "Amici",
     "remove": "Rimuovi",
     "sent": "Richiesta inviata",
-    "listInvite": "lista"
+    "listInvite": "lista",
+    "inviteUnknown": "Invito a una lista",
+    "invitedBy": "da @{name}",
+    "outgoing": "Richieste inviate",
+    "pending": "In attesa",
+    "already": "Amici",
+    "emptyFriends": "Ancora nessun amico",
+    "emptyFriendsText": "Cerca un nome utente e invia una richiesta.",
+    "emptyRequests": "Nessuna richiesta in arrivo",
+    "emptyInvites": "Nessun invito alle liste",
+    "emptyOutgoing": "Nessuna richiesta inviata",
+    "emptySearch": "Digita almeno due caratteri",
+    "you": "Sei tu",
+    "noUsers": "Nessuno trovato"
   },
   "notes": {
     "title": "Attività",
@@ -199,7 +230,14 @@
     "saved": "Salvato",
     "publicLists": "Liste pubbliche",
     "noPublic": "Nessuna lista pubblica.",
-    "notFound": "Utente non trovato"
+    "notFound": "Utente non trovato",
+    "edit": "Modifica profilo",
+    "addFriend": "Aggiungi amico",
+    "pending": "Richiesta inviata",
+    "listsCount": "{n} liste pubbliche",
+    "viewPublic": "Vedi pagina pubblica",
+    "copyLink": "Copia link del profilo",
+    "lead": "Come ti vedono gli altri e la pagina pubblica che possono aprire."
   },
   "settings": {
     "title": "Impostazioni",
@@ -270,7 +308,10 @@
     "insights": "Riepilogo",
     "prev": "Indietro",
     "next": "Avanti",
-    "duplicatedItem": "Voce duplicata"
+    "duplicatedItem": "Voce duplicata",
+    "created": "Creato",
+    "updated": "Aggiornato",
+    "deleted": "Eliminato"
   },
   "itemNotes": {
     "add": "Aggiungi nota",
@@ -290,7 +331,8 @@
     "private": "Solo tu",
     "invite": "Solo invitati",
     "friends": "Amici",
-    "public": "Pubblica"
+    "public": "Pubblica",
+    "link": "Chi ha il link"
   },
   "editMode": {
     "owner": "Solo il proprietario",
@@ -395,8 +437,8 @@
     "addButton": "Aggiungi pulsante",
     "move": "Sposta",
     "saveFlows": "Salva spostamenti",
-    "shareHint": "Visibilità e diritto di modifica sono separati.",
-    "shareEx": "Pubblica + «tramite proposte»: tutti vedono, le modifiche aspettano il tuo ok.",
+    "shareHint": "Visibilità, accesso dal link e diritto di modifica sono impostazioni separate.",
+    "shareEx": "Con il link si può solo vedere; gli invitati possono modificare.",
     "flowHint": "Un pulsante copia la riga in un’altra tua lista e può rimuoverla da qui.",
     "flowEx": "Da vedere → Visti. Mappa i campi: titolo→titolo.",
     "ioHint": "JSON conserva schema e righe. CSV sono solo valori.",
@@ -404,7 +446,14 @@
     "imported": "Importato",
     "importFail": "Importazione non riuscita",
     "jsonCsv": "Importa JSON o CSV",
-    "saved": "Salvato"
+    "saved": "Salvato",
+    "proposal": {
+      "create": "vuole aggiungere una voce",
+      "update": "vuole modificare una voce",
+      "delete": "vuole eliminare una voce",
+      "check": "vuole spuntare una voce",
+      "uncheck": "vuole togliere lo spunto"
+    }
   },
   "charts": {
     "hint": "Ogni grafico sceglie i propri campi. L’asse può essere una data, uno stato, un anno o qualsiasi altro campo.",
@@ -666,7 +715,9 @@
   },
   "calendar": {
     "prev": "Mese precedente",
-    "next": "Mese successivo"
+    "next": "Mese successivo",
+    "today": "Oggi",
+    "more": "+{n} in più"
   },
   "shortcuts": {
     "title": "Scorciatoie da tastiera",
@@ -676,6 +727,98 @@
     "open": "Apri evidenziata",
     "selectAll": "Seleziona tutto",
     "help": "Questo aiuto",
-    "close": "Chiudi"
+    "close": "Chiudi",
+    "palette": "Palette comandi"
+  },
+  "command": {
+    "title": "Vai a…",
+    "placeholder": "Liste, voci, azioni…",
+    "actions": "Azioni",
+    "lists": "Liste",
+    "items": "Voci in questa lista",
+    "empty": "Nessun risultato",
+    "newItem": "Nuova voce",
+    "newList": "Nuova lista",
+    "home": "Home",
+    "settings": "Impostazioni",
+    "explore": "Esplora",
+    "friends": "Persone"
+  },
+  "activity": {
+    "item_created": "ha aggiunto una voce",
+    "item_updated": "ha modificato una voce",
+    "item_checked": "ha spuntato una voce",
+    "item_unchecked": "ha rimosso lo spunto",
+    "item_deleted": "ha eliminato una voce",
+    "item_moved": "ha spostato una voce",
+    "unknown": "ha aggiornato la lista",
+    "open": "Apri"
+  },
+  "flow": {
+    "tab": "Automazioni",
+    "moves": "Pulsanti di spostamento",
+    "movesHint": "Un pulsante copia la voce in un’altra tua lista.",
+    "automationsHint": "Alla spunta, imposta una data, un campo o ripristina lo snapshot.",
+    "automationsEx": "Spesa: spunta → «Comprato il» = oggi.",
+    "onCheck": "Alla spunta",
+    "onUncheck": "Alla rimozione",
+    "named": "Regole con nome",
+    "addRule": "Aggiungi regola",
+    "trigger": "Trigger",
+    "addAction": "Aggiungi azione",
+    "setNow": "Imposta data adesso",
+    "setField": "Imposta campo",
+    "restore": "Ripristina snapshot",
+    "valueNow": "Ora (data e ora)",
+    "valueToday": "Oggi",
+    "targetList": "Lista di destinazione",
+    "deleteSource": "Rimuovi da questa lista",
+    "mapFields": "Mappa i campi",
+    "noLists": "Crea prima un’altra lista",
+    "ruleName": "Nuova regola",
+    "checked": "Quando una voce viene spuntata",
+    "unchecked": "Quando lo spunto viene rimosso",
+    "save": "Salva automazioni",
+    "enabled": "Attiva"
+  },
+  "board": {
+    "addInColumn": "Aggiungi qui"
+  },
+  "share": {
+    "title": "Condividi lista",
+    "lead": "Scegli cosa possono fare le persone con il link, oppure invita qualcuno per nome.",
+    "anyone": "Chi ha il link",
+    "anyoneHint": "Una lista solo con link non compare in Esplora. Una pubblica resta pubblica e usa lo stesso accesso.",
+    "access": {
+      "off": "Nessun link aperto",
+      "view": "Solo visualizzazione",
+      "propose": "Proporre modifiche",
+      "edit": "Può modificare"
+    },
+    "accessHint": {
+      "off": "Solo le persone che inviti o che hanno già accesso.",
+      "view": "Possono aprire la lista, non modificarla.",
+      "propose": "Possono suggerire modifiche. Tu le approvi.",
+      "edit": "Possono cambiare le voci come un editor."
+    },
+    "copyList": "Copia link della lista",
+    "copyOffHint": "Senza accesso aperto il link funziona solo per te, i membri e chi è già autorizzato.",
+    "invite": "Invita una persona",
+    "findUser": "Nome utente o nome",
+    "invited": "Invito inviato",
+    "copyInvite": "Copia invito con un ruolo",
+    "pending": "Inviti in attesa",
+    "openLink": "Link di invito aperto",
+    "joinMissing": "Invito non trovato",
+    "joinMissingText": "Il link non è valido o l’invito è stato ritirato.",
+    "joinKicker": "Sei stato invitato",
+    "joinRole": {
+      "viewer": "Potrai vedere questa lista.",
+      "proposer": "Potrai proporre modifiche.",
+      "editor": "Potrai modificare questa lista."
+    },
+    "joinClosed": "Questo invito non è più attivo.",
+    "joinLogin": "Accedi per unirti",
+    "linkAccess": "Cosa permette il link"
   }
 }

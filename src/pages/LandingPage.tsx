@@ -1,10 +1,21 @@
 import { Link } from 'react-router-dom'
+import { BarChart3, CalendarDays, Command, Filter, Link2, Rows3, Workflow } from 'lucide-react'
 import hero from '../hero.png'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import LanguageSwitch from '../components/ui/LanguageSwitch'
 import ColorPalettePicker from '../components/ui/ColorPalettePicker'
 import ThemeSwitch from '../components/ui/ThemeSwitch'
+
+const FEATURES = [
+  ['featFilters', 'featFiltersText', Filter],
+  ['featViews', 'featViewsText', CalendarDays],
+  ['featBulk', 'featBulkText', Rows3],
+  ['featInsights', 'featInsightsText', BarChart3],
+  ['featShare', 'featShareText', Link2],
+  ['featCommand', 'featCommandText', Command],
+  ['featFlow', 'featFlowText', Workflow],
+] as const
 
 export default function LandingPage() {
   const { user } = useAuth()
@@ -18,15 +29,21 @@ export default function LandingPage() {
           <ThemeSwitch />
           <ColorPalettePicker compact />
           {user ? (
-            <Link to="/dashboard" className="rounded-xl bg-ink px-4 py-2 text-sm text-paper">
+            <Link
+              to="/dashboard"
+              className="rounded-xl bg-ink px-4 py-2 text-sm text-paper transition-opacity hover:opacity-90"
+            >
               {t('nav.toLists')}
             </Link>
           ) : (
             <>
-              <Link to="/login" className="rounded-xl px-4 py-2 text-sm hover:bg-ink/5">
+              <Link to="/login" className="rounded-xl px-4 py-2 text-sm transition-colors hover:bg-ink/5">
                 {t('nav.login')}
               </Link>
-              <Link to="/register" className="rounded-xl bg-ink px-4 py-2 text-sm text-paper">
+              <Link
+                to="/register"
+                className="rounded-xl bg-ink px-4 py-2 text-sm text-paper transition-opacity hover:opacity-90"
+              >
                 {t('landing.register')}
               </Link>
             </>
@@ -39,10 +56,16 @@ export default function LandingPage() {
           <h1 className="mt-3 font-serif text-4xl leading-tight sm:text-5xl">{t('landing.title')}</h1>
           <p className="mt-4 max-w-md text-muted">{t('landing.text')}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/register" className="rounded-2xl bg-accent px-5 py-3 text-sm font-medium text-on-accent">
+            <Link
+              to="/register"
+              className="rounded-2xl bg-accent px-5 py-3 text-sm font-medium text-on-accent transition-colors hover:bg-accent-hover"
+            >
               {t('landing.start')}
             </Link>
-            <Link to="/explore" className="rounded-2xl bg-paper px-5 py-3 text-sm ring-1 ring-line">
+            <Link
+              to="/explore"
+              className="rounded-2xl bg-paper px-5 py-3 text-sm ring-1 ring-line transition-colors hover:bg-ink/5 hover:ring-accent"
+            >
               {t('landing.public')}
             </Link>
           </div>
@@ -52,18 +75,13 @@ export default function LandingPage() {
       <section className="mx-auto max-w-5xl px-4 pb-16">
         <h2 className="font-serif text-2xl">{t('landing.featTitle')}</h2>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {(
-            [
-              ['featFilters', 'featFiltersText'],
-              ['featViews', 'featViewsText'],
-              ['featBulk', 'featBulkText'],
-              ['featInsights', 'featInsightsText'],
-              ['featEditor', 'featEditorText'],
-              ['featShare', 'featShareText'],
-            ] as const
-          ).map(([title, text]) => (
-            <article key={title} className="rounded-2xl border border-line bg-paper p-4 shadow-lift">
-              <h3 className="font-medium">{t(`landing.${title}`)}</h3>
+          {FEATURES.map(([title, text, Icon]) => (
+            <article
+              key={title}
+              className="rounded-2xl border border-line bg-paper p-4 shadow-lift transition-colors hover:border-accent"
+            >
+              <Icon size={18} className="text-accent" />
+              <h3 className="mt-3 font-medium">{t(`landing.${title}`)}</h3>
               <p className="mt-1 text-sm text-muted">{t(`landing.${text}`)}</p>
             </article>
           ))}

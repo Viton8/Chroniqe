@@ -1,16 +1,23 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import { fetchPublicLists } from '../services/api'
 import type { ListRow } from '../types/domain'
-import { Spinner } from '../components/ui/EmptyState'
-import { Input } from '../components/ui/Input'
+import EmptyState, { Spinner } from '../components/ui/EmptyState'
+import { SearchField } from '../components/ui/Input'
+import PageHeader from '../components/ui/PageHeader'
+import ListCard from '../components/lists/ListCard'
+import { matchesQuery } from '../lib/search'
+import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
 export default function ExplorePage() {
   const { t } = usePrefs()
+  const { user } = useAuth()
   const [rows, setRows] = useState<ListRow[]>([])
   const [q, setQ] = useState('')
   const [loading, setLoading] = useState(true)
+  const debounced = useDebouncedValue(q)
 
   useEffect(() => {
     void fetchPublicLists()
@@ -18,35 +25,53 @@ export default function ExplorePage() {
       .finally(() => setLoading(false))
   }, [])
 
+  const filtered = useMemo(
+    () =>
+      rows.filter((l) =>
+        matchesQuery(debounced, l.title, l.description, l.icon, l.owner?.username, l.owner?.display_name),
+      ),
+    [rows, debounced],
+  )
+
   if (loading) return <Spinner />
-  const filtered = rows.filter((l) => l.title.toLowerCase().includes(q.toLowerCase()))
 
   return (
     <div>
-      <h1 className="font-serif text-3xl">{t('explore.title')}</h1>
-      <p className="mt-1 text-sm text-muted">{t('explore.lead')}</p>
-      <Input className="mt-4 max-w-sm" placeholder={t('common.search')} value={q} onChange={(e) => setQ(e.target.value)} />
-      <ul className="mt-4 grid gap-3 sm:grid-cols-2">
-        {filtered.map((l) => (
-          <li key={l.id}>
-            <Link to={`/lists/${l.id}`} className="block rounded-2xl border border-line bg-paper p-4 shadow-lift">
-              <p>
-                {l.icon} {l.title}
-              </p>
-              <p className="text-xs text-muted">
-                {l.owner?.username ? (
-                  <Link to={`/u/${l.owner.username}`} className="hover:underline">
-                    @{l.owner.username}
+      <PageHeader title={t('explore.title')} lead={t('explore.lead')} />
+      <SearchField
+        className="mt-4"
+        placeholder={t('explore.find')}
+        value={q}
+        onChange={(e) => setQ(e.target.value)}
+      />
+      {filtered.length ? (
+        <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+          {filtered.map((l) => (
+            <ListCard
+              key={l.id}
+              list={l}
+              favorite={Boolean(user)}
+              aside={
+                l.owner?.username ? (
+                  <Link to={`/u/${l.owner.username}`} className="text-accent hover:underline">
+                    {l.owner.display_name || `@${l.owner.username}`}
                   </Link>
                 ) : (
                   `@${t('explore.author')}`
-                )}
-              </p>
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {!filtered.length ? <p className="mt-6 text-sm text-muted">{t('explore.empty')}</p> : null}
+                )
+              }
+            />
+          ))}
+        </ul>
+      ) : (
+        <div className="mt-6">
+          <EmptyState
+            icon="🧭"
+            title={debounced ? t('explore.noSearch') : t('explore.empty')}
+            text={debounced ? t('lists.noSearchText') : undefined}
+          />
+        </div>
+      )}
     </div>
   )
 }

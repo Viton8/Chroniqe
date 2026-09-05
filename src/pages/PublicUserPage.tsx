@@ -1,17 +1,31 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
-import { fetchProfileByUsername, fetchPublicListsByOwner } from '../services/api'
-import type { ListRow, Profile } from '../types/domain'
+import { useToast } from '../context/ToastContext'
+import { fetchFriendships, fetchProfileByUsername, fetchPublicListsByOwner, respondFriend, sendFriendRequest } from '../services/api'
+import type { Friendship, ListRow, Profile } from '../types/domain'
 import Avatar from '../components/ui/Avatar'
+import Button from '../components/ui/Button'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
+import ListCard from '../components/lists/ListCard'
+import { friendRelation } from '../lib/friends'
+import { appUrl } from '../lib/share'
 
 export default function PublicUserPage() {
   const { username } = useParams()
+  const { user } = useAuth()
   const { t } = usePrefs()
+  const { toast } = useToast()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [lists, setLists] = useState<ListRow[]>([])
+  const [friends, setFriends] = useState<Friendship[]>([])
   const [loading, setLoading] = useState(true)
+
+  const reloadFriends = async () => {
+    if (!user) return
+    setFriends(await fetchFriendships(user.id))
+  }
 
   useEffect(() => {
     if (!username) return
@@ -21,43 +35,98 @@ export default function PublicUserPage() {
       if (cancelled) return
       setProfile(row)
       if (row) setLists(await fetchPublicListsByOwner(row.id))
+      if (user) setFriends(await fetchFriendships(user.id).catch(() => []))
     })().finally(() => {
       if (!cancelled) setLoading(false)
     })
     return () => {
       cancelled = true
     }
-  }, [username])
+  }, [username, user])
 
   if (loading) return <Spinner />
   if (!profile) {
-    return <EmptyState icon="?" title={t('profile.notFound')} text="" />
+    return <EmptyState icon="?" title={t('profile.notFound')} />
   }
+
+  const mine = user?.id === profile.id
+  const relation = user ? friendRelation(user.id, profile.id, friends) : 'none'
+  const incoming = friends.find((row) => row.status === 'pending' && row.requester_id === profile.id)
 
   return (
     <div>
-      <div className="flex items-center gap-4">
-        <Avatar name={profile.display_name || profile.username} url={profile.avatar_url} size={64} />
-        <div>
-          <h1 className="font-serif text-3xl">{profile.display_name || profile.username}</h1>
-          <p className="text-sm text-muted">@{profile.username}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-line bg-paper p-5 shadow-lift">
+        <div className="flex items-center gap-4">
+          <Avatar name={profile.display_name || profile.username} url={profile.avatar_url} size={64} />
+          <div>
+            <h1 className="font-serif text-3xl">{profile.display_name || profile.username}</h1>
+            <p className="text-sm text-muted">@{profile.username}</p>
+            <p className="mt-1 text-xs text-muted">{t('profile.listsCount', { n: lists.length })}</p>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {mine ? (
+            <>
+              <Link to="/profile">
+                <Button size="sm" variant="soft">
+                  {t('profile.edit')}
+                </Button>
+              </Link>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => {
+                  void navigator.clipboard.writeText(appUrl(`u/${profile.username}`)).then(() => toast(t('common.copied')))
+                }}
+              >
+                {t('profile.copyLink')}
+              </Button>
+            </>
+          ) : user ? (
+            relation === 'friends' ? (
+              <span className="rounded-full bg-ink/5 px-3 py-1 text-sm text-muted">{t('friends.already')}</span>
+            ) : relation === 'outgoing' ? (
+              <span className="rounded-full bg-ink/5 px-3 py-1 text-sm text-muted">{t('profile.pending')}</span>
+            ) : relation === 'incoming' && incoming ? (
+              <Button size="sm" onClick={() => void respondFriend(incoming.id, true).then(reloadFriends)}>
+                {t('friends.accept')}
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                onClick={async () => {
+                  try {
+                    await sendFriendRequest(user.id, profile.id)
+                    toast(t('friends.sent'))
+                    await reloadFriends()
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : t('common.error'), 'err')
+                  }
+                }}
+              >
+                {t('profile.addFriend')}
+              </Button>
+            )
+          ) : (
+            <Link to="/login" state={{ from: `/u/${profile.username}` }}>
+              <Button size="sm">{t('profile.addFriend')}</Button>
+            </Link>
+          )}
         </div>
       </div>
       {profile.bio ? <p className="mt-4 max-w-xl text-sm text-muted">{profile.bio}</p> : null}
       <h2 className="mt-8 font-serif text-2xl">{t('profile.publicLists')}</h2>
-      <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-        {lists.map((l) => (
-          <li key={l.id}>
-            <Link to={`/lists/${l.id}`} className="block rounded-2xl border border-line bg-paper p-4 shadow-lift">
-              <p>
-                {l.icon} {l.title}
-              </p>
-              {l.description ? <p className="mt-1 text-xs text-muted">{l.description}</p> : null}
-            </Link>
-          </li>
-        ))}
-      </ul>
-      {!lists.length ? <p className="mt-4 text-sm text-muted">{t('profile.noPublic')}</p> : null}
+      {lists.length ? (
+        <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+          {lists.map((l) => (
+            <ListCard key={l.id} list={l} favorite={Boolean(user)} />
+          ))}
+        </ul>
+      ) : (
+        <div className="mt-4">
+          <EmptyState compact icon="📋" title={t('profile.noPublic')} />
+        </div>
+      )}
     </div>
   )
 }

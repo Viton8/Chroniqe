@@ -59,7 +59,9 @@
     "example": "示例",
     "cancel": "取消",
     "pin": "置顶",
-    "unpin": "取消置顶"
+    "unpin": "取消置顶",
+    "undo": "撤销",
+    "today": "今天"
   },
   "nav": {
     "overview": "首页",
@@ -93,8 +95,12 @@
     "featInsightsText": "完成度、平均分、逾期与即将到来的日期——在列表和首页都能看到。",
     "featEditor": "更强的字段编辑器",
     "featEditorText": "排序、复制、默认值、唯一性，以及每个字段的提示。",
-    "featShare": "原有分享能力保留",
-    "featShareText": "可见性、提议、好友、评分和转移都还在——我们只是增加了能力。"
+    "featShare": "用链接分享",
+    "featShareText": "所有者决定链接能做什么：仅查看、提议修改或直接编辑。公开列表仍出现在探索页，仅链接的不会。",
+    "featCommand": "随处跳转",
+    "featCommandText": "⌘K 打开命令面板——列表、条目和操作，类似 Linear 或 Notion。",
+    "featFlow": "可编辑的自动化",
+    "featFlowText": "勾选即可写入日期、填写字段或移动一行，不用粘贴 UUID。"
   },
   "auth": {
     "loginTitle": "登录",
@@ -133,7 +139,14 @@
     "events": "动态",
     "pinned": "置顶",
     "upcoming": "即将到来",
-    "noUpcoming": "暂无近期日期"
+    "noUpcoming": "暂无近期日期",
+    "openNotes": "收件箱",
+    "search": "搜索你的列表",
+    "noSearch": "没有匹配的列表",
+    "noSearchText": "换个名称或描述试试。",
+    "friendRequests": "{n} 条好友请求",
+    "listInvites": "{n} 条列表邀请",
+    "shared": "与我共享"
   },
   "lists": {
     "title": "列表",
@@ -143,7 +156,10 @@
     "emptyText": "从零搭建字段，或从套装开始。",
     "templates": "打开模板",
     "find": "查找",
-    "pinned": "置顶"
+    "pinned": "置顶",
+    "noSearch": "没有匹配的列表",
+    "noSearchText": "换个标题或描述试试。",
+    "lead": "你的、与你共享的，以及你固定的列表。"
   },
   "newList": {
     "title": "新建列表",
@@ -164,7 +180,9 @@
     "title": "公开列表",
     "lead": "作者选择向所有人公开的内容。",
     "empty": "这里还是空的——发布你的一个列表吧。",
-    "author": "作者"
+    "author": "作者",
+    "find": "搜索标题、描述或作者",
+    "noSearch": "没有匹配的公开列表"
   },
   "friends": {
     "title": "好友",
@@ -181,7 +199,20 @@
     "friends": "好友",
     "remove": "移除",
     "sent": "请求已发送",
-    "listInvite": "列表"
+    "listInvite": "列表",
+    "inviteUnknown": "列表邀请",
+    "invitedBy": "来自 @{name}",
+    "outgoing": "已发送的请求",
+    "pending": "待处理",
+    "already": "已是好友",
+    "emptyFriends": "还没有好友",
+    "emptyFriendsText": "按用户名查找并发送请求。",
+    "emptyRequests": "没有收到的请求",
+    "emptyInvites": "没有列表邀请",
+    "emptyOutgoing": "没有已发送的请求",
+    "emptySearch": "至少输入两个字符",
+    "you": "这是你",
+    "noUsers": "没有找到用户"
   },
   "notes": {
     "title": "动态",
@@ -199,7 +230,14 @@
     "saved": "已保存",
     "publicLists": "公开列表",
     "noPublic": "没有公开列表。",
-    "notFound": "找不到用户"
+    "notFound": "找不到用户",
+    "edit": "编辑资料",
+    "addFriend": "加为好友",
+    "pending": "请求已发送",
+    "listsCount": "{n} 个公开列表",
+    "viewPublic": "查看公开主页",
+    "copyLink": "复制资料链接",
+    "lead": "别人看到的你，以及他们可以打开的公开主页。"
   },
   "settings": {
     "title": "设置",
@@ -270,7 +308,10 @@
     "insights": "概览",
     "prev": "上一条",
     "next": "下一条",
-    "duplicatedItem": "已复制条目"
+    "duplicatedItem": "已复制条目",
+    "created": "创建于",
+    "updated": "更新于",
+    "deleted": "已删除"
   },
   "itemNotes": {
     "add": "添加备注",
@@ -290,7 +331,8 @@
     "private": "仅自己",
     "invite": "仅邀请",
     "friends": "好友",
-    "public": "公开"
+    "public": "公开",
+    "link": "持有链接的人"
   },
   "editMode": {
     "owner": "仅所有者",
@@ -395,8 +437,8 @@
     "addButton": "添加按钮",
     "move": "转移",
     "saveFlows": "保存转移",
-    "shareHint": "可见性与编辑权是分开的。",
-    "shareEx": "公开 +「通过提议」：所有人能看，修改等你批准。",
+    "shareHint": "可见性、链接权限和编辑权是分开的。",
+    "shareEx": "持有链接的人只能查看，你邀请的人可以编辑。",
     "flowHint": "按钮把这一行复制到你的另一个列表，也可以从这里移除。",
     "flowEx": "待看 → 已看。映射字段：标题→标题。",
     "ioHint": "JSON 保留结构和行。CSV 只有值。",
@@ -404,7 +446,14 @@
     "imported": "已导入",
     "importFail": "导入失败",
     "jsonCsv": "导入 JSON 或 CSV",
-    "saved": "已保存"
+    "saved": "已保存",
+    "proposal": {
+      "create": "想添加一条记录",
+      "update": "想编辑一条记录",
+      "delete": "想删除一条记录",
+      "check": "想勾选一条记录",
+      "uncheck": "想取消勾选"
+    }
   },
   "charts": {
     "hint": "每张图表选择自己的字段。坐标轴可以是日期、状态、年份或任何其他字段。",
@@ -666,7 +715,9 @@
   },
   "calendar": {
     "prev": "上个月",
-    "next": "下个月"
+    "next": "下个月",
+    "today": "今天",
+    "more": "还有 {n} 项"
   },
   "shortcuts": {
     "title": "键盘快捷键",
@@ -676,6 +727,98 @@
     "open": "打开高亮项",
     "selectAll": "全选",
     "help": "本帮助",
-    "close": "关闭"
+    "close": "关闭",
+    "palette": "命令面板"
+  },
+  "command": {
+    "title": "跳转到…",
+    "placeholder": "搜索列表、条目、操作…",
+    "actions": "操作",
+    "lists": "列表",
+    "items": "当前列表中的条目",
+    "empty": "没有匹配项",
+    "newItem": "新条目",
+    "newList": "新列表",
+    "home": "首页",
+    "settings": "设置",
+    "explore": "发现",
+    "friends": "好友"
+  },
+  "activity": {
+    "item_created": "添加了一条记录",
+    "item_updated": "编辑了一条记录",
+    "item_checked": "勾选了一条记录",
+    "item_unchecked": "取消勾选了一条记录",
+    "item_deleted": "删除了一条记录",
+    "item_moved": "移动了一条记录",
+    "unknown": "更新了列表",
+    "open": "打开"
+  },
+  "flow": {
+    "tab": "自动化",
+    "moves": "移动按钮",
+    "movesHint": "条目上的按钮会把它复制到你的另一个列表。",
+    "automationsHint": "勾选时写入日期、填写字段，或恢复快照。",
+    "automationsEx": "购物清单：勾选 → 「购买日期」= 今天。",
+    "onCheck": "勾选时",
+    "onUncheck": "取消勾选时",
+    "named": "命名规则",
+    "addRule": "添加规则",
+    "trigger": "触发条件",
+    "addAction": "添加动作",
+    "setNow": "将日期设为现在",
+    "setField": "设置字段",
+    "restore": "恢复快照",
+    "valueNow": "现在（日期和时间）",
+    "valueToday": "今天",
+    "targetList": "目标列表",
+    "deleteSource": "从当前列表移除",
+    "mapFields": "映射字段",
+    "noLists": "请先再创建一个列表",
+    "ruleName": "新规则",
+    "checked": "当条目被勾选",
+    "unchecked": "当取消勾选",
+    "save": "保存自动化",
+    "enabled": "已启用"
+  },
+  "board": {
+    "addInColumn": "添加到此列"
+  },
+  "share": {
+    "title": "分享列表",
+    "lead": "选择持有链接的人可以做什么，或按名字邀请某人。",
+    "anyone": "持有链接的人",
+    "anyoneHint": "仅链接的列表不会出现在探索页。公开列表仍公开，并使用此权限。",
+    "access": {
+      "off": "不开放链接",
+      "view": "仅查看",
+      "propose": "提议更改",
+      "edit": "可以编辑"
+    },
+    "accessHint": {
+      "off": "只有你邀请的人或已有权限的人。",
+      "view": "可以打开列表，但不能更改。",
+      "propose": "可以建议修改，由你批准。",
+      "edit": "可以像编辑者一样更改条目。"
+    },
+    "copyList": "复制列表链接",
+    "copyOffHint": "未开放访问时，链接只对你、成员和已获准的人生效。",
+    "invite": "邀请某人",
+    "findUser": "用户名或姓名",
+    "invited": "邀请已发送",
+    "copyInvite": "复制带角色的邀请链接",
+    "pending": "待处理邀请",
+    "openLink": "开放邀请链接",
+    "joinMissing": "找不到邀请",
+    "joinMissingText": "链接无效或邀请已被撤回。",
+    "joinKicker": "你被邀请了",
+    "joinRole": {
+      "viewer": "你可以查看此列表。",
+      "proposer": "你可以提议更改。",
+      "editor": "你可以编辑此列表。"
+    },
+    "joinClosed": "此邀请已失效。",
+    "joinLogin": "登录后加入",
+    "linkAccess": "链接允许做什么"
   }
 }

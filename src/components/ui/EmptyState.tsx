@@ -1,25 +1,33 @@
 import type { ReactNode } from 'react'
 import Button from './Button'
 import { usePrefs } from '../../context/PrefsContext'
+import { cn } from '../../lib/cn'
 
 export default function EmptyState({
   icon,
   title,
   text,
   action,
+  compact,
 }: {
-  icon: ReactNode
+  icon?: ReactNode
   title: string
-  text: string
+  text?: string
   action?: { label: string; onClick: () => void }
+  compact?: boolean
 }) {
   return (
-    <div className="flex flex-col items-center rounded-3xl border border-dashed border-line bg-paper/60 px-6 py-12 text-center">
-      <div className="mb-3 text-3xl">{icon}</div>
-      <h2 className="font-serif text-2xl">{title}</h2>
-      {text ? <p className="mt-2 max-w-md text-sm text-muted">{text}</p> : null}
+    <div
+      className={cn(
+        'flex flex-col items-center border border-dashed border-line bg-paper/60 text-center',
+        compact ? 'rounded-2xl px-4 py-6' : 'rounded-3xl px-6 py-12',
+      )}
+    >
+      {icon ? <div className={compact ? 'mb-1.5 text-xl' : 'mb-3 text-3xl'}>{icon}</div> : null}
+      <h2 className={compact ? 'text-sm font-medium text-muted' : 'font-serif text-2xl'}>{title}</h2>
+      {text ? <p className={cn('max-w-md text-sm text-muted', compact ? 'mt-1' : 'mt-2')}>{text}</p> : null}
       {action ? (
-        <Button className="mt-5" onClick={action.onClick}>
+        <Button className={compact ? 'mt-3' : 'mt-5'} size={compact ? 'sm' : 'md'} onClick={action.onClick}>
           {action.label}
         </Button>
       ) : null}

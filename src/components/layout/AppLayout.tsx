@@ -66,7 +66,9 @@ export default function AppLayout() {
               key={to}
               to={to}
               onClick={() => setMenu(false)}
-              className="block rounded-xl px-3 py-2 text-sm hover:bg-ink/5"
+              className={({ isActive }) =>
+                `block rounded-xl px-3 py-2 text-sm ${isActive ? 'bg-accent-soft font-medium text-accent' : 'hover:bg-ink/5'}`
+              }
             >
               {label}
             </NavLink>

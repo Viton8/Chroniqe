@@ -4,10 +4,12 @@ import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import { useToast } from '../context/ToastContext'
 import { updateProfile, uploadAvatar } from '../services/api'
+import { appUrl } from '../lib/share'
 import type { Profile } from '../types/domain'
 import Avatar from '../components/ui/Avatar'
 import Button from '../components/ui/Button'
 import { FieldWrap, Input, Textarea } from '../components/ui/Input'
+import PageHeader from '../components/ui/PageHeader'
 
 export default function ProfilePage() {
   const { profile, user, refreshProfile, signOut } = useAuth()
@@ -42,29 +44,51 @@ function ProfileForm({
 
   return (
     <div className="max-w-lg">
-      <h1 className="font-serif text-3xl">{t('profile.title')}</h1>
-      <div className="mt-6 flex items-center gap-4">
-        <Avatar name={displayName || username} url={profile.avatar_url} size={64} />
-        <label className="text-sm text-accent">
-          {t('profile.photo')}
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
-            className="hidden"
-            onChange={async (e) => {
-              const file = e.target.files?.[0]
-              e.target.value = ''
-              if (!file) return
-              try {
-                const url = await uploadAvatar(userId, file)
-                await updateProfile(userId, { avatar_url: url })
-                await onSaved()
-              } catch (err) {
-                toast(err instanceof Error ? err.message : t('fields.uploadFail'), 'err')
-              }
+      <PageHeader title={t('profile.title')} lead={t('profile.lead')} />
+      <div className="mt-6 rounded-2xl border border-line bg-paper p-4 shadow-lift">
+        <div className="flex items-center gap-4">
+          <Avatar name={displayName || username} url={profile.avatar_url} size={64} />
+          <div className="min-w-0">
+            <p className="font-medium">{displayName || username}</p>
+            <p className="text-sm text-muted">@{username}</p>
+            <label className="mt-2 inline-block cursor-pointer text-sm text-accent hover:underline">
+              {t('profile.photo')}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0]
+                  e.target.value = ''
+                  if (!file) return
+                  try {
+                    const url = await uploadAvatar(userId, file)
+                    await updateProfile(userId, { avatar_url: url })
+                    await onSaved()
+                  } catch (err) {
+                    toast(err instanceof Error ? err.message : t('fields.uploadFail'), 'err')
+                  }
+                }}
+              />
+            </label>
+          </div>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Link to={`/u/${username}`}>
+            <Button size="sm" variant="soft">
+              {t('profile.viewPublic')}
+            </Button>
+          </Link>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => {
+              void navigator.clipboard.writeText(appUrl(`u/${username}`)).then(() => toast(t('common.copied')))
             }}
-          />
-        </label>
+          >
+            {t('profile.copyLink')}
+          </Button>
+        </div>
       </div>
       <form
         className="mt-6 space-y-3"
@@ -94,11 +118,6 @@ function ProfileForm({
         </FieldWrap>
         <Button>{t('common.save')}</Button>
       </form>
-      <p className="mt-4 text-sm">
-        <Link className="text-accent underline" to={`/u/${username}`}>
-          {t('profile.publicLists')}
-        </Link>
-      </p>
       <Button className="mt-8" variant="ghost" onClick={onSignOut}>
         {t('profile.logout')}
       </Button>

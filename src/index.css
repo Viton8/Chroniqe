@@ -207,6 +207,12 @@ select {
   @apply outline-none;
 }
 
+input:focus,
+textarea:focus,
+select:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-accent) 20%, transparent);
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;

@@ -7,6 +7,7 @@ import { fetchNotifications, markNotificationsRead } from '../../services/api'
 import type { AppNotification } from '../../types/domain'
 import { formatDateTime } from '../../lib/cn'
 import Button from '../ui/Button'
+import EmptyState from '../ui/EmptyState'
 
 const PREVIEW = 8
 
@@ -19,7 +20,7 @@ export function NotificationsFeed({
 }) {
   const { t } = usePrefs()
   if (!rows.length) {
-    return <p className="text-sm text-muted">{t('notes.empty')}</p>
+    return <EmptyState compact title={t('notes.empty')} />
   }
   return (
     <ul className="space-y-2">

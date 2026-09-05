@@ -1,6 +1,7 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import { Bell, Compass, LayoutGrid, List, Search, Shield, UserRound } from 'lucide-react'
 import { useAuth } from '../../context/AuthContext'
+import { useCommand } from '../../context/CommandContext'
 import { usePrefs } from '../../context/PrefsContext'
 import Avatar from '../ui/Avatar'
 import LanguageSwitch from '../ui/LanguageSwitch'
@@ -21,30 +22,39 @@ export default function Navbar({
 }) {
   const { profile, user } = useAuth()
   const { t } = usePrefs()
-  const navigate = useNavigate()
+  const { setOpen: setPaletteOpen } = useCommand()
 
   return (
     <header className="sticky top-0 z-40 border-b border-line/80 bg-paper/85 backdrop-blur">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 px-4">
         <button
           type="button"
-          className="rounded-lg p-2 text-ink md:hidden"
+          className="rounded-lg p-2 text-ink hover:bg-ink/5 md:hidden"
           onClick={onMenu}
           aria-label={t('nav.menu')}
         >
           <LayoutGrid size={18} />
         </button>
-        <NavLink to={user ? '/dashboard' : '/'} className="font-serif text-xl tracking-tight">
+        <NavLink to={user ? '/dashboard' : '/'} className="font-serif text-xl tracking-tight hover:text-accent">
           Chroniqe
         </NavLink>
         <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
-            className="hidden rounded-xl px-3 py-1.5 text-sm text-muted hover:bg-ink/5 sm:inline-flex"
-            onClick={() => navigate('/lists')}
+            className="rounded-xl p-2 text-ink hover:bg-ink/5 sm:hidden"
+            aria-label={t('command.title')}
+            onClick={() => setPaletteOpen(true)}
+          >
+            <Search size={18} />
+          </button>
+          <button
+            type="button"
+            className="hidden items-center rounded-xl px-3 py-1.5 text-sm text-muted hover:bg-ink/5 sm:inline-flex"
+            onClick={() => setPaletteOpen(true)}
           >
             <Search size={16} className="mr-2" />
-            {t('nav.lists')}
+            {t('command.placeholder')}
+            <kbd className="ml-2 rounded-md bg-ink/5 px-1.5 py-0.5 font-mono text-[10px]">⌘K</kbd>
           </button>
           <LanguageSwitch compact />
           <ThemeSwitch compact />
@@ -64,12 +74,18 @@ export default function Navbar({
                   <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-accent" />
                 ) : null}
               </button>
-              <NavLink to="/profile" className="rounded-full p-0.5">
+              <NavLink
+                to="/profile"
+                className="rounded-full p-0.5 transition hover:ring-2 hover:ring-accent/30"
+              >
                 <Avatar name={profile?.display_name || profile?.username || 'U'} url={profile?.avatar_url} />
               </NavLink>
             </>
           ) : (
-            <NavLink to="/login" className="rounded-xl bg-ink px-3 py-1.5 text-sm text-paper">
+            <NavLink
+              to="/login"
+              className="rounded-xl bg-ink px-3 py-1.5 text-sm text-paper transition-opacity hover:opacity-90"
+            >
               {t('nav.login')}
             </NavLink>
           )}
@@ -137,7 +153,7 @@ export function BottomNav({
             to={item.to}
             className={({ isActive }) =>
               cn(
-                'relative flex flex-col items-center gap-0.5 py-2 text-[11px]',
+                'relative flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors hover:bg-ink/5',
                 isActive ? 'text-accent' : 'text-muted',
               )
             }
@@ -149,7 +165,7 @@ export function BottomNav({
         <button
           type="button"
           className={cn(
-            'relative flex flex-col items-center gap-0.5 py-2 text-[11px]',
+            'relative flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors hover:bg-ink/5',
             notesOpen ? 'text-accent' : 'text-muted',
           )}
           aria-label={t('nav.notifications')}
@@ -167,7 +183,7 @@ export function BottomNav({
             to={item.to}
             className={({ isActive }) =>
               cn(
-                'relative flex flex-col items-center gap-0.5 py-2 text-[11px]',
+                'relative flex flex-col items-center gap-0.5 py-2 text-[11px] transition-colors hover:bg-ink/5',
                 isActive ? 'text-accent' : 'text-muted',
               )
             }

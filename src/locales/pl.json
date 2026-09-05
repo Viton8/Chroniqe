@@ -59,7 +59,9 @@
     "example": "Przykład",
     "cancel": "Anuluj",
     "pin": "Przypnij",
-    "unpin": "Odepnij"
+    "unpin": "Odepnij",
+    "undo": "Cofnij",
+    "today": "Dziś"
   },
   "nav": {
     "overview": "Start",
@@ -93,8 +95,12 @@
     "featInsightsText": "Postęp, średnie, zaległości i nadchodzące daty — na liście i na pulpicie.",
     "featEditor": "Mocniejszy edytor pól",
     "featEditorText": "Kolejność, duplikaty, wartości domyślne, unikalność i podpowiedzi dla każdego pola.",
-    "featShare": "Udostępnianie jak wcześniej",
-    "featShareText": "Widoczność, propozycje, znajomi, oceny i transfery zostają — dodaliśmy tylko więcej możliwości."
+    "featShare": "Udostępnianie linkiem",
+    "featShareText": "Właściciel wybiera, co pozwala link: oglądać, proponować zmiany albo edytować. Listy publiczne zostają w Explore, te tylko z linkiem — nie.",
+    "featCommand": "Skok gdziekolwiek",
+    "featCommandText": "⌘K otwiera paletę poleceń — listy, wpisy i akcje jak w Linear czy Notion.",
+    "featFlow": "Automatyzacje do edycji",
+    "featFlowText": "Odznaczenie wpisuje datę, wypełnia pole albo przenosi wiersz — bez wklejania UUID."
   },
   "auth": {
     "loginTitle": "Logowanie",
@@ -133,7 +139,14 @@
     "events": "Aktywność",
     "pinned": "Przypięte",
     "upcoming": "Wkrótce",
-    "noUpcoming": "Brak nadchodzących dat"
+    "noUpcoming": "Brak nadchodzących dat",
+    "openNotes": "Skrzynka",
+    "search": "Szukaj swoich list",
+    "noSearch": "Brak pasujących list",
+    "noSearchText": "Spróbuj innej nazwy lub opisu.",
+    "friendRequests": "Zaproszenia do znajomych: {n}",
+    "listInvites": "Zaproszenia do list: {n}",
+    "shared": "Udostępnione mi"
   },
   "lists": {
     "title": "Listy",
@@ -143,7 +156,10 @@
     "emptyText": "Zbuduj pola od zera albo zacznij od zestawu.",
     "templates": "Otwórz szablony",
     "find": "Szukaj",
-    "pinned": "Przypięte"
+    "pinned": "Przypięte",
+    "noSearch": "Brak pasujących list",
+    "noSearchText": "Spróbuj innego tytułu lub opisu.",
+    "lead": "Twoje, udostępnione tobie i przypięte."
   },
   "newList": {
     "title": "Nowa lista",
@@ -164,7 +180,9 @@
     "title": "Listy publiczne",
     "lead": "To, czym autorzy podzielili się ze wszystkimi.",
     "empty": "Na razie pusto — opublikuj jedną ze swoich.",
-    "author": "autor"
+    "author": "autor",
+    "find": "Tytuł, opis lub autor",
+    "noSearch": "Brak pasujących list publicznych"
   },
   "friends": {
     "title": "Ludzie",
@@ -181,7 +199,20 @@
     "friends": "Znajomi",
     "remove": "Usuń",
     "sent": "Wysłano zaproszenie",
-    "listInvite": "lista"
+    "listInvite": "lista",
+    "inviteUnknown": "Zaproszenie do listy",
+    "invitedBy": "od @{name}",
+    "outgoing": "Wysłane zaproszenia",
+    "pending": "Oczekuje",
+    "already": "Znajomi",
+    "emptyFriends": "Nie ma jeszcze znajomych",
+    "emptyFriendsText": "Znajdź kogoś po nazwie użytkownika i wyślij zaproszenie.",
+    "emptyRequests": "Brak przychodzących zaproszeń",
+    "emptyInvites": "Brak zaproszeń do list",
+    "emptyOutgoing": "Brak wysłanych zaproszeń",
+    "emptySearch": "Wpisz co najmniej dwa znaki",
+    "you": "To Ty",
+    "noUsers": "Nikogo nie znaleziono"
   },
   "notes": {
     "title": "Aktywność",
@@ -199,7 +230,14 @@
     "saved": "Zapisano",
     "publicLists": "Listy publiczne",
     "noPublic": "Brak publicznych list.",
-    "notFound": "Nie znaleziono użytkownika"
+    "notFound": "Nie znaleziono użytkownika",
+    "edit": "Edytuj profil",
+    "addFriend": "Dodaj znajomego",
+    "pending": "Zaproszenie wysłane",
+    "listsCount": "Listy publiczne: {n}",
+    "viewPublic": "Zobacz stronę publiczną",
+    "copyLink": "Kopiuj link do profilu",
+    "lead": "Jak wyglądasz dla innych i publiczna strona, którą mogą otworzyć."
   },
   "settings": {
     "title": "Ustawienia",
@@ -270,7 +308,10 @@
     "insights": "Podsumowanie",
     "prev": "Wstecz",
     "next": "Dalej",
-    "duplicatedItem": "Wpis skopiowany"
+    "duplicatedItem": "Wpis skopiowany",
+    "created": "Utworzono",
+    "updated": "Zaktualizowano",
+    "deleted": "Usunięto"
   },
   "itemNotes": {
     "add": "Dodaj notatkę",
@@ -290,7 +331,8 @@
     "private": "Tylko ty",
     "invite": "Tylko zaproszeni",
     "friends": "Znajomi",
-    "public": "Publiczna"
+    "public": "Publiczna",
+    "link": "Kto ma link"
   },
   "editMode": {
     "owner": "Tylko właściciel",
@@ -395,8 +437,8 @@
     "addButton": "Dodaj przycisk",
     "move": "Przenieś",
     "saveFlows": "Zapisz przeniesienia",
-    "shareHint": "Widoczność i prawo edycji są osobne.",
-    "shareEx": "Publiczna + „przez propozycje”: wszyscy widzą, zmiany czekają na twoją zgodę.",
+    "shareHint": "Widoczność, dostęp z linku i prawo edycji to osobne ustawienia.",
+    "shareEx": "Po linku można tylko oglądać, a zaproszeni znajomi mogą edytować.",
     "flowHint": "Przycisk kopiuje wiersz do innej twojej listy i może usunąć go tutaj.",
     "flowEx": "Do obejrzenia → Obejrzane. Mapowanie pól: tytuł→tytuł.",
     "ioHint": "JSON zachowuje schemat i wiersze. CSV to same wartości.",
@@ -404,7 +446,14 @@
     "imported": "Zaimportowano",
     "importFail": "Import nie powiódł się",
     "jsonCsv": "Import JSON lub CSV",
-    "saved": "Zapisano"
+    "saved": "Zapisano",
+    "proposal": {
+      "create": "chce dodać wpis",
+      "update": "chce edytować wpis",
+      "delete": "chce usunąć wpis",
+      "check": "chce odhaczyć wpis",
+      "uncheck": "chce cofnąć odhaczenie"
+    }
   },
   "charts": {
     "hint": "Każdy wykres wybiera własne pola. Oś może być datą, statusem, rokiem albo dowolnym innym polem.",
@@ -666,7 +715,9 @@
   },
   "calendar": {
     "prev": "Poprzedni miesiąc",
-    "next": "Następny miesiąc"
+    "next": "Następny miesiąc",
+    "today": "Dziś",
+    "more": "+{n} więcej"
   },
   "shortcuts": {
     "title": "Skróty klawiszowe",
@@ -676,6 +727,98 @@
     "open": "Otwórz podświetlony",
     "selectAll": "Zaznacz wszystko",
     "help": "Ta pomoc",
-    "close": "Zamknij"
+    "close": "Zamknij",
+    "palette": "Paleta poleceń"
+  },
+  "command": {
+    "title": "Przejdź do…",
+    "placeholder": "Listy, wpisy, akcje…",
+    "actions": "Akcje",
+    "lists": "Listy",
+    "items": "Wpisy na tej liście",
+    "empty": "Brak wyników",
+    "newItem": "Nowy wpis",
+    "newList": "Nowa lista",
+    "home": "Start",
+    "settings": "Ustawienia",
+    "explore": "Odkrywaj",
+    "friends": "Ludzie"
+  },
+  "activity": {
+    "item_created": "dodał wpis",
+    "item_updated": "edytował wpis",
+    "item_checked": "odhaczył wpis",
+    "item_unchecked": "cofnął odhaczenie",
+    "item_deleted": "usunął wpis",
+    "item_moved": "przeniósł wpis",
+    "unknown": "zaktualizował listę",
+    "open": "Otwórz"
+  },
+  "flow": {
+    "tab": "Automatyzacje",
+    "moves": "Przyciski przenoszenia",
+    "movesHint": "Przycisk na elemencie kopiuje go na inną Twoją listę.",
+    "automationsHint": "Przy odhaczeniu ustaw datę, pole albo przywróć migawkę.",
+    "automationsEx": "Zakupy: odhacz → „Kupiono” = dziś.",
+    "onCheck": "Po odhaczeniu",
+    "onUncheck": "Po cofnięciu",
+    "named": "Nazwane reguły",
+    "addRule": "Dodaj regułę",
+    "trigger": "Wyzwalacz",
+    "addAction": "Dodaj działanie",
+    "setNow": "Ustaw datę na teraz",
+    "setField": "Ustaw pole",
+    "restore": "Przywróć migawkę",
+    "valueNow": "Teraz (data i godzina)",
+    "valueToday": "Dziś",
+    "targetList": "Lista docelowa",
+    "deleteSource": "Usuń z tej listy",
+    "mapFields": "Mapuj pola",
+    "noLists": "Najpierw utwórz inną listę",
+    "ruleName": "Nowa reguła",
+    "checked": "Gdy wpis zostanie odhaczony",
+    "unchecked": "Gdy odhaczenie zostanie cofnięte",
+    "save": "Zapisz automatyzacje",
+    "enabled": "Włączone"
+  },
+  "board": {
+    "addInColumn": "Dodaj tutaj"
+  },
+  "share": {
+    "title": "Udostępnij listę",
+    "lead": "Wybierz, co mogą zrobić osoby z linkiem, albo zaproś kogoś po nazwie.",
+    "anyone": "Kto ma link",
+    "anyoneHint": "Lista tylko z linkiem nie pojawia się w Explore. Publiczna zostaje publiczna i też używa tego dostępu.",
+    "access": {
+      "off": "Bez otwartego linku",
+      "view": "Tylko podgląd",
+      "propose": "Proponować zmiany",
+      "edit": "Edytować"
+    },
+    "accessHint": {
+      "off": "Tylko osoby zaproszone lub z już przyznanym dostępem.",
+      "view": "Mogą otworzyć listę, ale jej nie zmieniać.",
+      "propose": "Mogą proponować edycje. Ty je zatwierdzasz.",
+      "edit": "Mogą zmieniać wpisy jak redaktor."
+    },
+    "copyList": "Kopiuj link do listy",
+    "copyOffHint": "Bez otwartego dostępu link działa tylko dla Ciebie, członków i osób już dopuszczonych.",
+    "invite": "Zaproś osobę",
+    "findUser": "Nazwa użytkownika lub imię",
+    "invited": "Zaproszenie wysłane",
+    "copyInvite": "Kopiuj zaproszenie z rolą",
+    "pending": "Oczekujące zaproszenia",
+    "openLink": "Otwarty link-zaproszenie",
+    "joinMissing": "Nie znaleziono zaproszenia",
+    "joinMissingText": "Link jest nieprawidłowy albo zaproszenie zostało wycofane.",
+    "joinKicker": "Zaproszono Cię",
+    "joinRole": {
+      "viewer": "Będziesz mógł oglądać tę listę.",
+      "proposer": "Będziesz mógł proponować zmiany.",
+      "editor": "Będziesz mógł edytować tę listę."
+    },
+    "joinClosed": "To zaproszenie nie jest już aktywne.",
+    "joinLogin": "Zaloguj się, aby dołączyć",
+    "linkAccess": "Co pozwala link"
   }
 }

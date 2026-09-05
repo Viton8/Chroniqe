@@ -380,7 +380,7 @@ function CheckToggle({
       onClick={() => onChange(!checked)}
       className={cn(
         'flex h-6 w-6 items-center justify-center rounded-md border',
-        checked ? 'border-accent bg-accent text-white' : 'border-line',
+        checked ? 'border-accent bg-accent text-on-accent' : 'border-line',
       )}
       aria-pressed={checked}
     >

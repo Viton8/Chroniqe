@@ -1,3 +1,4 @@
+import { useMemo } from 'react'
 import {
   Bar,
   BarChart,
@@ -19,8 +20,25 @@ import {
 import type { ChartConfig, ChartType, ItemRating, ItemRow, ListSchema } from '../../types/domain'
 import { buildChartSeries } from '../../lib/charts'
 import { usePrefs } from '../../context/PrefsContext'
+import { readCssColor } from '../../lib/themes'
 
-const COLORS = ['#6d28d9', '#0f766e', '#b45309', '#be123c', '#2563eb', '#7c3aed']
+function useChartColors() {
+  const { theme, palette } = usePrefs()
+  return useMemo(() => {
+    void theme
+    void palette
+    const accent = readCssColor('--c-accent', '#6d28d9')
+    const good = readCssColor('--c-good', '#0f766e')
+    return {
+      accent,
+      accentSoft: readCssColor('--c-accent-soft', '#efe7ff'),
+      line: readCssColor('--c-line', '#ddd4c4'),
+      muted: readCssColor('--c-muted', '#6e6578'),
+      ink: readCssColor('--c-ink', '#1c1724'),
+      slices: [accent, good, '#b45309', '#be123c', '#2563eb', '#7c3aed'],
+    }
+  }, [theme, palette])
+}
 
 export default function ChartView({
   type,
@@ -37,6 +55,8 @@ export default function ChartView({
 }) {
   const data = buildChartSeries(type, config, schema, items, ratings)
   const { t } = usePrefs()
+  const colors = useChartColors()
+  const tick = { fontSize: 11, fill: colors.muted }
 
   if (type === 'kpi') {
     return (
@@ -62,7 +82,7 @@ export default function ChartView({
           <PieChart>
             <Pie data={data} dataKey="value" nameKey="label" innerRadius={50} outerRadius={80}>
               {data.map((_, i) => (
-                <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                <Cell key={i} fill={colors.slices[i % colors.slices.length]} />
               ))}
             </Pie>
             <Tooltip />
@@ -77,11 +97,11 @@ export default function ChartView({
       <div className="h-64">
         <ResponsiveContainer>
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ddd4c4" />
-            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.line} />
+            <XAxis dataKey="label" tick={tick} />
+            <YAxis tick={tick} />
             <Tooltip />
-            <Bar dataKey="value" fill="#6d28d9" radius={[6, 6, 0, 0]} />
+            <Bar dataKey="value" fill={colors.accent} radius={[6, 6, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -93,11 +113,11 @@ export default function ChartView({
       <div className="h-64">
         <ResponsiveContainer>
           <AreaChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ddd4c4" />
-            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.line} />
+            <XAxis dataKey="label" tick={tick} />
+            <YAxis tick={tick} />
             <Tooltip />
-            <Area dataKey="value" stroke="#6d28d9" fill="#efe7ff" />
+            <Area dataKey="value" stroke={colors.accent} fill={colors.accentSoft} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
@@ -109,11 +129,11 @@ export default function ChartView({
       <div className="h-64">
         <ResponsiveContainer>
           <ScatterChart>
-            <CartesianGrid strokeDasharray="3 3" stroke="#ddd4c4" />
-            <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-            <YAxis dataKey="value" tick={{ fontSize: 11 }} />
+            <CartesianGrid strokeDasharray="3 3" stroke={colors.line} />
+            <XAxis dataKey="label" tick={tick} />
+            <YAxis dataKey="value" tick={tick} />
             <Tooltip />
-            <Scatter data={data} fill="#6d28d9" />
+            <Scatter data={data} fill={colors.accent} />
           </ScatterChart>
         </ResponsiveContainer>
       </div>
@@ -124,11 +144,11 @@ export default function ChartView({
     <div className="h-64">
       <ResponsiveContainer>
         <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#ddd4c4" />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-          <YAxis tick={{ fontSize: 11 }} />
+          <CartesianGrid strokeDasharray="3 3" stroke={colors.line} />
+          <XAxis dataKey="label" tick={tick} />
+          <YAxis tick={tick} />
           <Tooltip />
-          <Line type="monotone" dataKey="value" stroke="#6d28d9" strokeWidth={2} dot />
+          <Line type="monotone" dataKey="value" stroke={colors.accent} strokeWidth={2} dot />
         </LineChart>
       </ResponsiveContainer>
     </div>

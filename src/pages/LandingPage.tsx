@@ -3,6 +3,8 @@ import hero from '../hero.png'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import LanguageSwitch from '../components/ui/LanguageSwitch'
+import ColorPalettePicker from '../components/ui/ColorPalettePicker'
+import ThemeSwitch from '../components/ui/ThemeSwitch'
 
 export default function LandingPage() {
   const { user } = useAuth()
@@ -13,6 +15,8 @@ export default function LandingPage() {
         <span className="font-serif text-2xl">Chroniqe</span>
         <div className="flex items-center gap-2">
           <LanguageSwitch />
+          <ThemeSwitch />
+          <ColorPalettePicker compact />
           {user ? (
             <Link to="/dashboard" className="rounded-xl bg-ink px-4 py-2 text-sm text-paper">
               {t('nav.toLists')}
@@ -35,7 +39,7 @@ export default function LandingPage() {
           <h1 className="mt-3 font-serif text-4xl leading-tight sm:text-5xl">{t('landing.title')}</h1>
           <p className="mt-4 max-w-md text-muted">{t('landing.text')}</p>
           <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/register" className="rounded-2xl bg-accent px-5 py-3 text-sm font-medium text-white">
+            <Link to="/register" className="rounded-2xl bg-accent px-5 py-3 text-sm font-medium text-on-accent">
               {t('landing.start')}
             </Link>
             <Link to="/explore" className="rounded-2xl bg-paper px-5 py-3 text-sm ring-1 ring-line">

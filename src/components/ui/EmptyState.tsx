@@ -30,8 +30,19 @@ export default function EmptyState({
 export function Spinner({ label }: { label?: string }) {
   const { t } = usePrefs()
   return (
-    <div className="flex items-center justify-center gap-3 py-16 text-muted">
-      <span className="h-5 w-5 animate-spin rounded-full border-2 border-line border-t-accent" />
+    <div className="flex items-center justify-center gap-3 py-16 text-muted" role="status">
+      <svg className="block h-5 w-5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeOpacity="0.22" strokeWidth="2.5" />
+        <circle
+          className="chroniqe-spinner-arc"
+          cx="12"
+          cy="12"
+          r="8"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+        />
+      </svg>
       <span className="text-sm">{label ?? t('common.loading')}</span>
     </div>
   )

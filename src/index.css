@@ -2,7 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+html[data-palette='violet'] {
   color-scheme: light;
   --c-bg: #f3efe6;
   --c-paper: #fffcf7;
@@ -11,10 +12,14 @@
   --c-line: #ddd4c4;
   --c-accent: #6d28d9;
   --c-accent-soft: #efe7ff;
+  --c-accent-hover: #5b21b6;
+  --c-on-accent: #ffffff;
   --c-good: #0f766e;
+  --c-shadow: 0 1px 0 rgba(28, 23, 36, 0.04), 0 12px 32px -18px rgba(28, 23, 36, 0.28);
 }
 
-html.dark {
+html.dark,
+html.dark[data-palette='violet'] {
   color-scheme: dark;
   --c-bg: #14111a;
   --c-paper: #1c1826;
@@ -23,6 +28,149 @@ html.dark {
   --c-line: #3a3348;
   --c-accent: #a78bfa;
   --c-accent-soft: #2a2140;
+  --c-accent-hover: #c4b5fd;
+  --c-on-accent: #1c1724;
+  --c-good: #5eead4;
+  --c-shadow: 0 1px 0 rgba(0, 0, 0, 0.22), 0 16px 40px -16px rgba(0, 0, 0, 0.55);
+}
+
+html[data-palette='ocean'] {
+  color-scheme: light;
+  --c-bg: #e7eef3;
+  --c-paper: #f6fbfd;
+  --c-ink: #12202c;
+  --c-muted: #5a6d7c;
+  --c-line: #c5d4de;
+  --c-accent: #0369a1;
+  --c-accent-soft: #e0f2fe;
+  --c-accent-hover: #075985;
+  --c-on-accent: #ffffff;
+  --c-good: #0f766e;
+}
+
+html.dark[data-palette='ocean'] {
+  color-scheme: dark;
+  --c-bg: #0c141a;
+  --c-paper: #131c24;
+  --c-ink: #e8f0f5;
+  --c-muted: #8ea3b3;
+  --c-line: #2a3a48;
+  --c-accent: #7dd3fc;
+  --c-accent-soft: #163044;
+  --c-accent-hover: #bae6fd;
+  --c-on-accent: #0c141a;
+  --c-good: #5eead4;
+}
+
+html[data-palette='forest'] {
+  color-scheme: light;
+  --c-bg: #e7eee6;
+  --c-paper: #f6faf4;
+  --c-ink: #162017;
+  --c-muted: #5d6b5c;
+  --c-line: #c9d4c4;
+  --c-accent: #3f6b45;
+  --c-accent-soft: #e4efe3;
+  --c-accent-hover: #315637;
+  --c-on-accent: #ffffff;
+  --c-good: #0f766e;
+}
+
+html.dark[data-palette='forest'] {
+  color-scheme: dark;
+  --c-bg: #101610;
+  --c-paper: #171e17;
+  --c-ink: #e8efe6;
+  --c-muted: #93a491;
+  --c-line: #2d3a2c;
+  --c-accent: #86c48a;
+  --c-accent-soft: #1d2c1e;
+  --c-accent-hover: #a3d4a6;
+  --c-on-accent: #101610;
+  --c-good: #5eead4;
+}
+
+html[data-palette='rose'] {
+  color-scheme: light;
+  --c-bg: #f4ebe8;
+  --c-paper: #fff8f6;
+  --c-ink: #2a1618;
+  --c-muted: #7a5e62;
+  --c-line: #e3cfcb;
+  --c-accent: #be123c;
+  --c-accent-soft: #ffe4e8;
+  --c-accent-hover: #9f1239;
+  --c-on-accent: #ffffff;
+  --c-good: #0f766e;
+}
+
+html.dark[data-palette='rose'] {
+  color-scheme: dark;
+  --c-bg: #1a1114;
+  --c-paper: #24181c;
+  --c-ink: #f6eceb;
+  --c-muted: #c4a4aa;
+  --c-line: #46343a;
+  --c-accent: #fb7185;
+  --c-accent-soft: #3a1f28;
+  --c-accent-hover: #fda4af;
+  --c-on-accent: #1a1114;
+  --c-good: #5eead4;
+}
+
+html[data-palette='amber'] {
+  color-scheme: light;
+  --c-bg: #f3eee4;
+  --c-paper: #fffbf3;
+  --c-ink: #231c12;
+  --c-muted: #74685a;
+  --c-line: #e0d4c0;
+  --c-accent: #b45309;
+  --c-accent-soft: #fef3c7;
+  --c-accent-hover: #92400e;
+  --c-on-accent: #ffffff;
+  --c-good: #0f766e;
+}
+
+html.dark[data-palette='amber'] {
+  color-scheme: dark;
+  --c-bg: #16130e;
+  --c-paper: #1f1b14;
+  --c-ink: #f4ead8;
+  --c-muted: #b8a890;
+  --c-line: #3d3628;
+  --c-accent: #fbbf24;
+  --c-accent-soft: #3a2e14;
+  --c-accent-hover: #fcd34d;
+  --c-on-accent: #16130e;
+  --c-good: #5eead4;
+}
+
+html[data-palette='slate'] {
+  color-scheme: light;
+  --c-bg: #eceef1;
+  --c-paper: #f8f9fb;
+  --c-ink: #17191d;
+  --c-muted: #5c636e;
+  --c-line: #d3d7de;
+  --c-accent: #334155;
+  --c-accent-soft: #e8edf3;
+  --c-accent-hover: #1e293b;
+  --c-on-accent: #ffffff;
+  --c-good: #0f766e;
+}
+
+html.dark[data-palette='slate'] {
+  color-scheme: dark;
+  --c-bg: #121418;
+  --c-paper: #1a1d23;
+  --c-ink: #eef0f3;
+  --c-muted: #9aa3b0;
+  --c-line: #323844;
+  --c-accent: #94a3b8;
+  --c-accent-soft: #252a34;
+  --c-accent-hover: #cbd5e1;
+  --c-on-accent: #121418;
   --c-good: #5eead4;
 }
 
@@ -45,9 +193,7 @@ body {
 }
 
 .shadow-lift {
-  box-shadow:
-    0 1px 0 rgba(28, 23, 36, 0.04),
-    0 12px 32px -18px rgba(28, 23, 36, 0.28);
+  box-shadow: var(--c-shadow);
 }
 
 .checked-out {
@@ -69,4 +215,16 @@ select {
 ::-webkit-scrollbar-thumb {
   background: color-mix(in srgb, var(--c-muted) 55%, transparent);
   border-radius: 999px;
+}
+
+@keyframes chroniqe-spinner {
+  to {
+    stroke-dashoffset: -50.27;
+  }
+}
+
+.chroniqe-spinner-arc {
+  stroke-dasharray: 12.6 37.67;
+  stroke-dashoffset: 0;
+  animation: chroniqe-spinner 0.75s linear infinite;
 }

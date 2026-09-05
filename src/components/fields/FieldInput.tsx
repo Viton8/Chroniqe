@@ -116,7 +116,7 @@ export default function FieldInput(props: Props) {
                     }
                     className={cn(
                       'rounded-full px-3 py-1 text-xs ring-1 ring-line',
-                      on ? 'bg-accent text-white ring-accent' : 'bg-paper',
+                      on ? 'bg-accent text-on-accent ring-accent' : 'bg-paper',
                     )}
                   >
                     {o.label}

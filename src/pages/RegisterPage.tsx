@@ -5,6 +5,8 @@ import { usePrefs } from '../context/PrefsContext'
 import Button from '../components/ui/Button'
 import { FieldWrap, Input } from '../components/ui/Input'
 import LanguageSwitch from '../components/ui/LanguageSwitch'
+import ColorPalettePicker from '../components/ui/ColorPalettePicker'
+import ThemeSwitch from '../components/ui/ThemeSwitch'
 
 export default function RegisterPage() {
   const { signUp } = useAuth()
@@ -20,8 +22,10 @@ export default function RegisterPage() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4">
-      <div className="absolute right-4 top-4">
+      <div className="absolute right-4 top-4 flex items-center gap-2">
         <LanguageSwitch />
+        <ThemeSwitch />
+        <ColorPalettePicker compact />
       </div>
       <div className="w-full max-w-md rounded-3xl border border-line bg-paper p-8 shadow-lift">
         <Link to="/" className="font-serif text-2xl">

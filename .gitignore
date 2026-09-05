@@ -70,6 +70,9 @@ web_modules/
 .env.*
 !.env.example
 
+# Generated seed chunks (source of truth is seed.sql / _gen_seed.mjs)
+supabase/_chunks/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache

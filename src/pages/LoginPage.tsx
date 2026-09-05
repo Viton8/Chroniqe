@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { ACCOUNT_BLOCKED, useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import Button from '../components/ui/Button'
 import { FieldWrap, Input } from '../components/ui/Input'
 import LanguageSwitch from '../components/ui/LanguageSwitch'
+import ColorPalettePicker from '../components/ui/ColorPalettePicker'
+import ThemeSwitch from '../components/ui/ThemeSwitch'
 
 export default function LoginPage() {
   const { signIn } = useAuth()
@@ -29,7 +31,13 @@ export default function LoginPage() {
             await signIn(email, password)
             navigate(from, { replace: true })
           } catch (err) {
-            setError(err instanceof Error ? err.message : t('auth.loginFail'))
+            setError(
+              err instanceof Error && err.message === ACCOUNT_BLOCKED
+                ? t('auth.blocked')
+                : err instanceof Error
+                  ? err.message
+                  : t('auth.loginFail'),
+            )
           } finally {
             setBusy(false)
           }
@@ -70,8 +78,10 @@ export function AuthShell({
 }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center px-4">
-      <div className="absolute right-4 top-4">
+      <div className="absolute right-4 top-4 flex items-center gap-2">
         <LanguageSwitch />
+        <ThemeSwitch />
+        <ColorPalettePicker compact />
       </div>
       <div className="w-full max-w-md rounded-3xl border border-line bg-paper p-8 shadow-lift">
         <Link to="/" className="font-serif text-2xl">

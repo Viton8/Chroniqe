@@ -736,3 +736,50 @@ export async function countItems(listIds: string[]): Promise<Record<string, numb
   }
   return counts
 }
+
+const ADMIN_ERROR_KEYS: Record<string, string> = {
+  ADMIN_NOT_AUTHORIZED: 'admin.notAllowed',
+  ADMIN_LIST_NOT_PUBLIC: 'admin.listNotPublic',
+  ADMIN_CANNOT_BLOCK_SELF: 'admin.cannotBlockSelf',
+  ADMIN_CANNOT_BLOCK_ADMIN: 'admin.cannotBlockAdmin',
+  ADMIN_USER_NOT_FOUND: 'admin.userNotFound',
+}
+
+function throwAdmin(error: { message: string } | null): void {
+  if (!error) return
+  const key = ADMIN_ERROR_KEYS[error.message]
+  throw new Error(key ? msg(key) : error.message)
+}
+
+export async function fetchAdminPublicLists(): Promise<ListRow[]> {
+  const { data, error } = await supabase
+    .from('lists')
+    .select('*, owner:profiles!owner_id(*)')
+    .eq('visibility', 'public')
+    .order('updated_at', { ascending: false })
+    .limit(200)
+  throwIf(error)
+  return (data ?? []) as ListRow[]
+}
+
+export async function fetchAdminProfiles(query = ''): Promise<Profile[]> {
+  const { data, error } = await supabase.rpc('admin_list_profiles', {
+    p_query: query,
+    p_limit: 80,
+  })
+  throwAdmin(error)
+  return (data ?? []) as Profile[]
+}
+
+export async function adminDeletePublicList(listId: string): Promise<void> {
+  const { error } = await supabase.rpc('admin_delete_public_list', { p_list_id: listId })
+  throwAdmin(error)
+}
+
+export async function adminSetUserBlocked(userId: string, blocked: boolean): Promise<void> {
+  const { error } = await supabase.rpc('admin_set_user_blocked', {
+    p_user_id: userId,
+    p_blocked: blocked,
+  })
+  throwAdmin(error)
+}

@@ -4,13 +4,21 @@ import { useAuth } from '../../context/AuthContext'
 import { usePrefs } from '../../context/PrefsContext'
 import { fetchNotifications } from '../../services/api'
 import { supabase } from '../../services/supabase'
+import NotificationsModal from '../notifications/NotificationsModal'
 import Navbar, { BottomNav, Sidebar } from './Navbar'
 
 export default function AppLayout() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const { t } = usePrefs()
   const [menu, setMenu] = useState(false)
+  const [notesOpen, setNotesOpen] = useState(false)
+  const [notesAnchor, setNotesAnchor] = useState<HTMLElement | null>(null)
   const [unread, setUnread] = useState(0)
+
+  const openNotes = (el: HTMLElement) => {
+    setNotesAnchor(el)
+    setNotesOpen((open) => (open && notesAnchor === el ? false : true))
+  }
 
   useEffect(() => {
     if (!user) return
@@ -38,7 +46,12 @@ export default function AppLayout() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar onMenu={() => setMenu((v) => !v)} unread={unread} />
+      <Navbar
+        onMenu={() => setMenu((v) => !v)}
+        onNotifications={openNotes}
+        notesOpen={notesOpen}
+        unread={unread}
+      />
       {menu ? (
         <div className="border-b border-line bg-paper px-4 py-3 md:hidden">
           {[
@@ -46,6 +59,7 @@ export default function AppLayout() {
             ['/lists', t('nav.lists')],
             ['/explore', t('nav.explore')],
             ['/friends', t('nav.people')],
+            ...(isAdmin ? [['/admin', t('nav.admin')]] : []),
             ['/settings', t('nav.settings')],
           ].map(([to, label]) => (
             <NavLink
@@ -65,7 +79,19 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
-      <BottomNav unread={unread} />
+      <BottomNav
+        unread={unread}
+        notesOpen={notesOpen}
+        onNotifications={openNotes}
+      />
+      <NotificationsModal
+        open={notesOpen}
+        anchorEl={notesAnchor}
+        onClose={() => {
+          setNotesOpen(false)
+          setNotesAnchor(null)
+        }}
+      />
     </div>
   )
 }

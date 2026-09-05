@@ -193,6 +193,8 @@ export interface Profile {
   avatar_url: string | null
   created_at: string
   updated_at: string
+  is_admin?: boolean
+  blocked_at?: string | null
 }
 
 export interface ListRow {

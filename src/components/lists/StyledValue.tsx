@@ -2,6 +2,7 @@ import { Star } from 'lucide-react'
 import type { FieldDef, FieldViewStyle, ItemRating, ListSchema } from '../../types/domain'
 import { displayStyledValue, fieldBounds, formatNumberBody, resolveNumericValue } from '../../lib/display'
 import { cn } from '../../lib/cn'
+import RelationValue from './RelationValue'
 
 export default function StyledValue({
   field,
@@ -22,6 +23,9 @@ export default function StyledValue({
   schema?: ListSchema
   className?: string
 }) {
+  if (field.type === 'relation') {
+    return <RelationValue field={field} value={value} className={className} />
+  }
   const numeric = resolveNumericValue(field, value, style, ratings, itemId, values, schema)
   if (numeric != null && style?.numberDisplay === 'stars') {
     const { max } = fieldBounds(field)

@@ -50,6 +50,9 @@ export type FieldViewRole = (typeof FIELD_VIEW_ROLES)[number]
 export const NUMBER_DISPLAYS = ['number', 'range', 'fraction', 'stars'] as const
 export type NumberDisplay = (typeof NUMBER_DISPLAYS)[number]
 
+export const RELATION_DISPLAYS = ['title', 'title_cover', 'media'] as const
+export type RelationDisplay = (typeof RELATION_DISPLAYS)[number]
+
 export interface FieldViewStyle {
   fieldId: string
   role: FieldViewRole
@@ -125,6 +128,8 @@ export interface FieldConfig {
   maxSizeMb?: number
   relatedListId?: string
   allowMultiple?: boolean
+  /** How linked items render in views: title only, thumb+title, or cover card. */
+  relationDisplay?: RelationDisplay
   subfields?: SublistField[]
   defaultValue?: unknown
 }
@@ -177,6 +182,10 @@ export interface ListSettings {
   onCheck?: AutomationAction[]
   onUncheck?: AutomationAction[]
   linkAccess?: 'view' | 'propose' | 'edit'
+  showcase?: {
+    featured?: boolean
+    topic?: 'views' | 'charts' | 'collab' | 'flow' | 'ratings'
+  }
 }
 
 export interface ViewConfig {
@@ -348,6 +357,35 @@ export interface ActivityEvent {
   payload: Record<string, unknown>
   created_at: string
   actor?: Profile
+}
+
+export const FEED_EVENT_TYPES = [
+  'item_created',
+  'item_checked',
+  'item_unchecked',
+  'item_moved',
+] as const
+
+export type FeedEventType = (typeof FEED_EVENT_TYPES)[number]
+export type FeedFilter = 'all' | 'added' | 'checked' | 'moved'
+
+export interface FriendFeedEvent {
+  id: string
+  list_id: string | null
+  item_id: string | null
+  actor_id: string | null
+  event_type: string
+  payload: Record<string, unknown>
+  created_at: string
+  actor_username: string
+  actor_display_name: string
+  actor_avatar_url: string | null
+  list_title: string | null
+  list_icon: string | null
+  list_schema: ListSchema | null
+  target_list_id: string | null
+  target_list_title: string | null
+  target_list_icon: string | null
 }
 
 export interface AppNotification {

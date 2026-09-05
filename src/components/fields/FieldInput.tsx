@@ -1,10 +1,25 @@
 import { useEffect, useState } from 'react'
 import { Star } from 'lucide-react'
-import type { FieldDef, ItemRating } from '../../types/domain'
+import type { FieldDef, ItemRating, ItemRow, ListRow, Profile } from '../../types/domain'
 import { FieldWrap, Input, Textarea } from '../ui/Input'
-import { signedFileUrl, uploadListFile, upsertRating } from '../../services/api'
-import { asDateInputValue, asDatetimeInputValue, cn } from '../../lib/cn'
+import {
+  fetchFriendships,
+  fetchItems,
+  fetchList,
+  fetchMembers,
+  searchProfiles,
+  signedFileUrl,
+  uploadListFile,
+  upsertRating,
+} from '../../services/api'
+import { asDateInputValue, asDatetimeInputValue, cn, titleFromValues } from '../../lib/cn'
+import { emptySublistRow, subfieldAsDef } from '../../lib/fields'
+import { resolveCoverFieldId } from '../../lib/files'
+import { refId, refIds, refLabel } from '../../lib/refs'
+import { otherFriend } from '../../lib/friends'
 import Avatar from '../ui/Avatar'
+import CoverSlot from '../lists/CoverSlot'
+import { useAuth } from '../../context/AuthContext'
 import { usePrefs } from '../../context/PrefsContext'
 
 interface Props {
@@ -16,6 +31,7 @@ interface Props {
   userId?: string
   itemId?: string
   ratings?: ItemRating[]
+  onRatingChange?: (row: ItemRating) => void
   error?: string
 }
 
@@ -148,14 +164,36 @@ export default function FieldInput(props: Props) {
       )
     case 'multi_rating':
       return <MultiRating {...props} />
+    case 'color': {
+      const raw = String(value ?? '')
+      const hex = /^#[0-9a-fA-F]{6}$/.test(raw) ? raw : '#6d28d9'
+      return (
+        <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              className="h-10 w-12 shrink-0 cursor-pointer rounded-xl border border-line bg-paper"
+              value={hex}
+              disabled={disabled}
+              onChange={(e) => onChange(e.target.value)}
+            />
+            <Input
+              value={raw}
+              placeholder="#6d28d9"
+              disabled={disabled}
+              onChange={(e) => onChange(e.target.value)}
+            />
+          </div>
+        </FieldWrap>
+      )
+    }
     case 'url':
     case 'email':
     case 'text':
-    case 'color':
       return (
         <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
-            type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : field.type === 'color' ? 'color' : 'text'}
+            type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'}
             value={String(value ?? '')}
             minLength={cfg.minLength}
             maxLength={cfg.maxLength}
@@ -170,6 +208,10 @@ export default function FieldInput(props: Props) {
       return <FileField {...props} />
     case 'sublist':
       return <SublistField {...props} />
+    case 'relation':
+      return <RelationField {...props} />
+    case 'user':
+      return <UserField {...props} />
     default:
       return (
         <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
@@ -222,10 +264,17 @@ function MultiRating({
   userId,
   ratings = [],
   disabled,
+  onRatingChange,
 }: Props) {
   const { t } = usePrefs()
-  const mine = ratings.find((r) => r.field_id === field.id && r.user_id === userId)
-  const all = ratings.filter((r) => r.field_id === field.id)
+  const [local, setLocal] = useState(ratings)
+
+  useEffect(() => {
+    setLocal(ratings)
+  }, [ratings])
+
+  const mine = local.find((r) => r.field_id === field.id && r.user_id === userId)
+  const all = local.filter((r) => r.field_id === field.id)
   const avg = all.length ? all.reduce((s, r) => s + Number(r.value), 0) / all.length : 0
   const max = field.config?.ratingMax ?? 10
 
@@ -240,7 +289,25 @@ function MultiRating({
         disabled={disabled || !itemId || !userId}
         onChange={(n) => {
           if (!itemId || !userId) return
+          const next: ItemRating = {
+            item_id: itemId,
+            field_id: field.id,
+            user_id: userId,
+            value: n,
+            created_at: mine?.created_at ?? new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            profile: mine?.profile,
+          }
+          setLocal((prev) => {
+            const idx = prev.findIndex((r) => r.field_id === field.id && r.user_id === userId)
+            if (idx >= 0) return prev.map((r, i) => (i === idx ? { ...r, value: n, updated_at: next.updated_at } : r))
+            return [...prev, next]
+          })
           void upsertRating({ item_id: itemId, field_id: field.id, user_id: userId, value: n })
+            .then(() => onRatingChange?.(next))
+            .catch(() => {
+              setLocal(ratings)
+            })
         }}
       />
       <p className="mt-2 text-xs text-muted">
@@ -248,7 +315,7 @@ function MultiRating({
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {all.map((r) => (
-          <span key={r.user_id} className="inline-flex items-center gap-1 rounded-full bg-black/5 px-2 py-0.5 text-xs">
+          <span key={r.user_id} className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-xs">
             <Avatar name={r.profile?.display_name || r.profile?.username || '?'} url={r.profile?.avatar_url} size={16} />
             {r.profile?.username ?? t('fields.guest')} · {r.value}
           </span>
@@ -359,7 +426,7 @@ function TagEditor({
   )
 }
 
-function SublistField({ field, value, onChange, disabled }: Props) {
+function SublistField({ field, value, onChange, disabled, listId, userId }: Props) {
   const { t } = usePrefs()
   const rows = Array.isArray(value) ? (value as Record<string, unknown>[]) : []
   const sub = field.config?.subfields ?? []
@@ -368,23 +435,21 @@ function SublistField({ field, value, onChange, disabled }: Props) {
       label={field.name}
       hint={fieldHint(field, t('fields.nestedHint'))}
     >
-      <div className="space-y-2">
+      <div className="space-y-3">
         {rows.map((row, idx) => (
-          <div key={idx} className="rounded-xl border border-line p-3">
+          <div key={idx} className="space-y-3 rounded-xl border border-line p-3">
             {sub.map((sf) => (
-              <div key={sf.id} className="mb-2">
-                <Input
-                  placeholder={sf.name}
-                  value={String(row[sf.id] ?? '')}
-                  disabled={disabled}
-                  onChange={(e) => {
-                    const next = rows.map((r, i) =>
-                      i === idx ? { ...r, [sf.id]: e.target.value } : r,
-                    )
-                    onChange(next)
-                  }}
-                />
-              </div>
+              <FieldInput
+                key={sf.id}
+                field={subfieldAsDef(sf)}
+                value={row[sf.id]}
+                disabled={disabled}
+                listId={listId}
+                userId={userId}
+                onChange={(nextValue) => {
+                  onChange(rows.map((current, i) => (i === idx ? { ...current, [sf.id]: nextValue } : current)))
+                }}
+              />
             ))}
             {!disabled ? (
               <button
@@ -397,16 +462,257 @@ function SublistField({ field, value, onChange, disabled }: Props) {
             ) : null}
           </div>
         ))}
+        {!sub.length ? <p className="text-xs text-muted">{t('fields.nestedHint')}</p> : null}
         {!disabled ? (
           <button
             type="button"
             className="text-sm text-accent"
-            onClick={() => onChange([...rows, {}])}
+            onClick={() => onChange([...rows, emptySublistRow(sub)])}
           >
             {t('fields.addRow')}
           </button>
         ) : null}
       </div>
+    </FieldWrap>
+  )
+}
+
+function RelationField({ field, value, onChange, disabled, error }: Props) {
+  const { t } = usePrefs()
+  const relatedId = field.config?.relatedListId
+  const multi = Boolean(field.config?.allowMultiple)
+  const showCover = (field.config?.relationDisplay ?? 'title') !== 'title'
+  const [rows, setRows] = useState<ItemRow[]>([])
+  const [list, setList] = useState<ListRow | null>(null)
+
+  useEffect(() => {
+    if (!relatedId) return
+    let cancelled = false
+    void Promise.all([fetchList(relatedId), fetchItems(relatedId)]).then(([nextList, items]) => {
+      if (cancelled) return
+      setList(nextList)
+      setRows(items)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [relatedId])
+
+  if (!relatedId) {
+    return (
+      <FieldWrap label={field.name} error={error} hint={fieldHint(field, t('fields.noRelated'))}>
+        <p className="text-sm text-muted">{t('fields.noRelated')}</p>
+      </FieldWrap>
+    )
+  }
+
+  const coverFieldId = list ? resolveCoverFieldId(list.schema) : undefined
+  const coverField = coverFieldId ? list?.schema.fields.find((f) => f.id === coverFieldId) : undefined
+
+  const options = rows.map((item) => ({
+    id: item.id,
+    title: titleFromValues(item.values, list?.schema.titleFieldId),
+    cover: coverFieldId ? item.values[coverFieldId] : null,
+  }))
+
+  const pick = (id: string) => {
+    const hit = options.find((row) => row.id === id)
+    return hit ? { id: hit.id, title: hit.title } : null
+  }
+
+  if (multi || showCover) {
+    const selected = new Set(refIds(value))
+    return (
+      <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
+        <div className="max-h-56 space-y-1 overflow-y-auto rounded-xl border border-line p-2">
+          {options.map((row) => {
+            const checked = selected.has(row.id)
+            return (
+              <label
+                key={row.id}
+                className={cn(
+                  'flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 text-sm hover:bg-ink/5',
+                  checked && 'bg-accent-soft/60',
+                )}
+              >
+                <input
+                  type={multi ? 'checkbox' : 'radio'}
+                  name={`relation-${field.id}`}
+                  checked={checked}
+                  disabled={disabled}
+                  onChange={() => {
+                    if (multi) {
+                      const current = Array.isArray(value)
+                        ? value
+                        : refIds(value)
+                            .map((id) => pick(id))
+                            .filter(Boolean)
+                      if (checked) {
+                        onChange(current.filter((item) => refId(item) !== row.id))
+                      } else {
+                        const next = pick(row.id)
+                        onChange(next ? [...current, next] : current)
+                      }
+                    } else {
+                      onChange(checked ? null : pick(row.id))
+                    }
+                  }}
+                />
+                {showCover ? (
+                  <CoverSlot
+                    field={coverField}
+                    value={row.cover}
+                    alt={row.title}
+                    className="h-8 w-8 shrink-0 rounded-md"
+                    fallback={<span className="text-[10px] text-muted">·</span>}
+                  />
+                ) : null}
+                <span className="min-w-0 truncate">{row.title}</span>
+              </label>
+            )
+          })}
+          {!options.length ? <p className="text-xs text-muted">{t('fields.pickItem')}</p> : null}
+        </div>
+      </FieldWrap>
+    )
+  }
+
+  return (
+    <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
+      <select
+        className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+        value={refId(value)}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value ? pick(e.target.value) : null)}
+      >
+        <option value="">{t('fields.pickItem')}</option>
+        {options.map((row) => (
+          <option key={row.id} value={row.id}>
+            {row.title}
+          </option>
+        ))}
+      </select>
+    </FieldWrap>
+  )
+}
+
+function UserField({ field, value, onChange, disabled, error, listId, userId }: Props) {
+  const { t } = usePrefs()
+  const { profile } = useAuth()
+  const multi = Boolean(field.config?.allowMultiple)
+  const [people, setPeople] = useState<Profile[]>([])
+  const [query, setQuery] = useState('')
+
+  useEffect(() => {
+    if (!userId) return
+    let cancelled = false
+    void Promise.all([
+      listId ? fetchMembers(listId).catch(() => []) : Promise.resolve([]),
+      fetchFriendships(userId).catch(() => []),
+    ]).then(([members, friends]) => {
+      if (cancelled) return
+      const map = new Map<string, Profile>()
+      if (profile) map.set(profile.id, profile)
+      for (const member of members) {
+        if (member.profile) map.set(member.profile.id, member.profile)
+      }
+      for (const row of friends.filter((friend) => friend.status === 'accepted')) {
+        const other = otherFriend(userId, row)
+        if (other) map.set(other.id, other)
+      }
+      setPeople([...map.values()])
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [listId, profile, userId])
+
+  useEffect(() => {
+    const q = query.trim()
+    if (q.length < 2) return
+    let cancelled = false
+    void searchProfiles(q).then((rows) => {
+      if (cancelled) return
+      setPeople((prev) => {
+        const map = new Map(prev.map((row) => [row.id, row]))
+        for (const row of rows) map.set(row.id, row)
+        return [...map.values()]
+      })
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [query])
+
+  const pick = (id: string) => {
+    const hit = people.find((row) => row.id === id)
+    return hit ? { id: hit.id, name: hit.display_name || hit.username, username: hit.username } : null
+  }
+
+  const labelOf = (row: Profile) => row.display_name || `@${row.username}`
+
+  if (multi) {
+    const selected = new Set(refIds(value))
+    return (
+      <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
+        <Input
+          value={query}
+          disabled={disabled}
+          placeholder={t('fields.pickUser')}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <div className="mt-2 max-h-48 space-y-1 overflow-y-auto rounded-xl border border-line p-2">
+          {people.map((row) => (
+            <label key={row.id} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={selected.has(row.id)}
+                disabled={disabled}
+                onChange={(e) => {
+                  const current = Array.isArray(value)
+                    ? value
+                    : refIds(value)
+                        .map((id) => pick(id) ?? { id, name: id })
+                  if (e.target.checked) {
+                    const next = pick(row.id)
+                    onChange(next ? [...current, next] : current)
+                  } else {
+                    onChange(current.filter((item) => refId(item) !== row.id))
+                  }
+                }}
+              />
+              <span className="truncate">{labelOf(row)}</span>
+            </label>
+          ))}
+        </div>
+      </FieldWrap>
+    )
+  }
+
+  const currentId = refId(value)
+  const currentLabel = refLabel(value)
+
+  return (
+    <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
+      <Input
+        value={query}
+        disabled={disabled}
+        placeholder={currentLabel || t('fields.pickUser')}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <select
+        className="mt-2 w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+        value={currentId}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value ? pick(e.target.value) : null)}
+      >
+        <option value="">{t('fields.pickUser')}</option>
+        {people.map((row) => (
+          <option key={row.id} value={row.id}>
+            {labelOf(row)}
+          </option>
+        ))}
+      </select>
     </FieldWrap>
   )
 }

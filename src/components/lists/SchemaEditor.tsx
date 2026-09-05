@@ -1,14 +1,37 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronDown, ChevronUp, Copy, Plus, Trash2 } from 'lucide-react'
 import Hint from '../ui/Hint'
 import Button from '../ui/Button'
 import { FieldWrap, Input, Textarea } from '../ui/Input'
-import { FIELD_TYPES, type FieldDef, type FieldType, type ListSchema } from '../../types/domain'
+import {
+  FIELD_TYPES,
+  RELATION_DISPLAYS,
+  type FieldDef,
+  type FieldType,
+  type ListSchema,
+  type RelationDisplay,
+  type SublistField,
+} from '../../types/domain'
+import { NESTED_FIELD_TYPES, subfieldAsDef } from '../../lib/fields'
 import { newField } from '../../lib/templates'
 import { asDateInputValue, asDatetimeInputValue, cn, uid } from '../../lib/cn'
+import { useAuth } from '../../context/AuthContext'
 import { usePrefs } from '../../context/PrefsContext'
+import { fetchMyLists } from '../../services/api'
+import type { ListRow } from '../../types/domain'
 
-const HINT_TYPES: FieldType[] = ['text', 'number', 'integer', 'multi_rating', 'image', 'sublist', 'select']
+const HINT_TYPES: FieldType[] = [
+  'text',
+  'number',
+  'integer',
+  'date',
+  'multi_rating',
+  'image',
+  'file',
+  'sublist',
+  'select',
+  'relation',
+]
 
 export default function SchemaEditor({
   schema,
@@ -102,7 +125,14 @@ export default function SchemaEditor({
                     variant="ghost"
                     size="sm"
                     onClick={() =>
-                      onChange({ ...schema, fields: schema.fields.filter((row) => row.id !== field.id) })
+                      onChange({
+                        ...schema,
+                        fields: schema.fields.filter((row) => row.id !== field.id),
+                        titleFieldId: schema.titleFieldId === field.id ? undefined : schema.titleFieldId,
+                        imageFieldId: schema.imageFieldId === field.id ? undefined : schema.imageFieldId,
+                        dateFieldId: schema.dateFieldId === field.id ? undefined : schema.dateFieldId,
+                        groupFieldId: schema.groupFieldId === field.id ? undefined : schema.groupFieldId,
+                      })
                     }
                   >
                     <Trash2 size={14} /> {t('schema.deleteField')}
@@ -442,26 +472,61 @@ function Constraints({
       </FieldWrap>
     )
   }
+  if (field.type === 'relation' || field.type === 'user') {
+    return <LinkConstraints field={field} cfg={cfg} set={set} />
+  }
   if (field.type === 'sublist') {
     const sub = cfg.subfields ?? []
+    const patchSub = (index: number, next: SublistField) => {
+      set({ subfields: sub.map((row, idx) => (idx === index ? next : row)) })
+    }
     return (
-      <div className="mt-3 space-y-2">
-        <p className="text-xs text-muted">{t('schema.subfields')}</p>
+      <div className="mt-3 space-y-3">
+        <p className="text-xs text-muted">{t('schema.nestedLead')}</p>
         {sub.map((sf, i) => (
-          <div key={sf.id} className="flex gap-2">
-            <Input
-              value={sf.name}
-              onChange={(e) => {
-                const next = sub.map((s, idx) => (idx === i ? { ...s, name: e.target.value } : s))
-                set({ subfields: next })
-              }}
+          <div key={sf.id} className="space-y-2 rounded-xl border border-line p-3">
+            <div className="grid gap-2 sm:grid-cols-2">
+              <FieldWrap label={t('schema.name')}>
+                <Input value={sf.name} onChange={(e) => patchSub(i, { ...sf, name: e.target.value })} />
+              </FieldWrap>
+              <FieldWrap label={t('schema.type')}>
+                <select
+                  className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+                  value={sf.type}
+                  onChange={(e) =>
+                    patchSub(i, {
+                      ...sf,
+                      type: e.target.value as FieldType,
+                      config: { defaultValue: undefined },
+                    })
+                  }
+                >
+                  {NESTED_FIELD_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {t(`fieldTypes.${type}`)}
+                    </option>
+                  ))}
+                </select>
+              </FieldWrap>
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={Boolean(sf.required)}
+                onChange={(e) => patchSub(i, { ...sf, required: e.target.checked })}
+              />
+              {t('schema.required')}
+            </label>
+            <Constraints
+              field={subfieldAsDef(sf)}
+              onChange={(config) => patchSub(i, { ...sf, config })}
             />
             <button
               type="button"
               className={cn('text-xs text-rose-700')}
               onClick={() => set({ subfields: sub.filter((_, idx) => idx !== i) })}
             >
-              ×
+              {t('schema.deleteField')}
             </button>
           </div>
         ))}
@@ -470,7 +535,9 @@ function Constraints({
           size="sm"
           onClick={() => {
             const nf = newField('text')
-            set({ subfields: [...sub, { id: nf.id, key: nf.key, name: t('schema.addField'), type: 'text' }] })
+            set({
+              subfields: [...sub, { id: nf.id, key: nf.key, name: t('schema.subfield'), type: 'text' }],
+            })
           }}
         >
           {t('schema.subfield')}
@@ -479,4 +546,77 @@ function Constraints({
     )
   }
   return null
+}
+
+function LinkConstraints({
+  field,
+  cfg,
+  set,
+}: {
+  field: FieldDef
+  cfg: NonNullable<FieldDef['config']>
+  set: (patch: FieldDef['config']) => void
+}) {
+  const { t } = usePrefs()
+  const { user } = useAuth()
+  const [lists, setLists] = useState<ListRow[]>([])
+
+  useEffect(() => {
+    if (!user || field.type !== 'relation') return
+    let cancelled = false
+    void fetchMyLists(user.id).then((rows) => {
+      if (!cancelled) setLists(rows)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [field.type, user])
+
+  return (
+    <div className="mt-3 space-y-2">
+      {field.type === 'relation' ? (
+        <>
+          <FieldWrap label={t('schema.relatedList')}>
+            <select
+              className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+              value={cfg.relatedListId ?? ''}
+              onChange={(e) => set({ relatedListId: e.target.value || undefined })}
+            >
+              <option value="">{t('fields.noRelated')}</option>
+              {lists.map((row) => (
+                <option key={row.id} value={row.id}>
+                  {row.icon} {row.title}
+                </option>
+              ))}
+            </select>
+          </FieldWrap>
+          <FieldWrap label={t('schema.relationDisplay')}>
+            <select
+              className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+              value={cfg.relationDisplay ?? 'title'}
+              onChange={(e) =>
+                set({
+                  relationDisplay: (e.target.value as RelationDisplay) || 'title',
+                })
+              }
+            >
+              {RELATION_DISPLAYS.map((mode) => (
+                <option key={mode} value={mode}>
+                  {t(`schema.relationDisplayModes.${mode}`)}
+                </option>
+              ))}
+            </select>
+          </FieldWrap>
+        </>
+      ) : null}
+      <label className="flex items-center gap-2 text-xs">
+        <input
+          type="checkbox"
+          checked={Boolean(cfg.allowMultiple)}
+          onChange={(e) => set({ allowMultiple: e.target.checked })}
+        />
+        {t('schema.allowMultiple')}
+      </label>
+    </div>
+  )
 }

@@ -77,7 +77,7 @@ import ViewEditor, { ViewsManager } from '../components/lists/ViewEditor'
 import { normalizeViewConfig, toViewConfig } from '../lib/views'
 import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
-import { emptyValues, isEmptyValue, itemMatchesQuery, validateItem } from '../lib/validation'
+import { emptyValues, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
 import { applyFieldEquals, toggleChecked, transferItem } from '../lib/automations'
 import { asDatetimeInputValue, formatDateTime, titleFromValues } from '../lib/cn'
@@ -88,14 +88,12 @@ import {
   emptyFilters,
   sortItems,
   sortableFields,
-  titleFieldId,
   type ListFilters,
   type SortKey,
 } from '../lib/filters'
 import { buildInsights } from '../lib/insights'
 import FacetFilters from '../components/lists/FacetFilters'
 import BulkBar from '../components/lists/BulkBar'
-import QuickAdd from '../components/lists/QuickAdd'
 import ListInsights from '../components/lists/ListInsights'
 import FavoriteButton from '../components/lists/FavoriteButton'
 import ShortcutsHelp from '../components/lists/ShortcutsHelp'
@@ -517,11 +515,6 @@ function ListWorkspace({ id }: { id: string }) {
               <Settings2 size={14} /> {t('list.configure')}
             </Button>
           ) : null}
-          {canEdit || canPropose ? (
-            <Button size="sm" onClick={() => setCreating(true)}>
-              <Plus size={14} /> {t('list.entry')}
-            </Button>
-          ) : null}
           <div className="relative" ref={moreRef}>
             <Button
               variant="soft"
@@ -642,36 +635,9 @@ function ListWorkspace({ id }: { id: string }) {
                 onChange={(e) => setQuery(e.target.value)}
               />
               {canEdit || canPropose ? (
-                <QuickAdd
-                  schema={schema}
-                  disabled={!user}
-                  onCreate={async (title) => {
-                    const fieldId = titleFieldId(schema)
-                    const values = emptyValues(schema)
-                    if (fieldId) values[fieldId] = title
-                    const extraRequired = schema.fields.filter((field) => {
-                      if (!field.required || field.id === fieldId) return false
-                      return isEmptyValue(values[field.id])
-                    })
-                    if (extraRequired.length || (canPropose && !canEdit)) {
-                      setDraftValues(values)
-                      setCreating(true)
-                      return
-                    }
-                    if (!user) return
-                    try {
-                      await createItem({
-                        list_id: list.id,
-                        values,
-                        position: Date.now() / 1000,
-                        created_by: user.id,
-                      })
-                      await reload()
-                    } catch (error) {
-                      toast(error instanceof Error ? error.message : t('common.error'), 'err')
-                    }
-                  }}
-                />
+                <Button size="sm" onClick={() => startCreate()}>
+                  <Plus size={14} /> {t('list.entry')}
+                </Button>
               ) : null}
               <label className="flex items-center gap-2 text-xs text-muted">
                 <input

@@ -657,6 +657,8 @@ const bloodPressureTemplate: TemplateSpec = {
 }
 
 export const TEMPLATES: TemplateSpec[] = [
+  headacheTemplate,
+  bloodPressureTemplate,
   {
     key: 'blank',
     title: 'Пустой список',
@@ -1192,11 +1194,33 @@ export const TEMPLATES: TemplateSpec[] = [
       },
     ],
   },
-  headacheTemplate,
-  bloodPressureTemplate,
 ]
 
 export const TEMPLATE_PACKS: TemplatePack[] = [
+  {
+    key: 'health',
+    title: 'Головные боли и давление',
+    icon: '🩺',
+    description:
+      'Дневник приступов и журнал давления. Списки связаны в обе стороны: к приступу — несколько измерений, к измерению — приступ.',
+    hint: 'Создаются оба списка. В приступе поле «Давление» уже смотрит на журнал, в измерении «Приступ» — на дневник.',
+    lists: [
+      TEMPLATES.find((t) => t.key === 'headache_diary')!,
+      TEMPLATES.find((t) => t.key === 'blood_pressure')!,
+    ],
+    relations: [
+      {
+        fromKey: 'headache_diary',
+        fieldId: 'bp_readings',
+        toKey: 'blood_pressure',
+      },
+      {
+        fromKey: 'blood_pressure',
+        fieldId: 'headache',
+        toKey: 'headache_diary',
+      },
+    ],
+  },
   {
     key: 'catalog_log',
     title: 'Каталог и журнал',
@@ -1304,30 +1328,6 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
         toKey: 'games_done',
         label: 'Пройдено',
         fieldMap: { title: 'title', platform: 'platform', cover: 'cover' },
-      },
-    ],
-  },
-  {
-    key: 'health',
-    title: 'Головные боли и давление',
-    icon: '🩺',
-    description:
-      'Дневник приступов и журнал давления. Списки связаны в обе стороны: к приступу — несколько измерений, к измерению — приступ.',
-    hint: 'Создаются оба списка. В приступе поле «Давление» уже смотрит на журнал, в измерении «Приступ» — на дневник.',
-    lists: [
-      TEMPLATES.find((t) => t.key === 'headache_diary')!,
-      TEMPLATES.find((t) => t.key === 'blood_pressure')!,
-    ],
-    relations: [
-      {
-        fromKey: 'headache_diary',
-        fieldId: 'bp_readings',
-        toKey: 'blood_pressure',
-      },
-      {
-        fromKey: 'blood_pressure',
-        fieldId: 'headache',
-        toKey: 'headache_diary',
       },
     ],
   },

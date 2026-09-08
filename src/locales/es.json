@@ -563,7 +563,15 @@
       "title_cover": "Título y portada",
       "media": "Tarjeta con portada"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Resumen plegado",
+    "sublistSummaryModes": {
+      "rows": "Número de filas, o la única fila",
+      "peak_span": "Pico y tramo de tiempo"
+    },
+    "sublistPeakField": "Campo del pico",
+    "sublistStartField": "Campo de inicio",
+    "sublistEndField": "Campo de fin"
   },
   "fieldTypes": {
     "text": "Texto",
@@ -625,7 +633,12 @@
     "pickItem": "Elige un elemento",
     "pickUser": "Elige una persona",
     "noRelated": "Elige primero una lista relacionada en el esquema",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Fila {n}",
+    "sublistRows": "{n} entradas",
+    "sublistPeak": "pico {value}",
+    "sublistPeakSpan": "pico {value} · {span}",
+    "sublistExpand": "Mostrar filas anidadas"
   },
   "typeHint": {
     "text": "Limita la longitud si lo necesitas.",
@@ -751,6 +764,24 @@
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
       "example": "Tap Finished → the game is in the catalogue, dated today."
+    },
+    "headache_diary": {
+      "title": "Diario de dolor de cabeza",
+      "description": "Ataques con intensidad en el tiempo, síntomas, medicación, esfuerzo y vínculo con la tensión.",
+      "hint": "La intensidad es una sublista: plegada muestra el pico y el inicio–fin. El pack Salud la enlaza con la tensión.",
+      "example": "Pico 8 · 08:20–14:45; aura y náuseas; ibuprofeno 400 mg a las 08:40, efecto a las 09:10."
+    },
+    "blood_pressure": {
+      "title": "Tensión arterial",
+      "description": "Mediciones con pulso, foto, postura, cafeína, sueño, estrés y enlace a un ataque.",
+      "hint": "Sistólica, diastólica y pulso alimentan los gráficos. Enlaza una medición con una fila del diario.",
+      "example": "8 sep 08:15, 148/92, pulso 78, sentado, un poco de café, ligado a la migraña de la mañana."
+    },
+    "pack_health": {
+      "title": "Dolor de cabeza y tensión",
+      "description": "Dos listas enlazadas: diario de ataques y registro de tensión. Relaciones en ambos sentidos.",
+      "hint": "Crea ambas listas. Un ataque puede llevar varias mediciones; una medición abre el ataque.",
+      "example": "Migraña matutina ← dos mediciones (alta por la mañana, más baja tras la pastilla)."
     }
   },
   "filters": {

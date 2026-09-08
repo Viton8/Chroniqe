@@ -6,11 +6,13 @@ import { FieldWrap, Input, Textarea } from '../ui/Input'
 import {
   FIELD_TYPES,
   RELATION_DISPLAYS,
+  SUBLIST_SUMMARY_MODES,
   type FieldDef,
   type FieldType,
   type ListSchema,
   type RelationDisplay,
   type SublistField,
+  type SublistSummaryMode,
 } from '../../types/domain'
 import { NESTED_FIELD_TYPES, subfieldAsDef } from '../../lib/fields'
 import { newField } from '../../lib/templates'
@@ -41,12 +43,16 @@ export default function SchemaEditor({
   onChange: (schema: ListSchema) => void
 }) {
   const { t } = usePrefs()
-  const [openIds, setOpenIds] = useState<string[]>(() => schema.fields.slice(0, 2).map((field) => field.id))
+  const [openIds, setOpenIds] = useState<string[]>(() =>
+    schema.fields.slice(0, 2).map((field) => field.id),
+  )
 
   const updateField = (id: string, patch: Partial<FieldDef>) => {
     onChange({
       ...schema,
-      fields: schema.fields.map((field) => (field.id === id ? { ...field, ...patch } : field)),
+      fields: schema.fields.map((field) =>
+        field.id === id ? { ...field, ...patch } : field,
+      ),
     })
   }
 
@@ -82,14 +88,19 @@ export default function SchemaEditor({
         {schema.fields.map((field, index) => {
           const open = openIds.includes(field.id)
           return (
-            <article key={field.id} className="rounded-2xl border border-line bg-paper p-4">
+            <article
+              key={field.id}
+              className="rounded-2xl border border-line bg-paper p-4"
+            >
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 text-sm font-medium"
                   onClick={() =>
                     setOpenIds((prev) =>
-                      prev.includes(field.id) ? prev.filter((id) => id !== field.id) : [...prev, field.id],
+                      prev.includes(field.id)
+                        ? prev.filter((id) => id !== field.id)
+                        : [...prev, field.id],
                     )
                   }
                 >
@@ -97,7 +108,9 @@ export default function SchemaEditor({
                   <span>
                     {index + 1}. {field.name || t('schema.newField')}
                   </span>
-                  <span className="text-xs font-normal text-muted">{t(`fieldTypes.${field.type}`)}</span>
+                  <span className="text-xs font-normal text-muted">
+                    {t(`fieldTypes.${field.type}`)}
+                  </span>
                 </button>
                 <div className="ml-auto flex flex-wrap gap-1">
                   <Button
@@ -118,7 +131,11 @@ export default function SchemaEditor({
                   >
                     ↓
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => duplicateField(field)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => duplicateField(field)}
+                  >
                     <Copy size={14} /> {t('schema.duplicateField')}
                   </Button>
                   <Button
@@ -127,11 +144,25 @@ export default function SchemaEditor({
                     onClick={() =>
                       onChange({
                         ...schema,
-                        fields: schema.fields.filter((row) => row.id !== field.id),
-                        titleFieldId: schema.titleFieldId === field.id ? undefined : schema.titleFieldId,
-                        imageFieldId: schema.imageFieldId === field.id ? undefined : schema.imageFieldId,
-                        dateFieldId: schema.dateFieldId === field.id ? undefined : schema.dateFieldId,
-                        groupFieldId: schema.groupFieldId === field.id ? undefined : schema.groupFieldId,
+                        fields: schema.fields.filter(
+                          (row) => row.id !== field.id,
+                        ),
+                        titleFieldId:
+                          schema.titleFieldId === field.id
+                            ? undefined
+                            : schema.titleFieldId,
+                        imageFieldId:
+                          schema.imageFieldId === field.id
+                            ? undefined
+                            : schema.imageFieldId,
+                        dateFieldId:
+                          schema.dateFieldId === field.id
+                            ? undefined
+                            : schema.dateFieldId,
+                        groupFieldId:
+                          schema.groupFieldId === field.id
+                            ? undefined
+                            : schema.groupFieldId,
                       })
                     }
                   >
@@ -143,7 +174,12 @@ export default function SchemaEditor({
                 <div className="mt-3 space-y-3">
                   <div className="grid gap-3 sm:grid-cols-2">
                     <FieldWrap label={t('schema.name')}>
-                      <Input value={field.name} onChange={(e) => updateField(field.id, { name: e.target.value })} />
+                      <Input
+                        value={field.name}
+                        onChange={(e) =>
+                          updateField(field.id, { name: e.target.value })
+                        }
+                      />
                     </FieldWrap>
                     <FieldWrap label={t('schema.type')}>
                       <select
@@ -152,7 +188,10 @@ export default function SchemaEditor({
                         onChange={(e) =>
                           updateField(field.id, {
                             type: e.target.value as FieldType,
-                            config: { ...field.config, defaultValue: undefined },
+                            config: {
+                              ...field.config,
+                              defaultValue: undefined,
+                            },
                           })
                         }
                       >
@@ -164,16 +203,25 @@ export default function SchemaEditor({
                       </select>
                     </FieldWrap>
                   </div>
-                  <FieldWrap label={t('schema.description')} hint={t('schema.descriptionHint')}>
+                  <FieldWrap
+                    label={t('schema.description')}
+                    hint={t('schema.descriptionHint')}
+                  >
                     <Textarea
                       value={field.description ?? ''}
-                      onChange={(e) => updateField(field.id, { description: e.target.value || undefined })}
+                      onChange={(e) =>
+                        updateField(field.id, {
+                          description: e.target.value || undefined,
+                        })
+                      }
                     />
                   </FieldWrap>
                   <DefaultValueEditor
                     field={field}
                     onChange={(defaultValue) =>
-                      updateField(field.id, { config: { ...field.config, defaultValue } })
+                      updateField(field.id, {
+                        config: { ...field.config, defaultValue },
+                      })
                     }
                   />
                   <div className="flex flex-wrap gap-4">
@@ -181,7 +229,9 @@ export default function SchemaEditor({
                       <input
                         type="checkbox"
                         checked={Boolean(field.required)}
-                        onChange={(e) => updateField(field.id, { required: e.target.checked })}
+                        onChange={(e) =>
+                          updateField(field.id, { required: e.target.checked })
+                        }
                       />
                       {t('schema.required')}
                     </label>
@@ -189,7 +239,9 @@ export default function SchemaEditor({
                       <input
                         type="checkbox"
                         checked={Boolean(field.unique)}
-                        onChange={(e) => updateField(field.id, { unique: e.target.checked })}
+                        onChange={(e) =>
+                          updateField(field.id, { unique: e.target.checked })
+                        }
                       />
                       {t('schema.unique')}
                     </label>
@@ -197,14 +249,23 @@ export default function SchemaEditor({
                       <input
                         type="checkbox"
                         checked={Boolean(field.hidden)}
-                        onChange={(e) => updateField(field.id, { hidden: e.target.checked })}
+                        onChange={(e) =>
+                          updateField(field.id, { hidden: e.target.checked })
+                        }
                       />
                       {t('schema.hidden')}
                     </label>
                   </div>
-                  <Constraints field={field} onChange={(config) => updateField(field.id, { config })} />
+                  <Constraints
+                    field={field}
+                    onChange={(config) => updateField(field.id, { config })}
+                  />
                   {HINT_TYPES.includes(field.type) ? (
-                    <Hint compact title={t(`typeHint.${field.type}`)} example={t(`typeHint.${field.type}Ex`)} />
+                    <Hint
+                      compact
+                      title={t(`typeHint.${field.type}`)}
+                      example={t(`typeHint.${field.type}Ex`)}
+                    />
                   ) : null}
                 </div>
               ) : null}
@@ -238,14 +299,18 @@ export default function SchemaEditor({
         <MetaSelect
           label={t('schema.dateField')}
           value={schema.dateFieldId ?? ''}
-          fields={schema.fields.filter((field) => field.type === 'date' || field.type === 'datetime')}
+          fields={schema.fields.filter(
+            (field) => field.type === 'date' || field.type === 'datetime',
+          )}
           onChange={(dateFieldId) => onChange({ ...schema, dateFieldId })}
         />
         <MetaSelect
           label={t('schema.groupField')}
           value={schema.groupFieldId ?? ''}
           fields={schema.fields.filter((field) =>
-            ['select', 'multiselect', 'tags', 'boolean', 'checkbox'].includes(field.type),
+            ['select', 'multiselect', 'tags', 'boolean', 'checkbox'].includes(
+              field.type,
+            ),
           )}
           onChange={(groupFieldId) => onChange({ ...schema, groupFieldId })}
         />
@@ -263,13 +328,21 @@ function DefaultValueEditor({
 }) {
   const { t } = usePrefs()
   const value = field.config?.defaultValue
-  if (['image', 'file', 'sublist', 'relation', 'user', 'multi_rating'].includes(field.type)) {
+  if (
+    ['image', 'file', 'sublist', 'relation', 'user', 'multi_rating'].includes(
+      field.type,
+    )
+  ) {
     return null
   }
   if (field.type === 'boolean' || field.type === 'checkbox') {
     return (
       <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={Boolean(value)} onChange={(e) => onChange(e.target.checked)} />
+        <input
+          type="checkbox"
+          checked={Boolean(value)}
+          onChange={(e) => onChange(e.target.checked)}
+        />
         {t('schema.default')}
       </label>
     )
@@ -316,7 +389,9 @@ function DefaultValueEditor({
         <Input
           type="number"
           value={value == null || value === '' ? '' : String(value)}
-          onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))}
+          onChange={(e) =>
+            onChange(e.target.value === '' ? undefined : Number(e.target.value))
+          }
         />
       </FieldWrap>
     )
@@ -326,7 +401,11 @@ function DefaultValueEditor({
       <FieldWrap label={t('schema.default')}>
         <Input
           type={field.type === 'date' ? 'date' : 'datetime-local'}
-          value={field.type === 'date' ? asDateInputValue(value) : asDatetimeInputValue(value)}
+          value={
+            field.type === 'date'
+              ? asDateInputValue(value)
+              : asDatetimeInputValue(value)
+          }
           onChange={(e) => onChange(e.target.value || undefined)}
         />
       </FieldWrap>
@@ -334,7 +413,10 @@ function DefaultValueEditor({
   }
   return (
     <FieldWrap label={t('schema.default')}>
-      <Input value={String(value ?? '')} onChange={(e) => onChange(e.target.value || undefined)} />
+      <Input
+        value={String(value ?? '')}
+        onChange={(e) => onChange(e.target.value || undefined)}
+      />
     </FieldWrap>
   )
 }
@@ -386,14 +468,22 @@ function Constraints({
           <Input
             type="number"
             value={cfg.minLength ?? ''}
-            onChange={(e) => set({ minLength: e.target.value ? Number(e.target.value) : undefined })}
+            onChange={(e) =>
+              set({
+                minLength: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
           />
         </FieldWrap>
         <FieldWrap label={t('schema.maxChars')}>
           <Input
             type="number"
             value={cfg.maxLength ?? ''}
-            onChange={(e) => set({ maxLength: e.target.value ? Number(e.target.value) : undefined })}
+            onChange={(e) =>
+              set({
+                maxLength: e.target.value ? Number(e.target.value) : undefined,
+              })
+            }
           />
         </FieldWrap>
         <FieldWrap label={t('schema.placeholder')}>
@@ -419,14 +509,18 @@ function Constraints({
           <Input
             type="number"
             value={cfg.min ?? ''}
-            onChange={(e) => set({ min: e.target.value ? Number(e.target.value) : undefined })}
+            onChange={(e) =>
+              set({ min: e.target.value ? Number(e.target.value) : undefined })
+            }
           />
         </FieldWrap>
         <FieldWrap label={t('schema.to')}>
           <Input
             type="number"
             value={cfg.max ?? ''}
-            onChange={(e) => set({ max: e.target.value ? Number(e.target.value) : undefined })}
+            onChange={(e) =>
+              set({ max: e.target.value ? Number(e.target.value) : undefined })
+            }
           />
         </FieldWrap>
         {field.type.includes('rating') ? (
@@ -454,7 +548,10 @@ function Constraints({
                 .split(',')
                 .map((s) => s.trim())
                 .filter(Boolean)
-                .map((label) => ({ value: label.toLowerCase().replaceAll(' ', '_'), label })),
+                .map((label) => ({
+                  value: label.toLowerCase().replaceAll(' ', '_'),
+                  label,
+                })),
             })
           }
         />
@@ -484,10 +581,16 @@ function Constraints({
       <div className="mt-3 space-y-3">
         <p className="text-xs text-muted">{t('schema.nestedLead')}</p>
         {sub.map((sf, i) => (
-          <div key={sf.id} className="space-y-2 rounded-xl border border-line p-3">
+          <div
+            key={sf.id}
+            className="space-y-2 rounded-xl border border-line p-3"
+          >
             <div className="grid gap-2 sm:grid-cols-2">
               <FieldWrap label={t('schema.name')}>
-                <Input value={sf.name} onChange={(e) => patchSub(i, { ...sf, name: e.target.value })} />
+                <Input
+                  value={sf.name}
+                  onChange={(e) => patchSub(i, { ...sf, name: e.target.value })}
+                />
               </FieldWrap>
               <FieldWrap label={t('schema.type')}>
                 <select
@@ -513,7 +616,9 @@ function Constraints({
               <input
                 type="checkbox"
                 checked={Boolean(sf.required)}
-                onChange={(e) => patchSub(i, { ...sf, required: e.target.checked })}
+                onChange={(e) =>
+                  patchSub(i, { ...sf, required: e.target.checked })
+                }
               />
               {t('schema.required')}
             </label>
@@ -524,7 +629,9 @@ function Constraints({
             <button
               type="button"
               className={cn('text-xs text-rose-700')}
-              onClick={() => set({ subfields: sub.filter((_, idx) => idx !== i) })}
+              onClick={() =>
+                set({ subfields: sub.filter((_, idx) => idx !== i) })
+              }
             >
               {t('schema.deleteField')}
             </button>
@@ -536,12 +643,129 @@ function Constraints({
           onClick={() => {
             const nf = newField('text')
             set({
-              subfields: [...sub, { id: nf.id, key: nf.key, name: t('schema.subfield'), type: 'text' }],
+              subfields: [
+                ...sub,
+                {
+                  id: nf.id,
+                  key: nf.key,
+                  name: t('schema.subfield'),
+                  type: 'text',
+                },
+              ],
             })
           }}
         >
           {t('schema.subfield')}
         </Button>
+        {sub.length ? (
+          <div className="grid gap-2 sm:grid-cols-2">
+            <FieldWrap label={t('schema.sublistSummary')}>
+              <select
+                className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+                value={cfg.sublistSummary?.mode ?? 'rows'}
+                onChange={(e) => {
+                  const mode = e.target.value as SublistSummaryMode
+                  set({
+                    sublistSummary:
+                      mode === 'rows'
+                        ? { mode: 'rows' }
+                        : {
+                            mode,
+                            valueFieldId:
+                              cfg.sublistSummary?.valueFieldId ?? sub[0]?.id,
+                            startFieldId: cfg.sublistSummary?.startFieldId,
+                            endFieldId: cfg.sublistSummary?.endFieldId,
+                          },
+                  })
+                }}
+              >
+                {SUBLIST_SUMMARY_MODES.map((mode) => (
+                  <option key={mode} value={mode}>
+                    {t(`schema.sublistSummaryModes.${mode}`)}
+                  </option>
+                ))}
+              </select>
+            </FieldWrap>
+            {cfg.sublistSummary?.mode === 'peak_span' ? (
+              <>
+                <FieldWrap label={t('schema.sublistPeakField')}>
+                  <select
+                    className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+                    value={cfg.sublistSummary.valueFieldId ?? ''}
+                    onChange={(e) =>
+                      set({
+                        sublistSummary: {
+                          ...cfg.sublistSummary,
+                          mode: 'peak_span',
+                          valueFieldId: e.target.value || undefined,
+                        },
+                      })
+                    }
+                  >
+                    <option value="">—</option>
+                    {sub.map((sf) => (
+                      <option key={sf.id} value={sf.id}>
+                        {sf.name}
+                      </option>
+                    ))}
+                  </select>
+                </FieldWrap>
+                <FieldWrap label={t('schema.sublistStartField')}>
+                  <select
+                    className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+                    value={cfg.sublistSummary.startFieldId ?? ''}
+                    onChange={(e) =>
+                      set({
+                        sublistSummary: {
+                          ...cfg.sublistSummary,
+                          mode: 'peak_span',
+                          startFieldId: e.target.value || undefined,
+                        },
+                      })
+                    }
+                  >
+                    <option value="">—</option>
+                    {sub
+                      .filter(
+                        (sf) => sf.type === 'date' || sf.type === 'datetime',
+                      )
+                      .map((sf) => (
+                        <option key={sf.id} value={sf.id}>
+                          {sf.name}
+                        </option>
+                      ))}
+                  </select>
+                </FieldWrap>
+                <FieldWrap label={t('schema.sublistEndField')}>
+                  <select
+                    className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+                    value={cfg.sublistSummary.endFieldId ?? ''}
+                    onChange={(e) =>
+                      set({
+                        sublistSummary: {
+                          ...cfg.sublistSummary,
+                          mode: 'peak_span',
+                          endFieldId: e.target.value || undefined,
+                        },
+                      })
+                    }
+                  >
+                    <option value="">—</option>
+                    {sub
+                      .filter(
+                        (sf) => sf.type === 'date' || sf.type === 'datetime',
+                      )
+                      .map((sf) => (
+                        <option key={sf.id} value={sf.id}>
+                          {sf.name}
+                        </option>
+                      ))}
+                  </select>
+                </FieldWrap>
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     )
   }
@@ -580,7 +804,9 @@ function LinkConstraints({
             <select
               className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
               value={cfg.relatedListId ?? ''}
-              onChange={(e) => set({ relatedListId: e.target.value || undefined })}
+              onChange={(e) =>
+                set({ relatedListId: e.target.value || undefined })
+              }
             >
               <option value="">{t('fields.noRelated')}</option>
               {lists.map((row) => (
@@ -596,7 +822,8 @@ function LinkConstraints({
               value={cfg.relationDisplay ?? 'title'}
               onChange={(e) =>
                 set({
-                  relationDisplay: (e.target.value as RelationDisplay) || 'title',
+                  relationDisplay:
+                    (e.target.value as RelationDisplay) || 'title',
                 })
               }
             >

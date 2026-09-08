@@ -563,7 +563,15 @@
       "title_cover": "Назва і вокладка",
       "media": "Картка з вокладкай"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Зводка ў згорнутым выглядзе",
+    "sublistSummaryModes": {
+      "rows": "Колькасць радкоў або адзіны радок",
+      "peak_span": "Пік і прамежак часу"
+    },
+    "sublistPeakField": "Поле піку",
+    "sublistStartField": "Поле пачатку",
+    "sublistEndField": "Поле канца"
   },
   "fieldTypes": {
     "text": "Тэкст",
@@ -625,7 +633,12 @@
     "pickItem": "Выберыце запіс",
     "pickUser": "Выберыце чалавека",
     "noRelated": "Спачатку выберыце звязаны спіс у схеме",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Радок {n}",
+    "sublistRows": "{n} запісаў",
+    "sublistPeak": "пік {value}",
+    "sublistPeakSpan": "пік {value} · {span}",
+    "sublistExpand": "Паказаць укладзеныя радкі"
   },
   "typeHint": {
     "text": "Пры патрэбе абмяжуйце даўжыню.",
@@ -751,6 +764,24 @@
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
       "example": "Tap Finished → the game is in the catalogue, dated today."
+    },
+    "headache_diary": {
+      "title": "Дзённік галаўных боляў",
+      "description": "Прыступы са шкалой болю ў часе, сімптомамі, лекамі, нагрузкай і сувяззю з ціскам.",
+      "hint": "Інтэнсіўнасць — укладзены спіс: згорнуты паказвае пік і пачатак–канец. Набор звяжа дзённік з ціскам.",
+      "example": "Пік 8 · 08:20–14:45; аўра і млоснасць; ібупрафен 400 мг у 08:40, эфект у 09:10."
+    },
+    "blood_pressure": {
+      "title": "Ціск",
+      "description": "Вымярэнні з пульсам, фота, становішчам, кафеінам, сном, стрэсам і спасылкай на прыступ болю.",
+      "hint": "Сісталічны, дыясталічны і пульс ідуць на графікі. Прывяжыце вымярэнне да запісу дзённіка.",
+      "example": "8 вер 08:15, 148/92, пульс 78, седзячы, трохі кавы, сувязь з ранішняй мігрэнню."
+    },
+    "pack_health": {
+      "title": "Галаўныя болі і ціск",
+      "description": "Два звязаныя спісы: дзённік прыступаў і часопіс ціску. Сувязі ў абодва бакі.",
+      "hint": "Ствараюцца абодва спісы. Да прыступу можна прымацаваць некалькі вымярэнняў.",
+      "example": "Ранішняя мігрэнь ← два вымярэнні (раніцай высокае, пасля таблеткі ніжэй)."
     }
   },
   "filters": {

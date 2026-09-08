@@ -1,4 +1,5 @@
 import { itemDateIso, itemScore } from './filters'
+import { isPeakSpanSublist } from './fields'
 import { todayIso } from './cn'
 import type { FieldDef, ItemRating, ItemRow, ListSchema } from '../types/domain'
 
@@ -42,19 +43,22 @@ export function buildInsights(
   const checked = items.filter((item) => item.is_checked).length
   const ratingField =
     schema.fields.find((field) => field.type === 'multi_rating') ??
-    schema.fields.find((field) => field.type === 'rating')
+    schema.fields.find((field) => field.type === 'rating') ??
+    schema.fields.find((field) => isPeakSpanSublist(field))
   const groupField =
     schema.fields.find((field) => field.id === schema.groupFieldId) ??
     schema.fields.find((field) => field.type === 'select')
   const dateField =
     schema.fields.find((field) => field.id === schema.dateFieldId) ??
-    schema.fields.find((field) => field.type === 'date' || field.type === 'datetime')
+    schema.fields.find(
+      (field) => field.type === 'date' || field.type === 'datetime',
+    )
 
   let ratingSum = 0
   let ratingCount = 0
   if (ratingField) {
     for (const item of items) {
-      const score = itemScore(item, ratingField.id, ratings)
+      const score = itemScore(item, ratingField.id, ratings, ratingField)
       if (score != null) {
         ratingSum += score
         ratingCount += 1
@@ -89,7 +93,10 @@ export function buildInsights(
   const today = todayIso()
   const dated: DatedInsight[] = dateField
     ? items
-        .map((item) => ({ item, date: itemDateIso(item.values[dateField.id]) ?? '' }))
+        .map((item) => ({
+          item,
+          date: itemDateIso(item.values[dateField.id]) ?? '',
+        }))
         .filter((row) => row.date)
     : []
 
@@ -98,8 +105,12 @@ export function buildInsights(
     checked,
     open: items.length - checked,
     completion: items.length ? Math.round((checked / items.length) * 100) : 0,
-    addedThisWeek: items.filter((item) => new Date(item.created_at).getTime() >= weekAgo).length,
-    addedThisMonth: items.filter((item) => new Date(item.created_at).getTime() >= monthAgo).length,
+    addedThisWeek: items.filter(
+      (item) => new Date(item.created_at).getTime() >= weekAgo,
+    ).length,
+    addedThisMonth: items.filter(
+      (item) => new Date(item.created_at).getTime() >= monthAgo,
+    ).length,
     avgRating: ratingCount ? ratingSum / ratingCount : null,
     ratingCount,
     ratingField,

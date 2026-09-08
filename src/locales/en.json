@@ -563,7 +563,15 @@
       "title_cover": "Title and cover",
       "media": "Cover card"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Collapsed summary",
+    "sublistSummaryModes": {
+      "rows": "Row count, or the only row",
+      "peak_span": "Peak value and time span"
+    },
+    "sublistPeakField": "Peak field",
+    "sublistStartField": "Start time field",
+    "sublistEndField": "End time field"
   },
   "fieldTypes": {
     "text": "Text",
@@ -625,7 +633,12 @@
     "pickItem": "Pick an item",
     "pickUser": "Pick a person",
     "noRelated": "Choose a related list in the schema first",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Row {n}",
+    "sublistRows": "{n} entries",
+    "sublistPeak": "peak {value}",
+    "sublistPeakSpan": "peak {value} · {span}",
+    "sublistExpand": "Show nested rows"
   },
   "typeHint": {
     "text": "Cap the length if you need to.",
@@ -751,6 +764,24 @@
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
       "example": "Tap Finished → the game is in the catalogue, dated today."
+    },
+    "headache_diary": {
+      "title": "Headache diary",
+      "description": "Attacks with a pain timeline, symptoms, medication, activity, and optional blood-pressure links.",
+      "hint": "Intensity is a nested list: collapsed it shows the peak and start–end; open it for every interval. The Health pack wires blood pressure.",
+      "example": "Peak 8 · 08:20–14:45; aura and nausea; ibuprofen 400 mg at 08:40, relief at 09:10."
+    },
+    "blood_pressure": {
+      "title": "Blood pressure",
+      "description": "Timestamped readings with pulse, photo, posture, caffeine, sleep, stress, and a link to a headache attack.",
+      "hint": "Systolic, diastolic and pulse feed the charts. Link a reading to a diary row to see pressure around an attack.",
+      "example": "8 Sep 08:15, 148/92, pulse 78, sitting, a little coffee, linked to the morning migraine."
+    },
+    "pack_health": {
+      "title": "Headaches and blood pressure",
+      "description": "Two linked lists: headache diary and blood-pressure log. Relations go both ways.",
+      "hint": "Creates both lists. An attack can attach several readings; a reading can open the attack.",
+      "example": "Morning migraine ← two readings (high in the morning, lower after a pill)."
     }
   },
   "filters": {

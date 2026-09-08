@@ -7,6 +7,7 @@ import type {
   ListSchema,
 } from '../types/domain'
 import { displayValue } from './display'
+import { isPeakSpanSublist, sublistPeak } from './fields'
 import { msg } from './i18n'
 
 export interface ChartPoint {
@@ -16,7 +17,10 @@ export interface ChartPoint {
   extra?: string
 }
 
-export function fieldById(schema: ListSchema, id?: string): FieldDef | undefined {
+export function fieldById(
+  schema: ListSchema,
+  id?: string,
+): FieldDef | undefined {
   return schema.fields.find((f) => f.id === id)
 }
 
@@ -27,8 +31,11 @@ function numericFromValue(
   itemId: string,
 ): number | null {
   if (!field) return null
+  if (isPeakSpanSublist(field)) return sublistPeak(field, value)
   if (field.type === 'multi_rating') {
-    const mine = ratings.filter((r) => r.item_id === itemId && r.field_id === field.id)
+    const mine = ratings.filter(
+      (r) => r.item_id === itemId && r.field_id === field.id,
+    )
     if (!mine.length) return null
     return mine.reduce((s, r) => s + Number(r.value), 0) / mine.length
   }
@@ -52,7 +59,9 @@ export function buildChartSeries(
     const counts = new Map<string, number>()
     for (const item of items) {
       const raw = groupField ? item.values[groupField.id] : null
-      const key = groupField ? displayValue(groupField, raw, ratings, item.id) : '—'
+      const key = groupField
+        ? displayValue(groupField, raw, ratings, item.id)
+        : '—'
       counts.set(key || '—', (counts.get(key || '—') ?? 0) + 1)
     }
     return [...counts.entries()].map(([label, value]) => ({ label, value }))
@@ -60,23 +69,45 @@ export function buildChartSeries(
 
   if (type === 'kpi') {
     const values = items
-      .map((item) => numericFromValue(valueField, item.values[valueField?.id ?? ''], ratings, item.id))
+      .map((item) =>
+        numericFromValue(
+          valueField,
+          item.values[valueField?.id ?? ''],
+          ratings,
+          item.id,
+        ),
+      )
       .filter((n): n is number => n != null)
-    const avg = values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0
+    const avg = values.length
+      ? values.reduce((a, b) => a + b, 0) / values.length
+      : 0
     return [
       { label: msg('charts.records'), value: items.length },
       { label: msg('charts.average'), value: Number(avg.toFixed(2)) },
-      { label: msg('charts.checked'), value: items.filter((i) => i.is_checked).length },
+      {
+        label: msg('charts.checked'),
+        value: items.filter((i) => i.is_checked).length,
+      },
     ]
   }
 
   const buckets = new Map<string, number[]>()
   for (const item of items) {
-    const label = axisLabel(dateField, dateField ? item.values[dateField.id] : item.created_at, ratings, item.id)
+    const label = axisLabel(
+      dateField,
+      dateField ? item.values[dateField.id] : item.created_at,
+      ratings,
+      item.id,
+    )
     const n =
       agg === 'count'
         ? 1
-        : numericFromValue(valueField, item.values[valueField?.id ?? ''], ratings, item.id)
+        : numericFromValue(
+            valueField,
+            item.values[valueField?.id ?? ''],
+            ratings,
+            item.id,
+          )
     if (n == null) continue
     const arr = buckets.get(label) ?? []
     arr.push(n)
@@ -112,7 +143,9 @@ function axisLabel(
   if (field.type === 'date' || field.type === 'datetime') {
     if (value == null || value === '') return '—'
     const raw = String(value)
-    return field.type === 'date' ? raw.slice(0, 10) : raw.slice(0, 16).replace('T', ' ')
+    return field.type === 'date'
+      ? raw.slice(0, 10)
+      : raw.slice(0, 16).replace('T', ' ')
   }
   return displayValue(field, value, ratings, itemId)
 }
@@ -121,7 +154,11 @@ function compareAxisLabels(a: string, b: string, field?: FieldDef): number {
   if (!field || field.type === 'date' || field.type === 'datetime') {
     return a.localeCompare(b)
   }
-  if (field.type === 'number' || field.type === 'integer' || field.type === 'rating') {
+  if (
+    field.type === 'number' ||
+    field.type === 'integer' ||
+    field.type === 'rating'
+  ) {
     const na = Number(a)
     const nb = Number(b)
     if (Number.isFinite(na) && Number.isFinite(nb) && na !== nb) return na - nb

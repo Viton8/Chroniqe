@@ -1,6 +1,12 @@
 import { useEffect, useState } from 'react'
 import { Star } from 'lucide-react'
-import type { FieldDef, ItemRating, ItemRow, ListRow, Profile } from '../../types/domain'
+import type {
+  FieldDef,
+  ItemRating,
+  ItemRow,
+  ListRow,
+  Profile,
+} from '../../types/domain'
 import { FieldWrap, Input, Textarea } from '../ui/Input'
 import {
   fetchFriendships,
@@ -12,8 +18,18 @@ import {
   uploadListFile,
   upsertRating,
 } from '../../services/api'
-import { asDateInputValue, asDatetimeInputValue, cn, titleFromValues } from '../../lib/cn'
-import { emptySublistRow, subfieldAsDef } from '../../lib/fields'
+import {
+  asDateInputValue,
+  asDatetimeInputValue,
+  cn,
+  titleFromValues,
+} from '../../lib/cn'
+import {
+  emptySublistRow,
+  isPeakSpanSublist,
+  subfieldAsDef,
+} from '../../lib/fields'
+import { summarizeSublist } from '../../lib/display'
 import { resolveCoverFieldId } from '../../lib/files'
 import { refId, refIds, refLabel } from '../../lib/refs'
 import { otherFriend } from '../../lib/friends'
@@ -66,9 +82,12 @@ export default function FieldInput(props: Props) {
             step={field.type === 'integer' ? 1 : 'any'}
             min={cfg.min}
             max={cfg.max}
+            placeholder={cfg.placeholder}
             value={value == null ? '' : String(value)}
             disabled={disabled}
-            onChange={(e) => onChange(e.target.value === '' ? null : Number(e.target.value))}
+            onChange={(e) =>
+              onChange(e.target.value === '' ? null : Number(e.target.value))
+            }
           />
         </FieldWrap>
       )
@@ -78,7 +97,11 @@ export default function FieldInput(props: Props) {
         <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
             type={field.type === 'date' ? 'date' : 'datetime-local'}
-            value={field.type === 'date' ? asDateInputValue(value) : asDatetimeInputValue(value)}
+            value={
+              field.type === 'date'
+                ? asDateInputValue(value)
+                : asDatetimeInputValue(value)
+            }
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
           />
@@ -97,10 +120,17 @@ export default function FieldInput(props: Props) {
             />
             {field.name}
           </span>
-          {field.description ? <span className="mt-1 block text-xs text-muted">{field.description}</span> : null}
+          {field.description ? (
+            <span className="mt-1 block text-xs text-muted">
+              {field.description}
+            </span>
+          ) : null}
         </label>
       )
-    case 'select':
+    case 'select': {
+      const selected = (cfg.options ?? []).find(
+        (o) => o.value === String(value ?? ''),
+      )
       return (
         <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <select
@@ -111,20 +141,35 @@ export default function FieldInput(props: Props) {
           >
             <option value="">—</option>
             {(cfg.options ?? []).map((o) => (
-              <option key={o.value} value={o.value}>
+              <option key={o.value} value={o.value} title={o.description}>
                 {o.label}
               </option>
             ))}
           </select>
+          {selected?.description ? (
+            <p className="mt-1 text-xs text-muted">{selected.description}</p>
+          ) : null}
         </FieldWrap>
       )
+    }
     case 'multiselect':
     case 'tags': {
       const selected = Array.isArray(value) ? (value as string[]) : []
       return (
-        <FieldWrap label={field.name} error={error} hint={fieldHint(field, field.type === 'tags' ? t('fields.tagEnter') : undefined)}>
+        <FieldWrap
+          label={field.name}
+          error={error}
+          hint={fieldHint(
+            field,
+            field.type === 'tags' ? t('fields.tagEnter') : undefined,
+          )}
+        >
           {field.type === 'tags' ? (
-            <TagEditor value={selected} disabled={disabled} onChange={onChange} />
+            <TagEditor
+              value={selected}
+              disabled={disabled}
+              onChange={onChange}
+            />
           ) : (
             <div className="flex flex-wrap gap-2">
               {(cfg.options ?? []).map((o) => {
@@ -134,8 +179,13 @@ export default function FieldInput(props: Props) {
                     key={o.value}
                     type="button"
                     disabled={disabled}
+                    title={o.description}
                     onClick={() =>
-                      onChange(on ? selected.filter((v) => v !== o.value) : [...selected, o.value])
+                      onChange(
+                        on
+                          ? selected.filter((v) => v !== o.value)
+                          : [...selected, o.value],
+                      )
                     }
                     className={cn(
                       'rounded-full px-3 py-1 text-xs ring-1 ring-line',
@@ -193,7 +243,13 @@ export default function FieldInput(props: Props) {
       return (
         <FieldWrap label={field.name} error={error} hint={fieldHint(field)}>
           <Input
-            type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'}
+            type={
+              field.type === 'email'
+                ? 'email'
+                : field.type === 'url'
+                  ? 'url'
+                  : 'text'
+            }
             value={String(value ?? '')}
             minLength={cfg.minLength}
             maxLength={cfg.maxLength}
@@ -249,11 +305,15 @@ function Stars({
         >
           <Star
             size={18}
-            className={n <= value ? 'fill-amber-400 text-amber-400' : 'text-line'}
+            className={
+              n <= value ? 'fill-amber-400 text-amber-400' : 'text-line'
+            }
           />
         </button>
       ))}
-      <span className="ml-2 text-xs text-muted">{value || '—'}/{max}</span>
+      <span className="ml-2 text-xs text-muted">
+        {value || '—'}/{max}
+      </span>
     </div>
   )
 }
@@ -273,9 +333,13 @@ function MultiRating({
     setLocal(ratings)
   }, [ratings])
 
-  const mine = local.find((r) => r.field_id === field.id && r.user_id === userId)
+  const mine = local.find(
+    (r) => r.field_id === field.id && r.user_id === userId,
+  )
   const all = local.filter((r) => r.field_id === field.id)
-  const avg = all.length ? all.reduce((s, r) => s + Number(r.value), 0) / all.length : 0
+  const avg = all.length
+    ? all.reduce((s, r) => s + Number(r.value), 0) / all.length
+    : 0
   const max = field.config?.ratingMax ?? 10
 
   return (
@@ -299,11 +363,21 @@ function MultiRating({
             profile: mine?.profile,
           }
           setLocal((prev) => {
-            const idx = prev.findIndex((r) => r.field_id === field.id && r.user_id === userId)
-            if (idx >= 0) return prev.map((r, i) => (i === idx ? { ...r, value: n, updated_at: next.updated_at } : r))
+            const idx = prev.findIndex(
+              (r) => r.field_id === field.id && r.user_id === userId,
+            )
+            if (idx >= 0)
+              return prev.map((r, i) =>
+                i === idx ? { ...r, value: n, updated_at: next.updated_at } : r,
+              )
             return [...prev, next]
           })
-          void upsertRating({ item_id: itemId, field_id: field.id, user_id: userId, value: n })
+          void upsertRating({
+            item_id: itemId,
+            field_id: field.id,
+            user_id: userId,
+            value: n,
+          })
             .then(() => onRatingChange?.(next))
             .catch(() => {
               setLocal(ratings)
@@ -315,8 +389,15 @@ function MultiRating({
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {all.map((r) => (
-          <span key={r.user_id} className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-xs">
-            <Avatar name={r.profile?.display_name || r.profile?.username || '?'} url={r.profile?.avatar_url} size={16} />
+          <span
+            key={r.user_id}
+            className="bg-ink/5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+          >
+            <Avatar
+              name={r.profile?.display_name || r.profile?.username || '?'}
+              url={r.profile?.avatar_url}
+              size={16}
+            />
             {r.profile?.username ?? t('fields.guest')} · {r.value}
           </span>
         ))}
@@ -325,11 +406,20 @@ function MultiRating({
   )
 }
 
-function FileField({ field, value, onChange, disabled, listId, userId }: Props) {
+function FileField({
+  field,
+  value,
+  onChange,
+  disabled,
+  listId,
+  userId,
+}: Props) {
   const { t } = usePrefs()
-  const meta = (value && typeof value === 'object' ? value : null) as
-    | { path?: string; name?: string; mime?: string }
-    | null
+  const meta = (value && typeof value === 'object' ? value : null) as {
+    path?: string
+    name?: string
+    mime?: string
+  } | null
   const [url, setUrl] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
@@ -347,15 +437,30 @@ function FileField({ field, value, onChange, disabled, listId, userId }: Props) 
   }, [meta?.path])
 
   return (
-    <FieldWrap label={field.name} error={err ?? undefined} hint={fieldHint(field, t('fields.fileHint'))}>
+    <FieldWrap
+      label={field.name}
+      error={err ?? undefined}
+      hint={fieldHint(field, t('fields.fileHint'))}
+    >
       {meta?.path && url && field.type === 'image' ? (
-        <img src={url} alt="" className="mb-2 h-28 w-28 rounded-xl object-cover" />
+        <img
+          src={url}
+          alt=""
+          className="mb-2 h-28 w-28 rounded-xl object-cover"
+        />
       ) : null}
-      {meta?.name ? <p className="mb-2 text-xs text-muted">{meta.name}</p> : null}
+      {meta?.name ? (
+        <p className="mb-2 text-xs text-muted">{meta.name}</p>
+      ) : null}
       <input
         type="file"
         disabled={disabled || busy || !listId || !userId}
-        accept={(field.config?.accept ?? (field.type === 'image' ? ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] : undefined))?.join(',')}
+        accept={(
+          field.config?.accept ??
+          (field.type === 'image'
+            ? ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+            : undefined)
+        )?.join(',')}
         onChange={async (e) => {
           const file = e.target.files?.[0]
           e.target.value = ''
@@ -426,18 +531,39 @@ function TagEditor({
   )
 }
 
-function SublistField({ field, value, onChange, disabled, listId, userId }: Props) {
+function SublistField({
+  field,
+  value,
+  onChange,
+  disabled,
+  listId,
+  userId,
+}: Props) {
   const { t } = usePrefs()
   const rows = Array.isArray(value) ? (value as Record<string, unknown>[]) : []
   const sub = field.config?.subfields ?? []
+  const summary = isPeakSpanSublist(field)
+    ? summarizeSublist(field, value)
+    : null
   return (
     <FieldWrap
       label={field.name}
       hint={fieldHint(field, t('fields.nestedHint'))}
     >
       <div className="space-y-3">
+        {summary?.peakLabel ? (
+          <p className="bg-ink/5 rounded-xl px-3 py-2 text-xs text-muted">
+            {summary.text}
+          </p>
+        ) : null}
         {rows.map((row, idx) => (
-          <div key={idx} className="space-y-3 rounded-xl border border-line p-3">
+          <div
+            key={idx}
+            className="space-y-3 rounded-xl border border-line p-3"
+          >
+            <p className="text-xs font-medium text-muted">
+              {t('fields.sublistRow', { n: idx + 1 })}
+            </p>
             {sub.map((sf) => (
               <FieldInput
                 key={sf.id}
@@ -447,7 +573,11 @@ function SublistField({ field, value, onChange, disabled, listId, userId }: Prop
                 listId={listId}
                 userId={userId}
                 onChange={(nextValue) => {
-                  onChange(rows.map((current, i) => (i === idx ? { ...current, [sf.id]: nextValue } : current)))
+                  onChange(
+                    rows.map((current, i) =>
+                      i === idx ? { ...current, [sf.id]: nextValue } : current,
+                    ),
+                  )
                 }}
               />
             ))}
@@ -462,7 +592,9 @@ function SublistField({ field, value, onChange, disabled, listId, userId }: Prop
             ) : null}
           </div>
         ))}
-        {!sub.length ? <p className="text-xs text-muted">{t('fields.nestedHint')}</p> : null}
+        {!sub.length ? (
+          <p className="text-xs text-muted">{t('fields.nestedHint')}</p>
+        ) : null}
         {!disabled ? (
           <button
             type="button"
@@ -488,11 +620,13 @@ function RelationField({ field, value, onChange, disabled, error }: Props) {
   useEffect(() => {
     if (!relatedId) return
     let cancelled = false
-    void Promise.all([fetchList(relatedId), fetchItems(relatedId)]).then(([nextList, items]) => {
-      if (cancelled) return
-      setList(nextList)
-      setRows(items)
-    })
+    void Promise.all([fetchList(relatedId), fetchItems(relatedId)]).then(
+      ([nextList, items]) => {
+        if (cancelled) return
+        setList(nextList)
+        setRows(items)
+      },
+    )
     return () => {
       cancelled = true
     }
@@ -500,14 +634,20 @@ function RelationField({ field, value, onChange, disabled, error }: Props) {
 
   if (!relatedId) {
     return (
-      <FieldWrap label={field.name} error={error} hint={fieldHint(field, t('fields.noRelated'))}>
+      <FieldWrap
+        label={field.name}
+        error={error}
+        hint={fieldHint(field, t('fields.noRelated'))}
+      >
         <p className="text-sm text-muted">{t('fields.noRelated')}</p>
       </FieldWrap>
     )
   }
 
   const coverFieldId = list ? resolveCoverFieldId(list.schema) : undefined
-  const coverField = coverFieldId ? list?.schema.fields.find((f) => f.id === coverFieldId) : undefined
+  const coverField = coverFieldId
+    ? list?.schema.fields.find((f) => f.id === coverFieldId)
+    : undefined
 
   const options = rows.map((item) => ({
     id: item.id,
@@ -531,7 +671,7 @@ function RelationField({ field, value, onChange, disabled, error }: Props) {
               <label
                 key={row.id}
                 className={cn(
-                  'flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 text-sm hover:bg-ink/5',
+                  'hover:bg-ink/5 flex cursor-pointer items-center gap-2 rounded-lg px-1.5 py-1 text-sm',
                   checked && 'bg-accent-soft/60',
                 )}
               >
@@ -548,7 +688,9 @@ function RelationField({ field, value, onChange, disabled, error }: Props) {
                             .map((id) => pick(id))
                             .filter(Boolean)
                       if (checked) {
-                        onChange(current.filter((item) => refId(item) !== row.id))
+                        onChange(
+                          current.filter((item) => refId(item) !== row.id),
+                        )
                       } else {
                         const next = pick(row.id)
                         onChange(next ? [...current, next] : current)
@@ -571,7 +713,9 @@ function RelationField({ field, value, onChange, disabled, error }: Props) {
               </label>
             )
           })}
-          {!options.length ? <p className="text-xs text-muted">{t('fields.pickItem')}</p> : null}
+          {!options.length ? (
+            <p className="text-xs text-muted">{t('fields.pickItem')}</p>
+          ) : null}
         </div>
       </FieldWrap>
     )
@@ -596,7 +740,15 @@ function RelationField({ field, value, onChange, disabled, error }: Props) {
   )
 }
 
-function UserField({ field, value, onChange, disabled, error, listId, userId }: Props) {
+function UserField({
+  field,
+  value,
+  onChange,
+  disabled,
+  error,
+  listId,
+  userId,
+}: Props) {
   const { t } = usePrefs()
   const { profile } = useAuth()
   const multi = Boolean(field.config?.allowMultiple)
@@ -616,7 +768,9 @@ function UserField({ field, value, onChange, disabled, error, listId, userId }: 
       for (const member of members) {
         if (member.profile) map.set(member.profile.id, member.profile)
       }
-      for (const row of friends.filter((friend) => friend.status === 'accepted')) {
+      for (const row of friends.filter(
+        (friend) => friend.status === 'accepted',
+      )) {
         const other = otherFriend(userId, row)
         if (other) map.set(other.id, other)
       }
@@ -646,7 +800,13 @@ function UserField({ field, value, onChange, disabled, error, listId, userId }: 
 
   const pick = (id: string) => {
     const hit = people.find((row) => row.id === id)
-    return hit ? { id: hit.id, name: hit.display_name || hit.username, username: hit.username } : null
+    return hit
+      ? {
+          id: hit.id,
+          name: hit.display_name || hit.username,
+          username: hit.username,
+        }
+      : null
   }
 
   const labelOf = (row: Profile) => row.display_name || `@${row.username}`
@@ -671,8 +831,7 @@ function UserField({ field, value, onChange, disabled, error, listId, userId }: 
                 onChange={(e) => {
                   const current = Array.isArray(value)
                     ? value
-                    : refIds(value)
-                        .map((id) => pick(id) ?? { id, name: id })
+                    : refIds(value).map((id) => pick(id) ?? { id, name: id })
                   if (e.target.checked) {
                     const next = pick(row.id)
                     onChange(next ? [...current, next] : current)

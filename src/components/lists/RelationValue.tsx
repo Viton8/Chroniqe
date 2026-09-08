@@ -33,31 +33,29 @@ export default function RelationValue({
   const relatedListId = field.config?.relatedListId
   const mode: RelationDisplay = field.config?.relationDisplay ?? 'title'
   const ids = refIds(value)
+  const idsKey = ids.join('|')
+  const loadKey = relatedListId && ids.length ? `${relatedListId}:${idsKey}` : null
   const [list, setList] = useState<ListRow | null>(null)
   const [byId, setById] = useState<Map<string, ItemRow>>(new Map())
-  const [ready, setReady] = useState(!relatedListId || !ids.length)
+  const [resolvedKey, setResolvedKey] = useState<string | null>(null)
+  const ready = loadKey === null || resolvedKey === loadKey
 
   useEffect(() => {
-    if (!relatedListId || !ids.length) {
-      setReady(true)
-      return
-    }
+    if (!relatedListId || !idsKey) return
+    const key = `${relatedListId}:${idsKey}`
     let cancelled = false
-    setReady(false)
     void Promise.all([loadRelatedList(relatedListId), loadRelatedItems(relatedListId)]).then(
       ([nextList, items]) => {
         if (cancelled) return
         setList(nextList)
         setById(new Map(items.map((item) => [item.id, item])))
-        setReady(true)
+        setResolvedKey(key)
       },
     )
     return () => {
       cancelled = true
     }
-    // ids joined — stable key for the selected set
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [relatedListId, ids.join('|')])
+  }, [relatedListId, idsKey])
 
   if (!ids.length) {
     return <span className={cn('text-muted', className)}>—</span>

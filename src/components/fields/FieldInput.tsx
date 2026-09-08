@@ -318,6 +318,23 @@ function Stars({
   )
 }
 
+function overlayRating(
+  ratings: ItemRating[],
+  pending: ItemRating,
+): ItemRating[] {
+  const idx = ratings.findIndex(
+    (r) => r.field_id === pending.field_id && r.user_id === pending.user_id,
+  )
+  if (idx >= 0) {
+    return ratings.map((r, i) =>
+      i === idx
+        ? { ...r, value: pending.value, updated_at: pending.updated_at }
+        : r,
+    )
+  }
+  return [...ratings, pending]
+}
+
 function MultiRating({
   field,
   itemId,
@@ -327,11 +344,11 @@ function MultiRating({
   onRatingChange,
 }: Props) {
   const { t } = usePrefs()
-  const [local, setLocal] = useState(ratings)
-
-  useEffect(() => {
-    setLocal(ratings)
-  }, [ratings])
+  const [pending, setPending] = useState<ItemRating | null>(null)
+  const local =
+    pending && pending.field_id === field.id && pending.item_id === itemId
+      ? overlayRating(ratings, pending)
+      : ratings
 
   const mine = local.find(
     (r) => r.field_id === field.id && r.user_id === userId,
@@ -362,16 +379,7 @@ function MultiRating({
             updated_at: new Date().toISOString(),
             profile: mine?.profile,
           }
-          setLocal((prev) => {
-            const idx = prev.findIndex(
-              (r) => r.field_id === field.id && r.user_id === userId,
-            )
-            if (idx >= 0)
-              return prev.map((r, i) =>
-                i === idx ? { ...r, value: n, updated_at: next.updated_at } : r,
-              )
-            return [...prev, next]
-          })
+          setPending(next)
           void upsertRating({
             item_id: itemId,
             field_id: field.id,
@@ -380,7 +388,7 @@ function MultiRating({
           })
             .then(() => onRatingChange?.(next))
             .catch(() => {
-              setLocal(ratings)
+              setPending(null)
             })
         }}
       />

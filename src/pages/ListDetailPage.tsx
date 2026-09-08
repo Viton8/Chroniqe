@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Bell,
@@ -139,7 +139,11 @@ function ListWorkspace({ id }: { id: string }) {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [tab, setTab] = useState<'items' | 'insights' | 'charts' | 'activity'>('items')
-  const [openItem, setOpenItem] = useState<ItemRow | null>(null)
+  const [openItemId, setOpenItemId] = useState<string | null>(null)
+  const openItem = openItemId ? (items.find((row) => row.id === openItemId) ?? null) : null
+  const setOpenItem = useCallback((item: ItemRow | null) => {
+    setOpenItemId(item?.id ?? null)
+  }, [])
   const [creating, setCreating] = useState(false)
   const [draftValues, setDraftValues] = useState<Record<string, unknown> | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -234,13 +238,6 @@ function ListWorkspace({ id }: { id: string }) {
   }, [id])
 
   useEffect(() => {
-    setOpenItem((current) => {
-      if (!current) return current
-      return items.find((row) => row.id === current.id) ?? null
-    })
-  }, [items])
-
-  useEffect(() => {
     if (!moreOpen) return
     const onPointer = (event: PointerEvent) => {
       if (!moreRef.current?.contains(event.target as Node)) setMoreOpen(false)
@@ -314,7 +311,7 @@ function ListWorkspace({ id }: { id: string }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [filtered, focusIndex, perms, tab, overlayOpen, safeFocusIndex])
+  }, [filtered, focusIndex, perms, tab, overlayOpen, safeFocusIndex, setOpenItem])
 
   useEffect(() => {
     if (!list) return
@@ -362,7 +359,7 @@ function ListWorkspace({ id }: { id: string }) {
       createItem: () => setCreating(true),
     })
     return () => setWorkspace(null)
-  }, [list, items, setWorkspace])
+  }, [list, items, setWorkspace, setOpenItem])
 
   const notesByItem = useMemo(() => {
     const map: Record<string, ItemComment[]> = {}

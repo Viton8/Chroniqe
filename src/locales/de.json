@@ -563,7 +563,15 @@
       "title_cover": "Titel und Cover",
       "media": "Cover-Karte"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Zusammenfassung eingeklappt",
+    "sublistSummaryModes": {
+      "rows": "Anzahl der Zeilen oder die einzige Zeile",
+      "peak_span": "Höchstwert und Zeitspanne"
+    },
+    "sublistPeakField": "Feld für den Höchstwert",
+    "sublistStartField": "Feld für den Beginn",
+    "sublistEndField": "Feld für das Ende"
   },
   "fieldTypes": {
     "text": "Text",
@@ -625,7 +633,12 @@
     "pickItem": "Eintrag wählen",
     "pickUser": "Person wählen",
     "noRelated": "Wähle zuerst eine verknüpfte Liste im Schema",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Zeile {n}",
+    "sublistRows": "{n} Einträge",
+    "sublistPeak": "Spitze {value}",
+    "sublistPeakSpan": "Spitze {value} · {span}",
+    "sublistExpand": "Unterzeilen anzeigen"
   },
   "typeHint": {
     "text": "Begrenze die Länge, wenn nötig.",
@@ -751,6 +764,24 @@
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
       "example": "Tap Finished → the game is in the catalogue, dated today."
+    },
+    "headache_diary": {
+      "title": "Kopfschmerztagebuch",
+      "description": "Attacken mit Schmerzverlauf, Symptomen, Medikamenten, Belastung und Verknüpfung zum Blutdruck.",
+      "hint": "Die Intensität ist eine Unterliste: eingeklappt Spitze und Beginn–Ende, aufgeklappt jedes Intervall. Das Gesundheits-Paket verbindet den Blutdruck.",
+      "example": "Spitze 8 · 08:20–14:45; Aura und Übelkeit; Ibuprofen 400 mg um 08:40, Wirkung um 09:10."
+    },
+    "blood_pressure": {
+      "title": "Blutdruck",
+      "description": "Messungen mit Puls, Foto, Haltung, Koffein, Schlaf, Stress und Link zur Kopfschmerzattacke.",
+      "hint": "Systolisch, diastolisch und Puls speisen die Diagramme. Verknüpfen Sie eine Messung mit einem Tagebucheintrag.",
+      "example": "8. Sep. 08:15, 148/92, Puls 78, sitzend, etwas Kaffee, mit der Morgenmigräne verknüpft."
+    },
+    "pack_health": {
+      "title": "Kopfschmerz und Blutdruck",
+      "description": "Zwei verknüpfte Listen: Kopfschmerztagebuch und Blutdruckprotokoll. Relationen in beide Richtungen.",
+      "hint": "Erstellt beide Listen. An eine Attacke können mehrere Messungen hängen.",
+      "example": "Morgenmigräne ← zwei Messungen (morgens hoch, nach der Tablette niedriger)."
     }
   },
   "filters": {

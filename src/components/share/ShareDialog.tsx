@@ -49,13 +49,16 @@ export default function ShareDialog({
   const searchKey = open ? debounced.trim() : ''
   const visibleFound = searchKey.length < 2 || foundFor !== searchKey ? [] : found
   const searching = searchKey.length >= 2 && foundFor !== searchKey
+  const roleSession = open ? list.id : null
+  const [roleForSession, setRoleForSession] = useState<string | null>(roleSession)
+  if (roleSession !== roleForSession) {
+    setRoleForSession(roleSession)
+    if (roleSession) setRole(roleForLinkAccess(listLinkAccess(list)))
+  }
 
   useEffect(() => {
     if (!open) return
-    setRole(roleForLinkAccess(listLinkAccess(list)))
     void fetchListInvites(list.id).then(setInvites).catch(() => setInvites([]))
-    // Reset invite role when the dialog opens, not on every list patch.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, list.id])
 
   useEffect(() => {

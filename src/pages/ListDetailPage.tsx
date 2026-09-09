@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Bell,
@@ -77,7 +77,7 @@ import ViewEditor, { ViewsManager } from '../components/lists/ViewEditor'
 import { normalizeViewConfig, toViewConfig } from '../lib/views'
 import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
-import { emptyValues, isEmptyValue, itemMatchesQuery, validateItem } from '../lib/validation'
+import { emptyValues, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
 import { applyFieldEquals, toggleChecked, transferItem } from '../lib/automations'
 import { asDatetimeInputValue, formatDateTime, titleFromValues } from '../lib/cn'
@@ -88,14 +88,12 @@ import {
   emptyFilters,
   sortItems,
   sortableFields,
-  titleFieldId,
   type ListFilters,
   type SortKey,
 } from '../lib/filters'
 import { buildInsights } from '../lib/insights'
 import FacetFilters from '../components/lists/FacetFilters'
 import BulkBar from '../components/lists/BulkBar'
-import QuickAdd from '../components/lists/QuickAdd'
 import ListInsights from '../components/lists/ListInsights'
 import FavoriteButton from '../components/lists/FavoriteButton'
 import ShortcutsHelp from '../components/lists/ShortcutsHelp'
@@ -139,7 +137,11 @@ function ListWorkspace({ id }: { id: string }) {
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
   const [tab, setTab] = useState<'items' | 'insights' | 'charts' | 'activity'>('items')
-  const [openItem, setOpenItem] = useState<ItemRow | null>(null)
+  const [openItemId, setOpenItemId] = useState<string | null>(null)
+  const openItem = openItemId ? (items.find((row) => row.id === openItemId) ?? null) : null
+  const setOpenItem = useCallback((item: ItemRow | null) => {
+    setOpenItemId(item?.id ?? null)
+  }, [])
   const [creating, setCreating] = useState(false)
   const [draftValues, setDraftValues] = useState<Record<string, unknown> | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -234,13 +236,6 @@ function ListWorkspace({ id }: { id: string }) {
   }, [id])
 
   useEffect(() => {
-    setOpenItem((current) => {
-      if (!current) return current
-      return items.find((row) => row.id === current.id) ?? null
-    })
-  }, [items])
-
-  useEffect(() => {
     if (!moreOpen) return
     const onPointer = (event: PointerEvent) => {
       if (!moreRef.current?.contains(event.target as Node)) setMoreOpen(false)
@@ -314,7 +309,7 @@ function ListWorkspace({ id }: { id: string }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [filtered, focusIndex, perms, tab, overlayOpen, safeFocusIndex])
+  }, [filtered, focusIndex, perms, tab, overlayOpen, safeFocusIndex, setOpenItem])
 
   useEffect(() => {
     if (!list) return
@@ -362,7 +357,7 @@ function ListWorkspace({ id }: { id: string }) {
       createItem: () => setCreating(true),
     })
     return () => setWorkspace(null)
-  }, [list, items, setWorkspace])
+  }, [list, items, setWorkspace, setOpenItem])
 
   const notesByItem = useMemo(() => {
     const map: Record<string, ItemComment[]> = {}
@@ -520,11 +515,6 @@ function ListWorkspace({ id }: { id: string }) {
               <Settings2 size={14} /> {t('list.configure')}
             </Button>
           ) : null}
-          {canEdit || canPropose ? (
-            <Button size="sm" onClick={() => setCreating(true)}>
-              <Plus size={14} /> {t('list.entry')}
-            </Button>
-          ) : null}
           <div className="relative" ref={moreRef}>
             <Button
               variant="soft"
@@ -645,36 +635,9 @@ function ListWorkspace({ id }: { id: string }) {
                 onChange={(e) => setQuery(e.target.value)}
               />
               {canEdit || canPropose ? (
-                <QuickAdd
-                  schema={schema}
-                  disabled={!user}
-                  onCreate={async (title) => {
-                    const fieldId = titleFieldId(schema)
-                    const values = emptyValues(schema)
-                    if (fieldId) values[fieldId] = title
-                    const extraRequired = schema.fields.filter((field) => {
-                      if (!field.required || field.id === fieldId) return false
-                      return isEmptyValue(values[field.id])
-                    })
-                    if (extraRequired.length || (canPropose && !canEdit)) {
-                      setDraftValues(values)
-                      setCreating(true)
-                      return
-                    }
-                    if (!user) return
-                    try {
-                      await createItem({
-                        list_id: list.id,
-                        values,
-                        position: Date.now() / 1000,
-                        created_by: user.id,
-                      })
-                      await reload()
-                    } catch (error) {
-                      toast(error instanceof Error ? error.message : t('common.error'), 'err')
-                    }
-                  }}
-                />
+                <Button size="sm" onClick={() => startCreate()}>
+                  <Plus size={14} /> {t('list.entry')}
+                </Button>
               ) : null}
               <label className="flex items-center gap-2 text-xs text-muted">
                 <input

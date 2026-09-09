@@ -563,7 +563,15 @@
       "title_cover": "Titolo e copertina",
       "media": "Scheda con copertina"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Riepilogo compresso",
+    "sublistSummaryModes": {
+      "rows": "Numero di righe, o l’unica riga",
+      "peak_span": "Picco e intervallo di tempo"
+    },
+    "sublistPeakField": "Campo del picco",
+    "sublistStartField": "Campo di inizio",
+    "sublistEndField": "Campo di fine"
   },
   "fieldTypes": {
     "text": "Testo",
@@ -625,7 +633,12 @@
     "pickItem": "Scegli un elemento",
     "pickUser": "Scegli una persona",
     "noRelated": "Scegli prima una lista collegata nello schema",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Riga {n}",
+    "sublistRows": "{n} voci",
+    "sublistPeak": "picco {value}",
+    "sublistPeakSpan": "picco {value} · {span}",
+    "sublistExpand": "Mostra le righe nidificate"
   },
   "typeHint": {
     "text": "Limita la lunghezza se serve.",
@@ -751,6 +764,24 @@
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
       "example": "Tap Finished → the game is in the catalogue, dated today."
+    },
+    "headache_diary": {
+      "title": "Diario del mal di testa",
+      "description": "Attacchi con intensità nel tempo, sintomi, farmaci, sforzo e collegamento alla pressione.",
+      "hint": "L’intensità è una sotto-lista: chiusa mostra picco e inizio–fine. Il pacchetto Salute la collega alla pressione.",
+      "example": "Picco 8 · 08:20–14:45; aura e nausea; ibuprofene 400 mg alle 08:40, effetto alle 09:10."
+    },
+    "blood_pressure": {
+      "title": "Pressione",
+      "description": "Misurazioni con polso, foto, postura, caffeina, sonno, stress e collegamento a un attacco.",
+      "hint": "Sistolica, diastolica e polso alimentano i grafici. Collega una misurazione a una riga del diario.",
+      "example": "8 set 08:15, 148/92, polso 78, seduto, un po’ di caffè, collegato all’emicrania del mattino."
+    },
+    "pack_health": {
+      "title": "Mal di testa e pressione",
+      "description": "Due elenchi collegati: diario degli attacchi e registro della pressione. Relazioni in entrambe le direzioni.",
+      "hint": "Crea entrambi gli elenchi. A un attacco si possono attaccare più misurazioni.",
+      "example": "Emicrania del mattino ← due misurazioni (alta al mattino, più bassa dopo la compressa)."
     }
   },
   "filters": {

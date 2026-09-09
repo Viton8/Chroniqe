@@ -35,7 +35,13 @@ export const VIEW_MODES = [
 
 export type ViewMode = (typeof VIEW_MODES)[number]
 
-export const VIEW_KINDS = ['table', 'cards', 'board', 'timeline', 'calendar'] as const
+export const VIEW_KINDS = [
+  'table',
+  'cards',
+  'board',
+  'timeline',
+  'calendar',
+] as const
 export type ViewKind = (typeof VIEW_KINDS)[number]
 
 export const CARD_LAYOUTS = ['grid', 'media', 'compact'] as const
@@ -44,7 +50,15 @@ export type CardLayout = (typeof CARD_LAYOUTS)[number]
 export const TABLE_DENSITIES = ['comfortable', 'compact'] as const
 export type TableDensity = (typeof TABLE_DENSITIES)[number]
 
-export const FIELD_VIEW_ROLES = ['hidden', 'column', 'cover', 'title', 'subtitle', 'badge', 'meta'] as const
+export const FIELD_VIEW_ROLES = [
+  'hidden',
+  'column',
+  'cover',
+  'title',
+  'subtitle',
+  'badge',
+  'meta',
+] as const
 export type FieldViewRole = (typeof FIELD_VIEW_ROLES)[number]
 
 export const NUMBER_DISPLAYS = ['number', 'range', 'fraction', 'stars'] as const
@@ -76,7 +90,13 @@ export interface NamedView {
   fields: FieldViewStyle[]
 }
 
-export const VISIBILITY = ['private', 'invite', 'friends', 'public', 'link'] as const
+export const VISIBILITY = [
+  'private',
+  'invite',
+  'friends',
+  'public',
+  'link',
+] as const
 export type Visibility = (typeof VISIBILITY)[number]
 
 export const LINK_ACCESS = ['off', 'view', 'propose', 'edit'] as const
@@ -104,6 +124,19 @@ export interface SelectOption {
   value: string
   label: string
   color?: string
+  /** Longer explanation shown under the control when this option is selected. */
+  description?: string
+}
+
+export const SUBLIST_SUMMARY_MODES = ['rows', 'peak_span'] as const
+export type SublistSummaryMode = (typeof SUBLIST_SUMMARY_MODES)[number]
+
+export interface SublistSummary {
+  /** `peak_span` collapses to the worst numeric value plus the earliest–latest times. */
+  mode?: SublistSummaryMode
+  valueFieldId?: string
+  startFieldId?: string
+  endFieldId?: string
 }
 
 export interface SublistField {
@@ -132,6 +165,7 @@ export interface FieldConfig {
   relationDisplay?: RelationDisplay
   subfields?: SublistField[]
   defaultValue?: unknown
+  sublistSummary?: SublistSummary
 }
 
 export interface FieldDef {
@@ -172,7 +206,12 @@ export type AutomationTrigger =
 export type AutomationAction =
   | { type: 'set_field'; fieldId: string; value: unknown }
   | { type: 'set_now'; fieldId: string }
-  | { type: 'move_to_list'; targetListId: string; fieldMap: Record<string, string>; deleteSource?: boolean }
+  | {
+      type: 'move_to_list'
+      targetListId: string
+      fieldMap: Record<string, string>
+      deleteSource?: boolean
+    }
   | { type: 'restore_snapshot' }
 
 export interface ListSettings {
@@ -256,7 +295,15 @@ export interface ItemRating {
   profile?: Profile
 }
 
-export const NOTE_COLOR_IDS = ['violet', 'rose', 'amber', 'teal', 'sky', 'emerald', 'slate'] as const
+export const NOTE_COLOR_IDS = [
+  'violet',
+  'rose',
+  'amber',
+  'teal',
+  'sky',
+  'emerald',
+  'slate',
+] as const
 export type NoteColorId = (typeof NOTE_COLOR_IDS)[number]
 
 export interface ItemComment {

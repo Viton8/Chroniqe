@@ -563,7 +563,15 @@
       "title_cover": "Назва й обкладинка",
       "media": "Картка з обкладинкою"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Згорнутий підсумок",
+    "sublistSummaryModes": {
+      "rows": "Кількість рядків або єдиний рядок",
+      "peak_span": "Пік і проміжок часу"
+    },
+    "sublistPeakField": "Поле піку",
+    "sublistStartField": "Поле початку",
+    "sublistEndField": "Поле кінця"
   },
   "fieldTypes": {
     "text": "Текст",
@@ -625,7 +633,12 @@
     "pickItem": "Оберіть запис",
     "pickUser": "Оберіть людину",
     "noRelated": "Спочатку оберіть пов’язаний список у схемі",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Рядок {n}",
+    "sublistRows": "{n} записів",
+    "sublistPeak": "пік {value}",
+    "sublistPeakSpan": "пік {value} · {span}",
+    "sublistExpand": "Показати вкладені рядки"
   },
   "typeHint": {
     "text": "За потреби обмежте довжину.",
@@ -751,6 +764,24 @@
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
       "example": "Tap Finished → the game is in the catalogue, dated today."
+    },
+    "headache_diary": {
+      "title": "Щоденник головного болю",
+      "description": "Напади зі шкалою болю в часі, симптомами, ліками, навантаженням і зв’язком із тиском.",
+      "hint": "Інтенсивність — вкладений список: згорнутий показує пік і початок–кінець, розкритий — кожен проміжок. Набір зв’яже щоденник із тиском.",
+      "example": "Пік 8 · 08:20–14:45; аура і нудота; ібупрофен 400 мг о 08:40, ефект о 09:10."
+    },
+    "blood_pressure": {
+      "title": "Тиск",
+      "description": "Вимірювання з пульсом, фото, положенням, кофеїном, сном, стресом і посиланням на напад болю.",
+      "hint": "Систолічний, діастолічний і пульс ідуть на графіки. Прив’яжіть вимірювання до запису щоденника.",
+      "example": "8 вер 08:15, 148/92, пульс 78, сидячи, трохи кави, зв’язок із ранковою мігренню."
+    },
+    "pack_health": {
+      "title": "Головний біль і тиск",
+      "description": "Два пов’язані списки: щоденник нападів і журнал тиску. Зв’язки в обидва боки.",
+      "hint": "Створюються обидва списки. До нападу можна прикріпити кілька вимірювань, з вимірювання відкрити напад.",
+      "example": "Ранкова мігрень ← два вимірювання (вранішнє високе, після таблетки нижче)."
     }
   },
   "filters": {

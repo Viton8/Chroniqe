@@ -16,7 +16,8 @@ html[data-palette='violet'] {
   --c-on-accent: #ffffff;
   --c-good: #0f766e;
   --c-danger: #be123c;
-  --c-shadow: 0 1px 0 rgba(28, 23, 36, 0.04), 0 12px 32px -18px rgba(28, 23, 36, 0.28);
+  --c-shadow:
+    0 1px 0 rgba(28, 23, 36, 0.04), 0 12px 32px -18px rgba(28, 23, 36, 0.28);
 }
 
 html.dark,
@@ -33,7 +34,8 @@ html.dark[data-palette='violet'] {
   --c-on-accent: #1c1724;
   --c-good: #5eead4;
   --c-danger: #fb7185;
-  --c-shadow: 0 1px 0 rgba(0, 0, 0, 0.22), 0 16px 40px -16px rgba(0, 0, 0, 0.55);
+  --c-shadow:
+    0 1px 0 rgba(0, 0, 0, 0.22), 0 16px 40px -16px rgba(0, 0, 0, 0.55);
 }
 
 html[data-palette='ocean'] {
@@ -209,7 +211,9 @@ select {
   @apply outline-none;
 }
 
-input:not([type='checkbox']):not([type='file']):not([type='color']):not([type='radio']):focus,
+input:not([type='checkbox']):not([type='file']):not([type='color']):not(
+    [type='radio']
+  ):focus,
 textarea:focus,
 select:focus {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--c-accent) 20%, transparent);
@@ -293,4 +297,20 @@ input[type='file'] {
   .chroniqe-panel {
     animation: none;
   }
+}
+
+.sublist-summary {
+  list-style: none;
+}
+
+.sublist-summary::-webkit-details-marker {
+  display: none;
+}
+
+.sublist-details[open] .sublist-chevron {
+  transform: rotate(180deg);
+}
+
+.sublist-chevron {
+  transition: transform 0.15s ease;
 }

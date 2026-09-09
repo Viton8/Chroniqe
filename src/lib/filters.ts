@@ -1,3 +1,4 @@
+import { usesItemRatings } from './ratings'
 import { civilDateFromValue, titleFromValues } from './cn'
 import { isPeakSpanSublist, sublistPeak } from './fields'
 import type { FieldDef, ItemRating, ItemRow, ListSchema } from '../types/domain'
@@ -53,6 +54,7 @@ export function sortableFields(schema: ListSchema): FieldDef[] {
         'datetime',
         'rating',
         'multi_rating',
+        'community_rating',
         'select',
       ].includes(field.type) || isPeakSpanSublist(field),
   )
@@ -67,7 +69,7 @@ export function filterDateFields(schema: ListSchema): FieldDef[] {
 export function scoreFields(schema: ListSchema): FieldDef[] {
   return schema.fields.filter(
     (field) =>
-      ['rating', 'multi_rating', 'number', 'integer'].includes(field.type) ||
+      ['rating', 'multi_rating', 'community_rating', 'number', 'integer'].includes(field.type) ||
       isPeakSpanSublist(field),
   )
 }
@@ -199,7 +201,7 @@ function compareField(
     field.type === 'number' ||
     field.type === 'integer' ||
     field.type === 'rating' ||
-    field.type === 'multi_rating' ||
+    usesItemRatings(field) ||
     isPeakSpanSublist(field)
   ) {
     const left = itemScore(a, field.id, ratings, field) ?? -Infinity

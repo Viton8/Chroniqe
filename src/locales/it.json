@@ -151,6 +151,40 @@
     "following": "Seguiti",
     "feed": "Feed amici"
   },
+  "home": {
+    "customize": "Personalizza home",
+    "lead": "Scegli quali riquadri mostrare e in quale ordine. Metti Scaduti e In arrivo uno accanto all’altro per tenerli su due colonne.",
+    "leadEx": "Nascondi il feed amici, sposta gli scaduti in alto oppure incorpora una tua lista.",
+    "add": "Aggiungi riquadro",
+    "addKind": "Tipo di riquadro",
+    "reset": "Ripristina layout",
+    "resetConfirm": "Ripristinare il layout predefinito della home?",
+    "pickList": "Lista",
+    "pickView": "Vista",
+    "defaultView": "Vista predefinita",
+    "limit": "Elementi",
+    "emptyList": "Questa lista non c’è più, oppure non puoi aprirla.",
+    "chooseList": "Scegli una lista per questo riquadro.",
+    "openList": "Apri lista",
+    "noPanels": "Tutti i riquadri sono nascosti.",
+    "emptyFollowing": "Non segui ancora nessuna lista.",
+    "emptyPinned": "Fissa una lista per tenerla qui.",
+    "moveUp": "Su",
+    "moveDown": "Giù",
+    "show": "Mostra",
+    "hide": "Nascondi",
+    "kind": {
+      "stats": "Numeri",
+      "feed": "Feed amici",
+      "following": "Seguiti",
+      "pinned": "Liste fissate",
+      "overdue": "Scaduti",
+      "upcoming": "In arrivo",
+      "recent": "Liste recenti",
+      "activity": "Attività",
+      "list": "Una lista"
+    }
+  },
   "lists": {
     "title": "Liste",
     "mine": "Mie",
@@ -162,7 +196,95 @@
     "pinned": "Fissate",
     "noSearch": "Nessuna lista corrispondente",
     "noSearchText": "Prova un altro titolo o una descrizione.",
-    "lead": "Le tue, quelle condivise con te e quelle che fissi."
+    "lead": "Le tue, quelle condivise con te e quelle che fissi.",
+    "sortUpdated": "Ultima modifica",
+    "sortCreated": "Data di creazione",
+    "filterVisibility": "Visibilità",
+    "visibilityAll": "Qualsiasi visibilità",
+    "filterPeople": "Persone",
+    "people": {
+      "all": "Chiunque",
+      "solo": "Solo io",
+      "many": "Più persone"
+    },
+    "changed": "Modificata {when}",
+    "changedBy": "Modificata {when} da {name}"
+  },
+  "highlight": {
+    "label": "Evidenzia",
+    "auto": "Auto",
+    "none": "Nessuno",
+    "custom": "Colore personalizzato",
+    "rules": "Colori automatici",
+    "rulesHint": "La prima regola che corrisponde colora l’elemento, a meno che non scegli un colore a mano.",
+    "rulesEx": "Voto sotto 5 → rosso. Stato “fatto” → grigio.",
+    "matchAll": "Tutte le condizioni",
+    "matchAny": "Qualsiasi condizione",
+    "addCondition": "Aggiungi condizione",
+    "addRule": "Aggiungi regola",
+    "field": "Campo",
+    "operator": "Confronta",
+    "value": "Valore",
+    "checked": "Spuntato",
+    "yes": "Sì",
+    "no": "No",
+    "color": {
+      "red": "Rosso",
+      "orange": "Arancione",
+      "yellow": "Giallo",
+      "green": "Verde",
+      "teal": "Ottanio",
+      "blue": "Blu",
+      "purple": "Viola",
+      "pink": "Rosa",
+      "gray": "Grigio"
+    },
+    "op": {
+      "eq": "è",
+      "neq": "non è",
+      "gt": "maggiore di",
+      "gte": "almeno",
+      "lt": "minore di",
+      "lte": "al massimo",
+      "contains": "contiene",
+      "empty": "è vuoto",
+      "not_empty": "non è vuoto"
+    }
+  },
+  "agenda": {
+    "title": "Scaduti e in arrivo",
+    "hint": "Questi riquadri sono in Riepilogo della lista e in Home. Scegli la data di scadenza e quando una voce deve uscirne.",
+    "hintEx": "Scadenza + spunta, oppure Stato è “fatto”.",
+    "dateField": "Data per scaduti e in arrivo",
+    "dateHint": "Vuoto: questa lista non compare in quei riquadri.",
+    "dateOff": "Non mostrare in scaduti e in arrivo",
+    "needDateField": "Aggiungi prima un campo Data o Data e ora.",
+    "done": "Esce da scaduti e in arrivo quando",
+    "doneHint": "Apri l’elenco e scegli Mai, Spuntato o un campo (Stato, ecc.).",
+    "doneNone": "Mai — solo per data",
+    "doneChecked": "Spuntato",
+    "doneField": "Un campo corrisponde",
+    "match": "Corrispondenza",
+    "matchAll": "Tutte le condizioni",
+    "matchAny": "Qualsiasi condizione",
+    "addCondition": "Aggiungi condizione",
+    "field": "Campo",
+    "operator": "Confronta",
+    "value": "Valore",
+    "checked": "Spuntato",
+    "yes": "Sì",
+    "no": "No",
+    "op": {
+      "eq": "è",
+      "neq": "non è",
+      "gt": "maggiore di",
+      "gte": "almeno",
+      "lt": "minore di",
+      "lte": "al massimo",
+      "contains": "contiene",
+      "empty": "è vuoto",
+      "not_empty": "non è vuoto"
+    }
   },
   "newList": {
     "title": "Nuova lista",
@@ -331,6 +453,18 @@
     "comments": "Commenti",
     "write": "Scrivi…",
     "suggest": "Proponi",
+    "suggestItem": "Proponi elemento",
+    "suggestEdit": "Proponi modifiche",
+    "proposeHint": "Puoi proporre un nuovo elemento o delle modifiche. Il proprietario le accetta o le rifiuta.",
+    "proposeHintEx": "Apri un elemento e scegli «Proponi modifiche», oppure aggiungine uno con il pulsante in alto.",
+    "proposeSignIn": "per proporre modifiche a questo elenco.",
+    "noProposals": "Nessuna proposta in attesa",
+    "proposalUpdated": "Proposta aggiornata",
+    "proposalWithdrawn": "Proposta ritirata",
+    "withdraw": "Ritira",
+    "withdrawConfirm": "Ritirare questa proposta?",
+    "editProposal": "Modifica proposta",
+    "pendingProposal": "Hai già un suggerimento in attesa per questo elemento.",
     "someone": "qualcuno",
     "duplicated": "Lista duplicata",
     "duplicateFail": "Impossibile duplicare",
@@ -343,6 +477,20 @@
     "updated": "Aggiornato",
     "deleted": "Eliminato",
     "moreActions": "More"
+  },
+  "itemOpen": {
+    "label": "Al clic su una voce",
+    "view": "Scheda di lettura",
+    "edit": "Modulo di modifica",
+    "hint": "Le voci nuove si aprono sempre come modulo. Per quelle esistenti puoi cambiare nella finestra."
+  },
+  "relatedLists": {
+    "title": "Elenchi collegati",
+    "hint": "Gli elenchi collegati appaiono nella pagina: un clic per passarci. Il collegamento è bidirezionale.",
+    "hintEx": "«Da vedere», «Visto» e «Non guarderò» come tre elenchi collegati.",
+    "search": "Trova un elenco",
+    "viaFlow": "tramite spostamento",
+    "none": "Non hai ancora altri elenchi"
   },
   "itemNotes": {
     "add": "Aggiungi nota",
@@ -391,7 +539,8 @@
     "kind": "Tipo",
     "cardLayout": "Layout delle schede",
     "density": "Densità della tabella",
-    "groupField": "Campo colonna",
+    "groupField": "Campo colonne della bacheca",
+    "groupFieldHint": "Ogni valore di questo campo è una colonna. Trascinare una scheda scrive quel valore sull’elemento.",
     "dateField": "Campo data",
     "coverField": "Copertina",
     "noCover": "Nessuna copertina",
@@ -415,6 +564,13 @@
     "customize": "Personalizza vista",
     "toggle": "Comprimi o espandi vista",
     "edit": "Impostazioni della vista",
+    "preview": "Anteprima",
+    "previewOn": "Nascondi anteprima",
+    "previewOff": "Mostra anteprima",
+    "previewEmpty": "Nessuna voce — esempio mostrato",
+    "previewItem": "Esempio {n}",
+    "previewBody": "Un testo più lungo per vedere come si legge una voce in questa vista: paragrafi, a capo e densità.",
+    "previewTag": "esempio",
     "layout": {
       "grid": "Griglia",
       "media": "Poster",
@@ -445,6 +601,11 @@
     "name": "Titolo",
     "description": "Descrizione",
     "icon": "Icona",
+    "cover": "Immagine di copertina",
+    "coverHint": "Visibile nella pagina della lista e sulle schede. Dopo il caricamento premi Salva.",
+    "coverEmpty": "Nessuna copertina",
+    "uploadCover": "Carica copertina",
+    "removeCover": "Rimuovi copertina",
     "enableCheck": "Spunta gli elementi",
     "deleteList": "Elimina lista",
     "deleteConfirm": "Eliminare questa lista?",
@@ -497,10 +658,14 @@
     "average": "Media",
     "checked": "Spuntati",
     "dateField": "Campo dell’asse",
+    "eventDate": "Campo data",
+    "eventDateHint": "Ogni voce è posizionata sulla linea del tempo secondo questa data.",
     "valueField": "Valore",
     "groupField": "Raggruppa per",
     "aggregation": "Aggregazione",
     "needDate": "Scegli un campo per l’asse",
+    "needEventDate": "Scegli un campo data",
+    "emptyTimeline": "Nessuna voce con una data in questo campo.",
     "needValue": "Scegli un campo valore",
     "needGroup": "Scegli un campo per raggruppare",
     "agg": {
@@ -551,7 +716,8 @@
     "moveUp": "Su",
     "moveDown": "Giù",
     "duplicateField": "Duplica campo",
-    "groupField": "Campo bacheca / gruppo",
+    "groupField": "Colonne della bacheca",
+    "groupFieldHint": "Da questo campo nascono le colonne della bacheca (Stato, Genere). Trascinare una scheda cambia il valore. Una vista bacheca può scegliere un altro campo.",
     "placeholder": "Segnaposto",
     "pattern": "Modello",
     "patternPh": "es. ^[A-Z].+",
@@ -586,7 +752,8 @@
     "multiselect": "Selezione multipla",
     "tags": "Tag",
     "rating": "Voto",
-    "multi_rating": "Voti di più persone",
+    "multi_rating": "Voti di chi può modificare",
+    "community_rating": "Voti di tutti",
     "image": "Immagine",
     "file": "File",
     "url": "Link",
@@ -622,7 +789,9 @@
     "delRow": "Rimuovi riga",
     "tagEnter": "Invio aggiunge un tag",
     "tagPh": "tag poi Invio",
-    "multiHint": "Chiunque può votare — media e voti singoli appaiono sotto.",
+    "multiHint": "Possono votare solo chi può modificare questo elenco.",
+    "communityHint": "Chi è connesso può votare, senza diritti di modifica e senza proposta.",
+    "changeRating": "Un’altra stella cambia il voto; un altro clic sulla tua lo toglie.",
     "scanFail": "Il file non ha superato il controllo del contenuto",
     "scanReject": "File rifiutato dal controllo di sicurezza",
     "uploadFail": "Caricamento non riuscito",
@@ -633,6 +802,7 @@
     "pickItem": "Scegli un elemento",
     "pickUser": "Scegli una persona",
     "noRelated": "Scegli prima una lista collegata nello schema",
+    "openLinkedItem": "Apri l’elemento collegato",
     "nestedRow": "Row {n}: {error}",
     "sublistRow": "Riga {n}",
     "sublistRows": "{n} voci",
@@ -647,8 +817,10 @@
     "numberEx": "un voto da 2 a 30.",
     "integer": "Solo numeri interi.",
     "integerEx": "anno dal 1888 al 2100.",
-    "multi_rating": "Ogni spettatore vota a parte; la media viene calcolata.",
-    "multi_ratingEx": "un film con 8, 9 e 7 → media 8.0.",
+    "multi_rating": "Ogni persona che può modificare l’elenco lascia un voto; la media viene calcolata.",
+    "multi_ratingEx": "una lista di famiglia con 8, 9 e 7 → media 8.0.",
+    "community_rating": "Chi è connesso può votare anche senza diritti di modifica. Non è una proposta. Tutti i voti contano.",
+    "community_ratingEx": "un catalogo pubblico con 8, 9 e 7 → media 8.0.",
     "image": "I file vengono controllati per tipo, dimensione e contenuto.",
     "imageEx": "poster fino a 2 MB, JPEG/PNG/WEBP.",
     "sublist": "Un elemento può contenere una mini-tabella.",
@@ -667,79 +839,282 @@
       "title": "Lista vuota",
       "description": "Costruisci tu i campi — qualsiasi tipo, qualsiasi vincolo.",
       "hint": "Parti da un campo testo «Titolo», poi date, voti, file.",
-      "example": "Collezione di vinili: artista, anno, condizioni, foto di copertina."
+      "example": "Collezione di vinili: artista, anno, condizioni, foto di copertina.",
+      "field": {
+        "title": "Titolo"
+      }
     },
     "movies_watched": {
       "title": "Visti",
       "description": "Film e serie già visti. Chiunque può votare.",
       "hint": "«Voti» è collettivo: ognuno dà un punteggio, si calcola la media.",
-      "example": "Dune, 2021, film, data 12.03.2024, voti 8 e 9 → media 8.5."
+      "example": "Dune, 2021, film, data 12.03.2024, voti 8 e 9 → media 8.5.",
+      "field": {
+        "title": "Titolo",
+        "year": "Anno",
+        "kind": "Tipo",
+        "poster": "Locandina",
+        "watched_at": "Data di visione",
+        "ratings": "Voti",
+        "seasons": "Stagioni",
+        "review": "Recensione"
+      },
+      "sub": {
+        "seasons": {
+          "season": "Stagione",
+          "episodes": "Episodi",
+          "finished_at": "Finita",
+          "score": "Voto stagione"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Documentario"
+        }
+      },
+      "chart": {
+        "timeline": "Cronologia visioni",
+        "ratings": "Voti medi nel tempo"
+      }
     },
     "movies_watchlist": {
       "title": "Da vedere",
       "description": "Coda di film e serie. Spostali in Visti o Abbandonati.",
       "hint": "I pulsanti di spostamento compaiono se crei il pacchetto Cinema — collega tre liste.",
-      "example": "Tocca «Visti» → la riga si sposta, la data di visione è oggi."
+      "example": "Tocca «Visti» → la riga si sposta, la data di visione è oggi.",
+      "field": {
+        "title": "Titolo",
+        "year": "Anno",
+        "kind": "Tipo",
+        "poster": "Locandina",
+        "priority": "Priorità",
+        "note": "Nota"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Documentario"
+        },
+        "priority": {
+          "now": "Subito",
+          "soon": "Presto",
+          "someday": "Prima o poi"
+        }
+      }
     },
     "movies_dropped": {
       "title": "Abbandonati",
       "description": "Titoli saltati o rifiutati — così non vengono riproposti.",
       "hint": "Aggiungi un motivo: spiega perché la coda si è accorciata.",
-      "example": "«Il tono non funzionava» + data della decisione."
+      "example": "«Il tono non funzionava» + data della decisione.",
+      "field": {
+        "title": "Titolo",
+        "year": "Anno",
+        "kind": "Tipo",
+        "reason": "Motivo",
+        "decided_at": "Data"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Documentario"
+        }
+      }
     },
     "games_done": {
       "title": "Giochi finiti",
       "description": "Catalogo di giochi completati con piattaforma, ore e voto.",
       "hint": "La data di fine alimenta la timeline «cosa abbiamo giocato in quale anno».",
-      "example": "Hades, Switch, 40 h, voto 9, finito 02.2024."
+      "example": "Hades, Switch, 40 h, voto 9, finito 02.2024.",
+      "field": {
+        "title": "Titolo",
+        "platform": "Piattaforma",
+        "cover": "Copertina",
+        "finished_at": "Finito",
+        "hours": "Ore",
+        "ratings": "Voti",
+        "status": "Stato",
+        "note": "Nota"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Telefono",
+          "other": "Altro"
+        },
+        "status": {
+          "completed": "Finito",
+          "main": "Storia",
+          "hundred": "100%",
+          "dropped": "Abbandonato"
+        }
+      },
+      "chart": {
+        "timeline": "Quando abbiamo giocato",
+        "ratings": "Voti nel tempo"
+      }
     },
     "shopping": {
       "title": "Spesa",
       "description": "Lista della spesa con spunte. Puoi spostare le righe in Comprati.",
       "hint": "Attiva le spunte: spuntare può datare e spostare la riga.",
-      "example": "Latte ×2, categoria «cibo»."
+      "example": "Latte ×2, categoria «cibo».",
+      "field": {
+        "name": "Voce",
+        "qty": "Quantità",
+        "category": "Categoria",
+        "note": "Nota",
+        "bought_at": "Comprato"
+      },
+      "opt": {
+        "category": {
+          "food": "Cibo",
+          "home": "Casa",
+          "tech": "Tecnologia",
+          "other": "Altro"
+        }
+      },
+      "checkLabel": "Comprato"
     },
     "bought": {
       "title": "Comprati",
       "description": "Storico acquisti con data e prezzo.",
       "hint": "Sposta qui gli elementi dalla lista della spesa con un pulsante o un’automazione.",
-      "example": "Latte, 2 pz, 04.09.2026, 1,20 €."
+      "example": "Latte, 2 pz, 04.09.2026, 1,20 €.",
+      "field": {
+        "name": "Voce",
+        "qty": "Quantità",
+        "bought_at": "Data",
+        "price": "Prezzo",
+        "category": "Categoria"
+      },
+      "opt": {
+        "category": {
+          "food": "Cibo",
+          "home": "Casa",
+          "tech": "Tecnologia",
+          "other": "Altro"
+        }
+      },
+      "chart": {
+        "spend": "Spese per giorno"
+      }
     },
     "later_shopping": {
       "title": "Comprare per un’occasione",
       "description": "Acquisti rimandati — Capodanno, un compleanno, un viaggio.",
       "hint": "«Quando» può essere una data o un evento in testo libero.",
-      "example": "Luci → «per Capodanno»."
+      "example": "Luci → «per Capodanno».",
+      "field": {
+        "name": "Voce",
+        "qty": "Quantità",
+        "when": "Quando",
+        "note": "Nota"
+      },
+      "ph": {
+        "when": "per Capodanno"
+      }
     },
     "todo": {
       "title": "Attività",
       "description": "Todo classico: spunta, priorità, scadenza.",
       "hint": "Spuntare può impostare automaticamente la data di completamento.",
-      "example": "«Paga internet» entro venerdì → spunta → la data di fine è oggi."
+      "example": "«Paga internet» entro venerdì → spunta → la data di fine è oggi.",
+      "field": {
+        "title": "Attività",
+        "due": "Scadenza",
+        "priority": "Priorità",
+        "done_at": "Fatto",
+        "notes": "Note"
+      },
+      "opt": {
+        "priority": {
+          "high": "Alta",
+          "mid": "Media",
+          "low": "Bassa"
+        }
+      },
+      "checkLabel": "Fatto"
     },
     "books": {
       "title": "Libri",
       "description": "Letti e in corso — con voti e date.",
       "hint": "La timeline usa la data di fine. I voti collettivi funzionano come nei film.",
-      "example": "Il maestro e Margherita, finito 01.06.2024, voto 10."
+      "example": "Il maestro e Margherita, finito 01.06.2024, voto 10.",
+      "field": {
+        "title": "Titolo",
+        "author": "Autore",
+        "finished_at": "Letto",
+        "ratings": "Voti",
+        "status": "Stato",
+        "note": "Nota"
+      },
+      "opt": {
+        "status": {
+          "want": "Da leggere",
+          "reading": "In lettura",
+          "done": "Letto",
+          "dropped": "Abbandonato"
+        }
+      }
     },
     "pack_cinema": {
       "title": "Cinema",
       "description": "Tre liste collegate: coda, visti, abbandonati. I pulsanti di spostamento sono pronti.",
       "hint": "Crea tre liste in una volta. Da vedere ottiene «Visti» e «Non lo guardo».",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "Crea il pacchetto → la coda ottiene due pulsanti: Visti e Abbandonati.",
+      "transfer": {
+        "movies_watchlist__movies_watched": "Visto",
+        "movies_watchlist__movies_dropped": "Non lo guardo"
+      }
     },
     "catalog_items": {
       "title": "Catalogo",
       "description": "Elenco di riferimento senza duplicati: film, libri, luoghi, qualsiasi cosa.",
       "hint": "Una riga = un oggetto. Gli eventi ripetuti con date e voti vanno nel diario del pack Catalogo e diario.",
-      "example": "Dune, 2021, poster. Il film una volta; le visioni con voti diversi vivono nel diario."
+      "example": "Dune, 2021, poster. Il film una volta; le visioni con voti diversi vivono nel diario.",
+      "field": {
+        "title": "Titolo",
+        "year": "Anno",
+        "kind": "Tipo",
+        "cover": "Copertina",
+        "note": "Nota"
+      },
+      "opt": {
+        "kind": {
+          "film": "Film",
+          "book": "Libro",
+          "game": "Gioco",
+          "place": "Luogo",
+          "other": "Altro"
+        }
+      }
     },
     "event_log": {
       "title": "Diario",
       "description": "Eventi ripetuti: ogni volta data, voto e nota propri, collegati a una riga del catalogo.",
       "hint": "Collega il campo «Cosa» a un catalogo. Un film può comparire molte volte — ogni visione è una riga.",
-      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — due visioni, due voti."
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — due visioni, due voti.",
+      "field": {
+        "subject": "Cosa",
+        "happened_at": "Data",
+        "score": "Voto",
+        "note": "Nota"
+      },
+      "chart": {
+        "timeline": "Cronologia eventi",
+        "ratings": "Voti nel tempo"
+      }
     },
     "pack_catalog_log": {
       "title": "Catalogo e diario",
@@ -751,31 +1126,378 @@
       "title": "Spesa",
       "description": "Lista attuale, comprati e acquisti festivi rimandati.",
       "hint": "Spunta un elemento — o tocca un pulsante per mandarlo in Comprati / Capodanno.",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "Spunta il latte → va in Comprati con la data di oggi. Togli la spunta prima dello spostamento e la data sparisce.",
+      "transfer": {
+        "shopping__bought": "Comprato",
+        "shopping__later_shopping": "Per Capodanno",
+        "bought__shopping": "Rimetti in spesa"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "Da giocare",
+      "description": "Coda di giochi. Spostali in Finiti con un pulsante.",
+      "hint": "Il pacchetto Giochi collega la coda al catalogo finiti e mette la data di fine.",
+      "example": "Hades, Switch, subito → Finito → ore e voto sono nell’altra lista.",
+      "field": {
+        "title": "Titolo",
+        "platform": "Piattaforma",
+        "cover": "Copertina",
+        "priority": "Priorità",
+        "note": "Nota"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Telefono",
+          "other": "Altro"
+        },
+        "priority": {
+          "now": "Subito",
+          "soon": "Presto",
+          "someday": "Prima o poi"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "Giochi",
+      "description": "Coda e catalogo finiti. Il pulsante di spostamento è pronto.",
+      "hint": "Da giocare ottiene il pulsante Finito — la data di fine è oggi.",
+      "example": "Tocca Finito → il gioco è nel catalogo, datato oggi.",
+      "transfer": {
+        "games_backlog__games_done": "Finito"
+      }
     },
     "headache_diary": {
       "title": "Diario del mal di testa",
       "description": "Attacchi con intensità nel tempo, sintomi, farmaci, sforzo e collegamento alla pressione.",
       "hint": "L’intensità è una sotto-lista: chiusa mostra picco e inizio–fine. Il pacchetto Salute la collega alla pressione.",
-      "example": "Picco 8 · 08:20–14:45; aura e nausea; ibuprofene 400 mg alle 08:40, effetto alle 09:10."
+      "example": "Picco 8 · 08:20–14:45; aura e nausea; ibuprofene 400 mg alle 08:40, effetto alle 09:10.",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — non fa male",
+            "1": "1 — appena percettibile",
+            "2": "2 — lieve",
+            "3": "3 — percettibile",
+            "4": "4 — moderato",
+            "5": "5 — dà fastidio",
+            "6": "6 — forte",
+            "7": "7 — molto forte",
+            "8": "8 — intenso",
+            "9": "9 — insopportabile",
+            "10": "10 — massimo"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "Nessun dolore.",
+            "1": "Solo se ci fai attenzione.",
+            "2": "Facile da ignorare.",
+            "3": "C’è, ma quasi non disturba.",
+            "4": "Distrae, ma si può continuare.",
+            "5": "Difficile da ignorare; cala la concentrazione.",
+            "6": "Difficile pensare e lavorare.",
+            "7": "Le azioni normali sono difficili.",
+            "8": "Quasi nient’altro passa.",
+            "9": "Quasi impossibile fare qualsiasi cosa.",
+            "10": "Il peggior dolore immaginabile."
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
     },
     "blood_pressure": {
       "title": "Pressione",
       "description": "Misurazioni con polso, foto, postura, caffeina, sonno, stress e collegamento a un attacco.",
       "hint": "Sistolica, diastolica e polso alimentano i grafici. Collega una misurazione a una riga del diario.",
-      "example": "8 set 08:15, 148/92, polso 78, seduto, un po’ di caffè, collegato all’emicrania del mattino."
+      "example": "8 set 08:15, 148/92, polso 78, seduto, un po’ di caffè, collegato all’emicrania del mattino.",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
     },
     "pack_health": {
       "title": "Mal di testa e pressione",
@@ -876,17 +1598,29 @@
     "tab": "Automazioni",
     "moves": "Pulsanti di spostamento",
     "movesHint": "Un pulsante copia la voce in un’altra tua lista.",
-    "automationsHint": "Alla spunta, imposta una data, un campo o ripristina lo snapshot.",
+    "automationsHint": "Quando spunti un elemento puoi mettere la data di oggi, compilare un altro campo o in seguito ripristinare i valori salvati al momento della spunta.",
     "automationsEx": "Spesa: spunta → «Comprato il» = oggi.",
     "onCheck": "Alla spunta",
     "onUncheck": "Alla rimozione",
-    "named": "Regole con nome",
+    "onUncheckHint": "Si esegue quando togli la spunta. «Annulla le modifiche della spunta» ripristina i valori dei campi salvati al momento della spunta.",
+    "named": "Regole personali",
+    "namedHint": "Una regola attende un evento e poi esegue le azioni scelte. A differenza dei blocchi sopra, può scattare anche su un pulsante di spostamento o quando un campo assume un valore dato.",
+    "namedEx": "Quando Stato diventa Fatto, metti la data di fine.",
     "addRule": "Aggiungi regola",
-    "trigger": "Trigger",
+    "trigger": "Quando succede questo",
+    "triggerHint": {
+      "checked": "Si esegue dopo aver spuntato l’elemento.",
+      "unchecked": "Si esegue dopo aver tolto la spunta.",
+      "button": "Si esegue quando qualcuno usa il pulsante di spostamento scelto.",
+      "field_equals": "Si esegue quando questo campo assume il valore sotto — anche trascinando una scheda sulla bacheca."
+    },
     "addAction": "Aggiungi azione",
-    "setNow": "Imposta data adesso",
-    "setField": "Imposta campo",
-    "restore": "Ripristina snapshot",
+    "setNow": "Metti una data",
+    "setNowHint": "Scrive oggi (o adesso, per i campi data e ora) nel campo data scelto.",
+    "setField": "Compila un campo",
+    "setFieldHint": "Scrive un valore a tua scelta in un altro campo: uno stato, una nota, la data di oggi, ecc.",
+    "restore": "Annulla le modifiche della spunta",
+    "restoreHint": "Ripristina i valori dei campi salvati quando l’elemento è stato spuntato. Usalo togliendo la spunta.",
     "valueNow": "Ora (data e ora)",
     "valueToday": "Oggi",
     "targetList": "Lista di destinazione",

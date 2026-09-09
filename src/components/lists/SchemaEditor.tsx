@@ -16,6 +16,7 @@ import {
 } from '../../types/domain'
 import { NESTED_FIELD_TYPES, subfieldAsDef } from '../../lib/fields'
 import { newField } from '../../lib/templates'
+import { usesItemRatings } from '../../lib/ratings'
 import { asDateInputValue, asDatetimeInputValue, cn, uid } from '../../lib/cn'
 import { useAuth } from '../../context/AuthContext'
 import { usePrefs } from '../../context/PrefsContext'
@@ -28,6 +29,7 @@ const HINT_TYPES: FieldType[] = [
   'integer',
   'date',
   'multi_rating',
+  'community_rating',
   'image',
   'file',
   'sublist',
@@ -225,26 +227,26 @@ export default function SchemaEditor({
                     }
                   />
                   <div className="flex flex-wrap gap-4">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(field.required)}
-                        onChange={(e) =>
-                          updateField(field.id, { required: e.target.checked })
-                        }
-                      />
-                      {t('schema.required')}
-                    </label>
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={Boolean(field.unique)}
-                        onChange={(e) =>
-                          updateField(field.id, { unique: e.target.checked })
-                        }
-                      />
-                      {t('schema.unique')}
-                    </label>
+                    {!usesItemRatings(field) ? (
+                      <>
+                        <label className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(field.required)}
+                            onChange={(e) => updateField(field.id, { required: e.target.checked })}
+                          />
+                          {t('schema.required')}
+                        </label>
+                        <label className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(field.unique)}
+                            onChange={(e) => updateField(field.id, { unique: e.target.checked })}
+                          />
+                          {t('schema.unique')}
+                        </label>
+                      </>
+                    ) : null}
                     <label className="flex items-center gap-2 text-sm">
                       <input
                         type="checkbox"
@@ -297,15 +299,8 @@ export default function SchemaEditor({
           onChange={(imageFieldId) => onChange({ ...schema, imageFieldId })}
         />
         <MetaSelect
-          label={t('schema.dateField')}
-          value={schema.dateFieldId ?? ''}
-          fields={schema.fields.filter(
-            (field) => field.type === 'date' || field.type === 'datetime',
-          )}
-          onChange={(dateFieldId) => onChange({ ...schema, dateFieldId })}
-        />
-        <MetaSelect
           label={t('schema.groupField')}
+          hint={t('schema.groupFieldHint')}
           value={schema.groupFieldId ?? ''}
           fields={schema.fields.filter((field) =>
             ['select', 'multiselect', 'tags', 'boolean', 'checkbox'].includes(
@@ -328,11 +323,7 @@ function DefaultValueEditor({
 }) {
   const { t } = usePrefs()
   const value = field.config?.defaultValue
-  if (
-    ['image', 'file', 'sublist', 'relation', 'user', 'multi_rating'].includes(
-      field.type,
-    )
-  ) {
+  if (['image', 'file', 'sublist', 'relation', 'user', 'multi_rating', 'community_rating'].includes(field.type)) {
     return null
   }
   if (field.type === 'boolean' || field.type === 'checkbox') {
@@ -423,17 +414,19 @@ function DefaultValueEditor({
 
 function MetaSelect({
   label,
+  hint,
   value,
   fields,
   onChange,
 }: {
   label: string
+  hint?: string
   value: string
   fields: FieldDef[]
   onChange: (id: string | undefined) => void
 }) {
   return (
-    <FieldWrap label={label}>
+    <FieldWrap label={label} hint={hint}>
       <select
         className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
         value={value}
@@ -502,7 +495,7 @@ function Constraints({
       </div>
     )
   }
-  if (['number', 'integer', 'rating', 'multi_rating'].includes(field.type)) {
+  if (['number', 'integer', 'rating', 'multi_rating', 'community_rating'].includes(field.type)) {
     return (
       <div className="mt-3 grid grid-cols-3 gap-2">
         <FieldWrap label={t('schema.from')}>

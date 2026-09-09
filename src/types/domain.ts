@@ -12,6 +12,7 @@ export const FIELD_TYPES = [
   'tags',
   'rating',
   'multi_rating',
+  'community_rating',
   'image',
   'file',
   'url',
@@ -101,6 +102,9 @@ export type Visibility = (typeof VISIBILITY)[number]
 
 export const LINK_ACCESS = ['off', 'view', 'propose', 'edit'] as const
 export type LinkAccess = (typeof LINK_ACCESS)[number]
+
+export const ITEM_OPEN_MODES = ['view', 'edit'] as const
+export type ItemOpenMode = (typeof ITEM_OPEN_MODES)[number]
 
 export const EDIT_MODES = ['owner', 'selected', 'friends', 'proposals'] as const
 export type EditMode = (typeof EDIT_MODES)[number]
@@ -214,6 +218,46 @@ export type AutomationAction =
     }
   | { type: 'restore_snapshot' }
 
+export const HIGHLIGHT_COLORS = [
+  'red',
+  'orange',
+  'yellow',
+  'green',
+  'teal',
+  'blue',
+  'purple',
+  'pink',
+  'gray',
+] as const
+export type HighlightColor = (typeof HIGHLIGHT_COLORS)[number]
+
+export const HIGHLIGHT_OPS = ['eq', 'neq', 'gt', 'gte', 'lt', 'lte', 'contains', 'empty', 'not_empty'] as const
+export type HighlightOp = (typeof HIGHLIGHT_OPS)[number]
+
+export const HIGHLIGHT_MATCH = ['all', 'any'] as const
+export type HighlightMatch = (typeof HIGHLIGHT_MATCH)[number]
+
+export interface HighlightCondition {
+  fieldId: string
+  op: HighlightOp
+  value?: unknown
+}
+
+export interface HighlightRule {
+  id: string
+  color: string
+  match: HighlightMatch
+  conditions: HighlightCondition[]
+}
+
+export interface AgendaConfig {
+  /** Date/datetime used for overdue and upcoming. Empty string turns the lists off. */
+  dateFieldId?: string
+  doneMatch?: HighlightMatch
+  /** When these match, the item leaves overdue and upcoming. */
+  done?: HighlightCondition[]
+}
+
 export interface ListSettings {
   enableCheck?: boolean
   checkLabel?: string
@@ -221,6 +265,14 @@ export interface ListSettings {
   onCheck?: AutomationAction[]
   onUncheck?: AutomationAction[]
   linkAccess?: 'view' | 'propose' | 'edit'
+  /** Other lists shown on this list’s page; kept in sync both ways when edited. */
+  relatedListIds?: string[]
+  /** How an existing item opens on click. Creating an item always uses the form. */
+  itemOpenMode?: ItemOpenMode
+  /** First matching rule tints the row unless the item has its own color. */
+  highlightRules?: HighlightRule[]
+  /** Which date is a deadline, and when a row leaves overdue / coming up. */
+  agenda?: AgendaConfig
   showcase?: {
     featured?: boolean
     topic?: 'views' | 'charts' | 'collab' | 'flow' | 'ratings'
@@ -267,7 +319,9 @@ export interface ListRow {
   edit_mode: EditMode
   created_at: string
   updated_at: string
+  updated_by?: string | null
   owner?: Profile
+  updater?: Profile | null
   item_count?: number
 }
 

@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { Link2 } from 'lucide-react'
 import type { FieldDef, ItemRow, ListRow, RelationDisplay } from '../../types/domain'
+import { usePrefs } from '../../context/PrefsContext'
 import { cn } from '../../lib/cn'
 import { refIds, refLabel } from '../../lib/refs'
 import {
@@ -111,25 +113,32 @@ function RelationChip({
   relatedListId?: string
   coverField?: FieldDef
 }) {
+  const { t } = usePrefs()
   const href = relatedListId ? `/lists/${relatedListId}?item=${refItem.id}` : undefined
+  const openHint = t('fields.openLinkedItem')
   const titleCls = cn(
-    'truncate font-medium',
+    'min-w-0 font-medium',
     refItem.missing ? 'text-muted line-through' : 'text-ink',
     size === 'sm' ? 'text-xs' : 'text-sm',
   )
 
   if (mode === 'title') {
-    const body = <span className={titleCls}>{refItem.title}</span>
-    return href ? (
-      <Link
-        to={href}
-        onClick={(e) => e.stopPropagation()}
-        className="inline-flex max-w-full rounded-lg px-1.5 py-0.5 hover:bg-ink/5"
-      >
-        {body}
-      </Link>
-    ) : (
-      body
+    const body = (
+      <>
+        {href ? <LinkGlyph size={size} /> : null}
+        <span className={cn(titleCls, 'truncate')}>{refItem.title}</span>
+      </>
+    )
+    return wrapRef(
+      href,
+      cn(
+        'group/rel inline-flex max-w-full items-center gap-1 rounded-lg',
+        size === 'md' ? 'px-1.5 py-0.5' : 'px-1 py-px',
+        href && 'rel-link',
+      ),
+      body,
+      refItem.title,
+      openHint,
     )
   }
 
@@ -144,44 +153,71 @@ function RelationChip({
           className={cn(thumb, 'shrink-0 rounded-md')}
           fallback={<span className="px-1 text-[10px] text-muted">·</span>}
         />
-        <span className={titleCls}>{refItem.title}</span>
+        <span className={cn(titleCls, 'truncate')}>{refItem.title}</span>
+        {href ? <LinkGlyph size={size} /> : null}
       </>
     )
-    return href ? (
-      <Link
-        to={href}
-        onClick={(e) => e.stopPropagation()}
-        className="inline-flex max-w-full items-center gap-2 rounded-xl border border-line/70 bg-paper/80 py-1 pl-1 pr-2 hover:border-ink/20"
-      >
-        {inner}
-      </Link>
-    ) : (
-      <span className="inline-flex max-w-full items-center gap-2 rounded-xl border border-line/70 bg-paper/80 py-1 pl-1 pr-2">
-        {inner}
-      </span>
+    return wrapRef(
+      href,
+      'group/rel inline-flex max-w-full items-center gap-1.5 rounded-xl border border-line/70 bg-paper/80 py-1 pl-1 pr-2 hover:border-ink/25 hover:bg-ink/[0.03]',
+      inner,
+      refItem.title,
+      openHint,
     )
   }
 
-  // media
   const card = (
     <>
-      <CoverSlot
-        field={coverField}
-        value={refItem.cover}
-        alt={refItem.title}
-        className={cn('aspect-[2/3] w-full', size === 'sm' ? 'rounded-lg' : 'rounded-xl')}
-        fallback={<span className="line-clamp-3 p-2 font-serif text-xs">{refItem.title}</span>}
-      />
+      <span className="relative block w-full">
+        <CoverSlot
+          field={coverField}
+          value={refItem.cover}
+          alt={refItem.title}
+          className={cn('aspect-[2/3] w-full', size === 'sm' ? 'rounded-lg' : 'rounded-xl')}
+          fallback={<span className="line-clamp-3 p-2 font-serif text-xs">{refItem.title}</span>}
+        />
+        {href ? (
+          <span className="pointer-events-none absolute right-1 top-1 rounded-md bg-paper p-0.5 text-muted shadow-sm">
+            <Link2 size={size === 'sm' ? 10 : 11} strokeWidth={2} aria-hidden />
+          </span>
+        ) : null}
+      </span>
       <span className={cn('mt-1 line-clamp-2 text-center', titleCls)}>{refItem.title}</span>
     </>
   )
-  const box = cn('flex w-20 flex-col', size === 'sm' ? 'w-16' : 'w-20')
-  return href ? (
-    <Link to={href} onClick={(e) => e.stopPropagation()} className={cn(box, 'hover:opacity-90')}>
-      {card}
+  const box = cn('group/rel flex flex-col', size === 'sm' ? 'w-16' : 'w-20', href && 'hover:opacity-90')
+  return wrapRef(href, box, card, refItem.title, openHint)
+}
+
+function LinkGlyph({ size }: { size: 'sm' | 'md' }) {
+  return (
+    <Link2
+      size={size === 'sm' ? 12 : 13}
+      strokeWidth={2}
+      aria-hidden
+      className="shrink-0 text-muted transition-colors group-hover/rel:text-ink"
+    />
+  )
+}
+
+function wrapRef(
+  href: string | undefined,
+  className: string,
+  children: ReactNode,
+  title: string,
+  openHint: string,
+) {
+  if (!href) return <span className={className}>{children}</span>
+  return (
+    <Link
+      to={href}
+      onClick={(e) => e.stopPropagation()}
+      className={className}
+      title={openHint}
+      aria-label={`${title}. ${openHint}`}
+    >
+      {children}
     </Link>
-  ) : (
-    <span className={box}>{card}</span>
   )
 }
 

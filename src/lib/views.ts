@@ -1,9 +1,11 @@
-import { uid } from './cn'
+import { todayIso, uid } from './cn'
 import { msg } from './i18n'
 import type {
   CardLayout,
+  FieldDef,
   FieldViewRole,
   FieldViewStyle,
+  ItemRow,
   ListSchema,
   NamedView,
   ViewConfig,
@@ -11,6 +13,98 @@ import type {
   ViewMode,
 } from '../types/domain'
 import { VIEW_KINDS } from '../types/domain'
+
+const PREVIEW_PREF = 'chroniqe-view-preview'
+
+export function readViewPreviewPref(): boolean {
+  try {
+    return localStorage.getItem(PREVIEW_PREF) !== '0'
+  } catch {
+    return true
+  }
+}
+
+export function writeViewPreviewPref(on: boolean) {
+  try {
+    localStorage.setItem(PREVIEW_PREF, on ? '1' : '0')
+  } catch {
+    /* ignore */
+  }
+}
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+function sampleFieldValue(field: FieldDef, index: number, now: Date): unknown {
+  const day = new Date(now.getFullYear(), now.getMonth(), now.getDate() - index)
+  const iso = todayIso(day)
+  const options = field.config?.options ?? []
+  const option = options[index % Math.max(1, options.length)]
+  switch (field.type) {
+    case 'textarea':
+      return msg('viewEditor.previewBody')
+    case 'number':
+      return 8 + index
+    case 'integer':
+      return 2018 + index
+    case 'date':
+      return iso
+    case 'datetime':
+      return `${iso}T${pad2((14 + index) % 24)}:30`
+    case 'boolean':
+    case 'checkbox':
+      return index % 2 === 0
+    case 'select':
+      return option?.value ?? ''
+    case 'multiselect':
+    case 'tags':
+      return option?.value ? [option.value] : index === 0 ? [msg('viewEditor.previewTag')] : []
+    case 'rating':
+    case 'multi_rating':
+    case 'community_rating':
+      return Math.min(field.config?.ratingMax ?? 10, 7 + (index % 3))
+    case 'url':
+      return 'https://example.com'
+    case 'email':
+      return 'ada@example.com'
+    case 'color':
+      return ['#6d28d9', '#0f766e', '#b45309'][index % 3]
+    case 'image':
+    case 'file':
+    case 'relation':
+    case 'user':
+    case 'sublist':
+      return field.type === 'sublist' || field.type === 'relation' || field.type === 'user' ? [] : null
+    default:
+      return msg('viewEditor.previewItem', { n: index + 1 })
+  }
+}
+
+export function samplePreviewItems(schema: ListSchema, count = 4): ItemRow[] {
+  const now = new Date()
+  const titleId = schema.titleFieldId ?? schema.fields[0]?.id
+  return Array.from({ length: count }, (_, index) => {
+    const values: Record<string, unknown> = {}
+    for (const field of schema.fields) {
+      values[field.id] = sampleFieldValue(field, index, now)
+    }
+    if (titleId) values[titleId] = msg('viewEditor.previewItem', { n: index + 1 })
+    return {
+      id: `preview-${index}`,
+      list_id: 'preview',
+      values,
+      position: index,
+      is_checked: index === count - 1,
+      checked_at: null,
+      check_snapshot: null,
+      created_by: null,
+      updated_by: null,
+      created_at: now.toISOString(),
+      updated_at: now.toISOString(),
+    }
+  })
+}
 
 export interface ResolvedViews {
   allowedKinds: ViewKind[]

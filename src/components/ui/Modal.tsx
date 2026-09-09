@@ -16,7 +16,7 @@ export default function Modal({
   title: string
   onClose: () => void
   children: ReactNode
-  wide?: boolean
+  wide?: boolean | 'xl'
   description?: string
 }) {
   const { t } = usePrefs()
@@ -58,7 +58,7 @@ export default function Modal({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={`chroniqe-panel relative max-h-[92vh] w-full overflow-y-auto rounded-t-3xl bg-paper p-5 shadow-lift outline-none sm:rounded-3xl sm:p-6 ${
-          wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'
+          wide === 'xl' ? 'sm:max-w-6xl' : wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'
         }`}
       >
         <div className="mb-4 flex items-start justify-between gap-3">

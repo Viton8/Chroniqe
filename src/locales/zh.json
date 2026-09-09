@@ -151,6 +151,40 @@
     "following": "正在关注",
     "feed": "好友动态"
   },
+  "home": {
+    "customize": "自定义首页",
+    "lead": "选择显示哪些面板以及顺序。把过期和即将到来放在一起，即可保持两列并排。",
+    "leadEx": "关闭好友动态、把过期事项移到最上方，或嵌入你的某个列表。",
+    "add": "添加面板",
+    "addKind": "面板类型",
+    "reset": "重置布局",
+    "resetConfirm": "恢复默认首页布局？",
+    "pickList": "列表",
+    "pickView": "视图",
+    "defaultView": "默认视图",
+    "limit": "条目",
+    "emptyList": "该列表已不存在，或你无法打开。",
+    "chooseList": "为这个面板选择一个列表。",
+    "openList": "打开列表",
+    "noPanels": "所有面板都已隐藏。",
+    "emptyFollowing": "你还没有关注任何列表。",
+    "emptyPinned": "固定一个列表，即可显示在这里。",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "show": "显示",
+    "hide": "隐藏",
+    "kind": {
+      "stats": "数字",
+      "feed": "好友动态",
+      "following": "正在关注",
+      "pinned": "置顶列表",
+      "overdue": "过期",
+      "upcoming": "即将到来",
+      "recent": "最近的列表",
+      "activity": "动态",
+      "list": "一个列表"
+    }
+  },
   "lists": {
     "title": "列表",
     "mine": "我的",
@@ -162,7 +196,95 @@
     "pinned": "置顶",
     "noSearch": "没有匹配的列表",
     "noSearchText": "换个标题或描述试试。",
-    "lead": "你的、与你共享的，以及你固定的列表。"
+    "lead": "你的、与你共享的，以及你固定的列表。",
+    "sortUpdated": "最近更改",
+    "sortCreated": "创建时间",
+    "filterVisibility": "可见性",
+    "visibilityAll": "任意可见性",
+    "filterPeople": "人员",
+    "people": {
+      "all": "全部",
+      "solo": "仅自己",
+      "many": "多人协作"
+    },
+    "changed": "{when} 更改",
+    "changedBy": "{when} 由 {name} 更改"
+  },
+  "highlight": {
+    "label": "高亮",
+    "auto": "自动",
+    "none": "无",
+    "custom": "自定义颜色",
+    "rules": "自动颜色",
+    "rulesHint": "除非你手动选色，否则第一条匹配的规则会给条目上色。",
+    "rulesEx": "评分低于 5 → 红色。状态为“完成” → 灰色。",
+    "matchAll": "全部条件",
+    "matchAny": "任一条件",
+    "addCondition": "添加条件",
+    "addRule": "添加规则",
+    "field": "字段",
+    "operator": "比较",
+    "value": "值",
+    "checked": "已勾选",
+    "yes": "是",
+    "no": "否",
+    "color": {
+      "red": "红",
+      "orange": "橙",
+      "yellow": "黄",
+      "green": "绿",
+      "teal": "青",
+      "blue": "蓝",
+      "purple": "紫",
+      "pink": "粉",
+      "gray": "灰"
+    },
+    "op": {
+      "eq": "等于",
+      "neq": "不等于",
+      "gt": "大于",
+      "gte": "至少",
+      "lt": "小于",
+      "lte": "至多",
+      "contains": "包含",
+      "empty": "为空",
+      "not_empty": "不为空"
+    }
+  },
+  "agenda": {
+    "title": "过期与即将到来",
+    "hint": "这些面板出现在列表的“概览”和首页。选择截止日期，以及条目何时从面板中消失。",
+    "hintEx": "截止日期 + 勾选，或状态为“完成”。",
+    "dateField": "过期与即将到来的日期",
+    "dateHint": "留空则此列表不出现在这些面板中。",
+    "dateOff": "不显示在过期与即将到来中",
+    "needDateField": "请先添加“日期”或“日期和时间”字段。",
+    "done": "在以下情况离开过期与即将到来",
+    "doneHint": "打开列表，选择“从不”、“已勾选”或某个字段（如状态）。",
+    "doneNone": "从不 — 仅按日期",
+    "doneChecked": "已勾选",
+    "doneField": "字段匹配",
+    "match": "匹配",
+    "matchAll": "全部条件",
+    "matchAny": "任一条件",
+    "addCondition": "添加条件",
+    "field": "字段",
+    "operator": "比较",
+    "value": "值",
+    "checked": "已勾选",
+    "yes": "是",
+    "no": "否",
+    "op": {
+      "eq": "等于",
+      "neq": "不等于",
+      "gt": "大于",
+      "gte": "至少",
+      "lt": "小于",
+      "lte": "至多",
+      "contains": "包含",
+      "empty": "为空",
+      "not_empty": "不为空"
+    }
   },
   "newList": {
     "title": "新建列表",
@@ -331,6 +453,18 @@
     "comments": "评论",
     "write": "写点什么…",
     "suggest": "提议",
+    "suggestItem": "提议条目",
+    "suggestEdit": "提议修改",
+    "proposeHint": "你可以提议新条目或修改。由所有者接受或拒绝。",
+    "proposeHintEx": "打开条目并选择“提议修改”，或用上方按钮添加新条目。",
+    "proposeSignIn": "即可向此列表提议更改。",
+    "noProposals": "没有待处理的提议",
+    "proposalUpdated": "提议已更新",
+    "proposalWithdrawn": "提议已撤回",
+    "withdraw": "撤回",
+    "withdrawConfirm": "撤回这条提议？",
+    "editProposal": "编辑提议",
+    "pendingProposal": "你已有一条待审的提议针对此条目。",
     "someone": "有人",
     "duplicated": "列表已复制",
     "duplicateFail": "无法复制",
@@ -343,6 +477,20 @@
     "updated": "更新于",
     "deleted": "已删除",
     "moreActions": "More"
+  },
+  "itemOpen": {
+    "label": "点击条目时",
+    "view": "阅读卡片",
+    "edit": "编辑表单",
+    "hint": "新建条目始终打开表单。已有条目可在窗口中切换。"
+  },
+  "relatedLists": {
+    "title": "关联列表",
+    "hint": "关联列表显示在页面上，一键即可跳转。关联是双向的。",
+    "hintEx": "「待看」「已看」「不看」作为三个关联列表。",
+    "search": "查找列表",
+    "viaFlow": "通过转移",
+    "none": "还没有其他列表"
   },
   "itemNotes": {
     "add": "添加备注",
@@ -391,7 +539,8 @@
     "kind": "类型",
     "cardLayout": "卡片布局",
     "density": "表格密度",
-    "groupField": "列字段",
+    "groupField": "看板列字段",
+    "groupFieldHint": "该字段的每个值都是一列。拖动卡片会把该列的值写入条目。",
     "dateField": "日期字段",
     "coverField": "封面",
     "noCover": "无封面",
@@ -415,6 +564,13 @@
     "customize": "自定义视图",
     "toggle": "折叠或展开视图",
     "edit": "视图设置",
+    "preview": "预览",
+    "previewOn": "隐藏预览",
+    "previewOff": "显示预览",
+    "previewEmpty": "暂无条目 — 显示示例",
+    "previewItem": "示例 {n}",
+    "previewBody": "较长的文字，方便查看条目在此视图中的阅读效果：段落、换行和疏密。",
+    "previewTag": "示例",
     "layout": {
       "grid": "网格",
       "media": "海报",
@@ -445,6 +601,11 @@
     "name": "标题",
     "description": "描述",
     "icon": "图标",
+    "cover": "封面图",
+    "coverHint": "显示在列表页和列表卡片上。上传后请点保存。",
+    "coverEmpty": "还没有封面",
+    "uploadCover": "上传封面",
+    "removeCover": "移除封面",
     "enableCheck": "勾选条目",
     "deleteList": "删除列表",
     "deleteConfirm": "删除这个列表？",
@@ -497,10 +658,14 @@
     "average": "平均",
     "checked": "已勾选",
     "dateField": "轴字段",
+    "eventDate": "日期字段",
+    "eventDateHint": "每条记录按此日期放在时间线上。",
     "valueField": "数值",
     "groupField": "分组依据",
     "aggregation": "聚合",
     "needDate": "请选择轴字段",
+    "needEventDate": "请选择日期字段",
+    "emptyTimeline": "此字段没有带日期的条目。",
     "needValue": "请选择数值字段",
     "needGroup": "请选择分组字段",
     "agg": {
@@ -551,7 +716,8 @@
     "moveUp": "上移",
     "moveDown": "下移",
     "duplicateField": "复制字段",
-    "groupField": "看板 / 分组字段",
+    "groupField": "看板列",
+    "groupFieldHint": "看板的列来自这个字段（状态、类型）。拖动卡片会改它的值。看板视图也可以另选字段。",
     "placeholder": "占位符",
     "pattern": "正则",
     "patternPh": "例如 ^[A-Z].+",
@@ -586,7 +752,8 @@
     "multiselect": "多选",
     "tags": "标签",
     "rating": "评分",
-    "multi_rating": "多人评分",
+    "multi_rating": "编辑者评分",
+    "community_rating": "所有人评分",
     "image": "图片",
     "file": "文件",
     "url": "链接",
@@ -622,7 +789,9 @@
     "delRow": "删除行",
     "tagEnter": "回车添加标签",
     "tagPh": "标签后按回车",
-    "multiHint": "任何人都可以评分——平均值和个人分数会显示在下方。",
+    "multiHint": "只有可以编辑此列表的人才能评分。",
+    "communityHint": "任何登录用户都可以评分，无需编辑权限，也无需提交提议。",
+    "changeRating": "点另一颗星可改分，再点自己的星可取消。",
     "scanFail": "文件未通过内容检查",
     "scanReject": "文件被安全检查拒绝",
     "uploadFail": "上传失败",
@@ -633,6 +802,7 @@
     "pickItem": "选择条目",
     "pickUser": "选择用户",
     "noRelated": "请先在架构中选择关联列表",
+    "openLinkedItem": "打开关联条目",
     "nestedRow": "Row {n}: {error}",
     "sublistRow": "第 {n} 行",
     "sublistRows": "{n} 条",
@@ -647,8 +817,10 @@
     "numberEx": "分数从 2 到 30。",
     "integer": "仅限整数。",
     "integerEx": "年份从 1888 到 2100。",
-    "multi_rating": "每位观众单独评分，平均值会自动计算。",
-    "multi_ratingEx": "一部电影评 8、9 和 7 → 平均 8.0。",
+    "multi_rating": "每位能编辑列表的人单独评分，平均值会自动计算。",
+    "multi_ratingEx": "家庭片单评 8、9 和 7 → 平均 8.0。",
+    "community_rating": "任何登录用户都可以评分，无需编辑权限，也无需提议。所有分数都计入平均。",
+    "community_ratingEx": "公开目录评 8、9 和 7 → 平均 8.0。",
     "image": "文件会检查类型、大小和内容。",
     "imageEx": "海报不超过 2 MB，JPEG/PNG/WEBP。",
     "sublist": "一个条目可以包含小表格。",
@@ -667,79 +839,282 @@
       "title": "空白列表",
       "description": "自己搭建字段——任意类型、任意约束。",
       "hint": "先加一个文本字段「标题」，再加日期、评分、文件。",
-      "example": "黑胶收藏：艺人、年份、成色、封面照片。"
+      "example": "黑胶收藏：艺人、年份、成色、封面照片。",
+      "field": {
+        "title": "名称"
+      }
     },
     "movies_watched": {
       "title": "已看",
       "description": "已经看过的电影和剧集。任何人都可以评分。",
       "hint": "「评分」是集体的：每人打分，再算平均。",
-      "example": "沙丘，2021，电影，日期 12.03.2024，分数 8 和 9 → 平均 8.5。"
+      "example": "沙丘，2021，电影，日期 12.03.2024，分数 8 和 9 → 平均 8.5。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "poster": "海报",
+        "watched_at": "观看日期",
+        "ratings": "评分",
+        "seasons": "季",
+        "review": "评论"
+      },
+      "sub": {
+        "seasons": {
+          "season": "季数",
+          "episodes": "集数",
+          "finished_at": "看完",
+          "score": "本季评分"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "电影",
+          "series": "剧集",
+          "anime": "动画",
+          "doc": "纪录片"
+        }
+      },
+      "chart": {
+        "timeline": "观看时间线",
+        "ratings": "平均评分随时间"
+      }
     },
     "movies_watchlist": {
       "title": "待看",
       "description": "电影和剧集队列。把它们移到已看或弃看。",
       "hint": "如果你创建「影视」套装，会出现转移按钮——它会连起三个列表。",
-      "example": "点「已看」→ 这一行被移走，观看日期设为今天。"
+      "example": "点「已看」→ 这一行被移走，观看日期设为今天。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "poster": "海报",
+        "priority": "优先级",
+        "note": "备注"
+      },
+      "opt": {
+        "kind": {
+          "movie": "电影",
+          "series": "剧集",
+          "anime": "动画",
+          "doc": "纪录片"
+        },
+        "priority": {
+          "now": "马上",
+          "soon": "不久",
+          "someday": "有空再说"
+        }
+      }
     },
     "movies_dropped": {
       "title": "弃看",
       "description": "你跳过或拒绝的片名——以免再次被推荐。",
       "hint": "加上原因：说明待看为何变短。",
-      "example": "「气质不对」+ 决定日期。"
+      "example": "「气质不对」+ 决定日期。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "reason": "原因",
+        "decided_at": "日期"
+      },
+      "opt": {
+        "kind": {
+          "movie": "电影",
+          "series": "剧集",
+          "anime": "动画",
+          "doc": "纪录片"
+        }
+      }
     },
     "games_done": {
       "title": "已通关游戏",
       "description": "已完成游戏目录，含平台、时长和评分。",
       "hint": "完成日期会进入「哪年玩了什么」时间线。",
-      "example": "哈迪斯，Switch，40 小时，评分 9，完成于 02.2024。"
+      "example": "哈迪斯，Switch，40 小时，评分 9，完成于 02.2024。",
+      "field": {
+        "title": "名称",
+        "platform": "平台",
+        "cover": "封面",
+        "finished_at": "通关",
+        "hours": "时长",
+        "ratings": "评分",
+        "status": "状态",
+        "note": "备注"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "手机",
+          "other": "其他"
+        },
+        "status": {
+          "completed": "已通关",
+          "main": "主线",
+          "hundred": "100%",
+          "dropped": "弃坑"
+        }
+      },
+      "chart": {
+        "timeline": "何时通关",
+        "ratings": "评分随时间"
+      }
     },
     "shopping": {
       "title": "购物",
       "description": "可勾选的购物清单。可以把行移到已买。",
       "hint": "开启勾选：打钩可以盖上日期并转移这一行。",
-      "example": "牛奶 ×2，分类「食品」。"
+      "example": "牛奶 ×2，分类「食品」。",
+      "field": {
+        "name": "条目",
+        "qty": "数量",
+        "category": "分类",
+        "note": "备注",
+        "bought_at": "已买"
+      },
+      "opt": {
+        "category": {
+          "food": "食品",
+          "home": "家居",
+          "tech": "数码",
+          "other": "其他"
+        }
+      },
+      "checkLabel": "已买"
     },
     "bought": {
       "title": "已买",
       "description": "带日期和价格的购买记录。",
       "hint": "用按钮或自动化把购物清单里的条目移到这里。",
-      "example": "牛奶，2 件，04.09.2026，12 元。"
+      "example": "牛奶，2 件，04.09.2026，12 元。",
+      "field": {
+        "name": "条目",
+        "qty": "数量",
+        "bought_at": "日期",
+        "price": "价格",
+        "category": "分类"
+      },
+      "opt": {
+        "category": {
+          "food": "食品",
+          "home": "家居",
+          "tech": "数码",
+          "other": "其他"
+        }
+      },
+      "chart": {
+        "spend": "每日花费"
+      }
     },
     "later_shopping": {
       "title": "为活动采购",
       "description": "延后的购买——新年、生日、旅行。",
       "hint": "「何时」可以是日期，也可以是自由文本活动。",
-      "example": "彩灯 →「给新年」。"
+      "example": "彩灯 →「给新年」。",
+      "field": {
+        "name": "条目",
+        "qty": "数量",
+        "when": "何时",
+        "note": "备注"
+      },
+      "ph": {
+        "when": "新年前"
+      }
     },
     "todo": {
       "title": "任务",
       "description": "经典待办：勾选、优先级、截止日期。",
       "hint": "勾选可以自动盖上完成日期。",
-      "example": "「交网费」截止周五 → 勾选 → 完成日是今天。"
+      "example": "「交网费」截止周五 → 勾选 → 完成日是今天。",
+      "field": {
+        "title": "任务",
+        "due": "截止",
+        "priority": "优先级",
+        "done_at": "完成",
+        "notes": "备注"
+      },
+      "opt": {
+        "priority": {
+          "high": "高",
+          "mid": "中",
+          "low": "低"
+        }
+      },
+      "checkLabel": "完成"
     },
     "books": {
       "title": "书籍",
       "description": "已读和在读——带评分和日期。",
       "hint": "时间线使用读完日期。集体评分和电影一样。",
-      "example": "大师和玛格丽特，读完 01.06.2024，评分 10。"
+      "example": "大师和玛格丽特，读完 01.06.2024，评分 10。",
+      "field": {
+        "title": "名称",
+        "author": "作者",
+        "finished_at": "读完",
+        "ratings": "评分",
+        "status": "状态",
+        "note": "备注"
+      },
+      "opt": {
+        "status": {
+          "want": "想读",
+          "reading": "在读",
+          "done": "已读",
+          "dropped": "弃读"
+        }
+      }
     },
     "pack_cinema": {
       "title": "影视",
       "description": "三个相连的列表：队列、已看、弃看。转移按钮已就绪。",
       "hint": "一次创建三个列表。待看会有「已看」和「不看」。",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "创建套装后，待看列表会出现两个按钮：已看和不看。",
+      "transfer": {
+        "movies_watchlist__movies_watched": "已看",
+        "movies_watchlist__movies_dropped": "不看"
+      }
     },
     "catalog_items": {
       "title": "目录",
       "description": "无重复的实体参考列表：电影、书籍、地点等任意对象。",
       "hint": "一行 = 一个对象。带日期与评分的重复事件放在「目录与日志」套装中的日志里。",
-      "example": "《沙丘》，2021，海报。影片只一条；不同评分的多次观看在日志中。"
+      "example": "《沙丘》，2021，海报。影片只一条；不同评分的多次观看在日志中。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "cover": "封面",
+        "note": "备注"
+      },
+      "opt": {
+        "kind": {
+          "film": "电影",
+          "book": "书",
+          "game": "游戏",
+          "place": "地点",
+          "other": "其他"
+        }
+      }
     },
     "event_log": {
       "title": "日志",
       "description": "重复事件：每次各自的日期、评分与备注，并链接到目录中的一行。",
       "hint": "将「对象」字段指向目录列表。同一部影片可出现多次——每次观看单独一行。",
-      "example": "沙丘 · 12.03.2024 · 9；沙丘 · 01.09.2025 · 8 —— 两次观看，两个评分。"
+      "example": "沙丘 · 12.03.2024 · 9；沙丘 · 01.09.2025 · 8 —— 两次观看，两个评分。",
+      "field": {
+        "subject": "对象",
+        "happened_at": "日期",
+        "score": "评分",
+        "note": "备注"
+      },
+      "chart": {
+        "timeline": "事件时间线",
+        "ratings": "评分随时间"
+      }
     },
     "pack_catalog_log": {
       "title": "目录与日志",
@@ -751,31 +1126,378 @@
       "title": "购物",
       "description": "当前清单、已买，以及延后的节日采购。",
       "hint": "勾选一条——或点按钮送到已买 / 新年。",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "勾选牛奶 → 转到已买并记下今天。在转移前取消勾选，日期会清掉。",
+      "transfer": {
+        "shopping__bought": "已买",
+        "shopping__later_shopping": "留到新年",
+        "bought__shopping": "退回购物清单"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "待玩",
+      "description": "游戏队列。用按钮移到已通关。",
+      "hint": "「游戏」套装会把队列和已通关目录连起来，并自动填入通关日期。",
+      "example": "Hades，Switch，马上 → 已通关 → 时长和评分在另一个列表里。",
+      "field": {
+        "title": "名称",
+        "platform": "平台",
+        "cover": "封面",
+        "priority": "优先级",
+        "note": "备注"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "手机",
+          "other": "其他"
+        },
+        "priority": {
+          "now": "马上",
+          "soon": "不久",
+          "someday": "有空再说"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "游戏",
+      "description": "待玩队列和已通关目录。转移按钮已就绪。",
+      "hint": "待玩会有「已通关」按钮，通关日期设为今天。",
+      "example": "点已通关 → 游戏进入目录，日期是今天。",
+      "transfer": {
+        "games_backlog__games_done": "已通关"
+      }
     },
     "headache_diary": {
       "title": "头痛日记",
       "description": "发作记录：疼痛随时间变化、症状、用药、运动，并可关联血压。",
       "hint": "强度是嵌套列表：折叠显示峰值与起止，展开显示每个时段。健康套装会连上血压。",
-      "example": "峰值 8 · 08:20–14:45；先兆与恶心；08:40 布洛芬 400 mg，09:10 起效。"
+      "example": "峰值 8 · 08:20–14:45；先兆与恶心；08:40 布洛芬 400 mg，09:10 起效。",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — 不痛",
+            "1": "1 — 几乎感觉不到",
+            "2": "2 — 轻微",
+            "3": "3 — 能察觉",
+            "4": "4 — 中等",
+            "5": "5 — 妨碍",
+            "6": "6 — 较强",
+            "7": "7 — 很强",
+            "8": "8 — 剧烈",
+            "9": "9 — 难以忍受",
+            "10": "10 — 最痛"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "没有疼痛。",
+            "1": "只有特意去注意时才感觉到。",
+            "2": "可以忽略。",
+            "3": "有痛感，但几乎不影响做事。",
+            "4": "会分心，但还能继续工作。",
+            "5": "很难忽略，注意力下降。",
+            "6": "难以思考和工作。",
+            "7": "日常动作都变难。",
+            "8": "几乎顾不上别的。",
+            "9": "几乎什么都做不了。",
+            "10": "能想象到的最痛。"
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
     },
     "blood_pressure": {
       "title": "血压",
       "description": "带时间的读数：脉搏、照片、体位、咖啡因、睡眠、压力，以及头痛关联。",
       "hint": "收缩压、舒张压和脉搏用于图表。把读数链到日记行，可看发作前后的血压。",
-      "example": "9月8日 08:15，148/92，脉搏 78，坐姿，少量咖啡，关联晨间偏头痛。"
+      "example": "9月8日 08:15，148/92，脉搏 78，坐姿，少量咖啡，关联晨间偏头痛。",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
     },
     "pack_health": {
       "title": "头痛与血压",
@@ -876,17 +1598,29 @@
     "tab": "自动化",
     "moves": "移动按钮",
     "movesHint": "条目上的按钮会把它复制到你的另一个列表。",
-    "automationsHint": "勾选时写入日期、填写字段，或恢复快照。",
+    "automationsHint": "勾选条目时，可以把今天写入日期、填入另一个字段，或之后恢复勾选时保存的值。",
     "automationsEx": "购物清单：勾选 → 「购买日期」= 今天。",
     "onCheck": "勾选时",
     "onUncheck": "取消勾选时",
-    "named": "命名规则",
+    "onUncheckHint": "在去掉勾选时运行。「撤销勾选时的更改」会恢复勾选时保存的字段值。",
+    "named": "自定义规则",
+    "namedHint": "规则等待某个事件，然后执行你选择的动作。与上面的勾选区块不同，它也可以在移动按钮或字段变为指定值时触发。",
+    "namedEx": "当状态变为完成时，写入结束日期。",
     "addRule": "添加规则",
-    "trigger": "触发条件",
+    "trigger": "何时触发",
+    "triggerHint": {
+      "checked": "在勾选条目后运行。",
+      "unchecked": "在取消勾选后运行。",
+      "button": "有人使用所选移动按钮时运行。",
+      "field_equals": "当该字段变为下面的值时运行——包括在看板上拖动卡片。"
+    },
     "addAction": "添加动作",
-    "setNow": "将日期设为现在",
-    "setField": "设置字段",
-    "restore": "恢复快照",
+    "setNow": "写入日期",
+    "setNowHint": "把今天（或现在，若是日期时间字段）写入所选日期字段。",
+    "setField": "填写字段",
+    "setFieldHint": "把你选择的值写入另一个字段——状态、备注、今天的日期等。",
+    "restore": "撤销勾选时的更改",
+    "restoreHint": "恢复勾选时保存的字段值。在取消勾选时使用。",
     "valueNow": "现在（日期和时间）",
     "valueToday": "今天",
     "targetList": "目标列表",

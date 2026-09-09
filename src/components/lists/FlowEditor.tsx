@@ -117,6 +117,7 @@ export default function FlowEditor({
           onChange={(onCheck) => patchSettings({ ...list.settings, onCheck })}
         />
         <h3 className="pt-2 font-medium">{t('flow.onUncheck')}</h3>
+        <p className="text-xs text-muted">{t('flow.onUncheckHint')}</p>
         <ActionEditor
           actions={list.settings?.onUncheck ?? []}
           fields={fields}
@@ -126,6 +127,7 @@ export default function FlowEditor({
 
       <section className="space-y-3">
         <h3 className="font-medium">{t('flow.named')}</h3>
+        <Hint title={t('flow.namedHint')} example={t('flow.namedEx')} />
         {rules.map((rule) => (
           <article key={rule.id} className="space-y-3 rounded-2xl border border-line p-3">
             <div className="flex flex-wrap items-center gap-2">
@@ -160,7 +162,7 @@ export default function FlowEditor({
                 <Trash2 size={14} />
               </button>
             </div>
-            <FieldWrap label={t('flow.trigger')}>
+            <FieldWrap label={t('flow.trigger')} hint={t(`flow.triggerHint.${rule.trigger.type}`)}>
               <select
                 className={selectClass}
                 value={rule.trigger.type}
@@ -481,7 +483,7 @@ function ActionEditor({
 }) {
   const { t } = usePrefs()
   const stampable = fields.filter((field) => field.type === 'date' || field.type === 'datetime')
-  const writable = fields.filter((field) => !['image', 'file', 'sublist', 'relation', 'multi_rating'].includes(field.type))
+  const writable = fields.filter((field) => !['image', 'file', 'sublist', 'relation', 'multi_rating', 'community_rating'].includes(field.type))
 
   return (
     <div className="space-y-2">
@@ -512,6 +514,13 @@ function ActionEditor({
                 <Trash2 size={14} />
               </button>
             </div>
+            <p className="text-xs text-muted">
+              {action.type === 'set_now'
+                ? t('flow.setNowHint')
+                : action.type === 'set_field'
+                  ? t('flow.setFieldHint')
+                  : t('flow.restoreHint')}
+            </p>
             {action.type === 'set_now' ? (
               <select
                 className={selectClass}

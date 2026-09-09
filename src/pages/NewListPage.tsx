@@ -21,17 +21,17 @@ export default function NewListPage() {
     if (!spec) return
     setBusy(true)
     try {
-      const cloned = cloneTemplate(spec)
+      const cloned = cloneTemplate(spec, t)
       const list = await createList({
         owner_id: user.id,
-        title: t(`tpl.${spec.key}.title`),
+        title: cloned.title,
         icon: cloned.icon,
         template_key: cloned.template_key,
         schema: cloned.schema,
         view_config: cloned.view_config,
         settings: cloned.settings,
       })
-      for (const chart of spec.charts ?? []) {
+      for (const chart of cloned.charts) {
         await createChart({
           list_id: list.id,
           name: chart.name,
@@ -55,10 +55,10 @@ export default function NewListPage() {
     try {
       const created: Record<string, string> = {}
       for (const spec of pack.lists) {
-        const cloned = cloneTemplate(spec)
+        const cloned = cloneTemplate(spec, t)
         const list = await createList({
           owner_id: user.id,
-          title: t(`tpl.${spec.key}.title`),
+          title: cloned.title,
           icon: cloned.icon,
           template_key: cloned.template_key,
           schema: cloned.schema,
@@ -66,7 +66,7 @@ export default function NewListPage() {
           settings: cloned.settings,
         })
         created[spec.key] = list.id
-        for (const chart of spec.charts ?? []) {
+        for (const chart of cloned.charts) {
           await createChart({
             list_id: list.id,
             name: chart.name,
@@ -75,7 +75,7 @@ export default function NewListPage() {
           })
         }
       }
-      for (const row of applyPackSettings(pack, created)) {
+      for (const row of applyPackSettings(pack, created, t)) {
         await updateList(row.listId, {
           settings: row.settings,
           ...(row.schema ? { schema: row.schema } : {}),

@@ -1,3 +1,4 @@
+import { usesItemRatings } from './ratings'
 import type { FieldDef, ItemRating, ListSchema } from '../types/domain'
 
 export function formulaToken(field: FieldDef): string {
@@ -40,7 +41,7 @@ function rawFieldNumber(
   values: Record<string, unknown>,
   ctx?: FormulaCtx,
 ): number | null {
-  if (field.type === 'multi_rating' && ctx?.ratings && ctx.itemId) {
+  if (usesItemRatings(field) && ctx?.ratings && ctx.itemId) {
     const all = ctx.ratings.filter((r) => r.field_id === field.id && r.item_id === ctx.itemId)
     if (!all.length) return null
     return all.reduce((s, r) => s + Number(r.value), 0) / all.length

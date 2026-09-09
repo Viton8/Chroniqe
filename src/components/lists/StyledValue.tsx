@@ -1,3 +1,4 @@
+import { usesItemRatings } from '../../lib/ratings'
 import { Star } from 'lucide-react'
 import type {
   FieldDef,
@@ -35,7 +36,7 @@ export default function StyledValue({
   className?: string
 }) {
   if (field.type === 'relation') {
-    return <RelationValue field={field} value={value} className={className} />
+    return <RelationValue field={field} value={value} className={className} size="sm" />
   }
   if (field.type === 'sublist') {
     return (
@@ -60,9 +61,8 @@ export default function StyledValue({
   if (numeric != null && style?.numberDisplay === 'stars') {
     const { max } = fieldBounds(field)
     const count =
-      field.type === 'multi_rating' && ratings && itemId
-        ? ratings.filter((r) => r.field_id === field.id && r.item_id === itemId)
-            .length
+      usesItemRatings(field) && ratings && itemId
+        ? ratings.filter((r) => r.field_id === field.id && r.item_id === itemId).length
         : 0
     return (
       <span className={cn('inline-flex items-center gap-1', className)}>

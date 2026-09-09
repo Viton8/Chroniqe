@@ -1,3 +1,4 @@
+import { usesItemRatings } from './ratings'
 import type {
   ChartConfig,
   ChartType,
@@ -7,6 +8,7 @@ import type {
   ListSchema,
 } from '../types/domain'
 import { displayValue } from './display'
+import { formatDate, formatDateTime, parseWallOrInstant, titleFromValues } from './cn'
 import { isPeakSpanSublist, sublistPeak } from './fields'
 import { msg } from './i18n'
 
@@ -17,10 +19,39 @@ export interface ChartPoint {
   extra?: string
 }
 
-export function fieldById(
+export interface TimelineEvent {
+  id: string
+  title: string
+  at: number
+  label: string
+}
+
+export function buildTimelineEvents(
+  config: ChartConfig,
   schema: ListSchema,
-  id?: string,
-): FieldDef | undefined {
+  items: ItemRow[],
+): TimelineEvent[] {
+  const dateField = fieldById(schema, config.dateFieldId)
+  if (!dateField || (dateField.type !== 'date' && dateField.type !== 'datetime')) return []
+  const events: TimelineEvent[] = []
+  for (const item of items) {
+    const raw = item.values[dateField.id]
+    if (raw == null || raw === '') continue
+    const parsed = parseWallOrInstant(String(raw))
+    if (!parsed) continue
+    const stamp = String(raw)
+    events.push({
+      id: item.id,
+      title: titleFromValues(item.values, schema.titleFieldId),
+      at: parsed.getTime(),
+      label: dateField.type === 'datetime' ? formatDateTime(stamp) : formatDate(stamp),
+    })
+  }
+  events.sort((a, b) => a.at - b.at || a.title.localeCompare(b.title))
+  return events
+}
+
+export function fieldById(schema: ListSchema, id?: string): FieldDef | undefined {
   return schema.fields.find((f) => f.id === id)
 }
 
@@ -32,10 +63,8 @@ function numericFromValue(
 ): number | null {
   if (!field) return null
   if (isPeakSpanSublist(field)) return sublistPeak(field, value)
-  if (field.type === 'multi_rating') {
-    const mine = ratings.filter(
-      (r) => r.item_id === itemId && r.field_id === field.id,
-    )
+  if (usesItemRatings(field)) {
+    const mine = ratings.filter((r) => r.item_id === itemId && r.field_id === field.id)
     if (!mine.length) return null
     return mine.reduce((s, r) => s + Number(r.value), 0) / mine.length
   }

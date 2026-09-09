@@ -18,9 +18,10 @@ import {
   AreaChart,
 } from 'recharts'
 import type { ChartConfig, ChartType, ItemRating, ItemRow, ListSchema } from '../../types/domain'
-import { buildChartSeries } from '../../lib/charts'
+import { buildChartSeries, buildTimelineEvents } from '../../lib/charts'
 import { usePrefs } from '../../context/PrefsContext'
 import { readCssColor } from '../../lib/themes'
+import EventTimeline from './EventTimeline'
 
 function useChartColors() {
   const { theme, palette } = usePrefs()
@@ -54,7 +55,6 @@ export default function ChartView({
   items: ItemRow[]
   ratings: ItemRating[]
 }) {
-  const data = buildChartSeries(type, config, schema, items, ratings)
   const { t } = usePrefs()
   const colors = useChartColors()
   const tick = { fontSize: 11, fill: colors.muted }
@@ -65,6 +65,19 @@ export default function ChartView({
     borderRadius: 12,
     color: colors.ink,
   }
+
+  if (type === 'timeline') {
+    if (!config.dateFieldId) {
+      return <p className="py-8 text-center text-sm text-muted">{t('charts.needEventDate')}</p>
+    }
+    const events = buildTimelineEvents(config, schema, items)
+    if (!events.length) {
+      return <p className="py-8 text-center text-sm text-muted">{t('charts.emptyTimeline')}</p>
+    }
+    return <EventTimeline events={events} />
+  }
+
+  const data = buildChartSeries(type, config, schema, items, ratings)
 
   if (type === 'kpi') {
     return (

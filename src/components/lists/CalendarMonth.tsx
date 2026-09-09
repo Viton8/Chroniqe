@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { ItemRow, ListSchema, NamedView } from '../../types/domain'
 import { itemDateIso } from '../../lib/filters'
+import { itemHighlightBind } from '../../lib/highlight'
 import { cn, titleFromValues } from '../../lib/cn'
 import { usePrefs } from '../../context/PrefsContext'
 import Button from '../ui/Button'
@@ -23,6 +24,7 @@ export default function CalendarMonth({
   onToggleSelect,
   onCreateOnDate,
   onMoveDate,
+  highlightOf,
 }: {
   schema: ListSchema
   items: ItemRow[]
@@ -36,6 +38,7 @@ export default function CalendarMonth({
   onToggleSelect?: (item: ItemRow) => void
   onCreateOnDate?: (iso: string) => void
   onMoveDate?: (item: ItemRow, iso: string) => void
+  highlightOf?: (item: ItemRow) => string | null
 }) {
   const { t, locale } = usePrefs()
   const [cursor, setCursor] = useState(() => {
@@ -134,7 +137,9 @@ export default function CalendarMonth({
             >
               <p className={cn('text-xs', today ? 'font-semibold text-accent' : 'text-muted')}>{cell}</p>
               <div className="mt-1 space-y-1">
-                {dayItems.slice(0, 3).map((item) => (
+                {dayItems.slice(0, 3).map((item) => {
+                  const hl = itemHighlightBind(highlightOf?.(item) ?? null)
+                  return (
                   <button
                     key={item.id}
                     type="button"
@@ -144,7 +149,10 @@ export default function CalendarMonth({
                       item.is_checked && 'checked-out',
                       highlightedId === item.id && 'bg-accent-soft',
                       selectedIds?.has(item.id) && 'ring-1 ring-accent',
+                      hl.className,
                     )}
+                    style={hl.style}
+                    data-hl={hl['data-hl']}
                     onDragStart={(event) => {
                       event.dataTransfer.setData(ITEM_MIME, item.id)
                       event.dataTransfer.effectAllowed = 'move'
@@ -156,7 +164,8 @@ export default function CalendarMonth({
                   >
                     {titleFromValues(item.values, view.titleFieldId ?? schema.titleFieldId)}
                   </button>
-                ))}
+                  )
+                })}
                 {dayItems.length > 3 ? (
                   <p className="px-1 text-[10px] text-muted">{t('calendar.more', { n: dayItems.length - 3 })}</p>
                 ) : null}
@@ -173,11 +182,15 @@ export default function CalendarMonth({
             {t('insights.noDate')}
           </p>
           <div className="flex flex-wrap gap-2">
-            {undated.map((item) => (
+            {undated.map((item) => {
+              const hl = itemHighlightBind(highlightOf?.(item) ?? null)
+              return (
               <button
                 key={item.id}
                 type="button"
-                className="rounded-full bg-ink/5 px-3 py-1 text-xs hover:bg-ink/10"
+                className={cn('rounded-full bg-ink/5 px-3 py-1 text-xs hover:bg-ink/10', hl.className)}
+                style={hl.style}
+                data-hl={hl['data-hl']}
                 draggable={Boolean(canEdit && onMoveDate)}
                 onDragStart={(event) => {
                   event.dataTransfer.setData(ITEM_MIME, item.id)
@@ -190,7 +203,8 @@ export default function CalendarMonth({
               >
                 {titleFromValues(item.values, schema.titleFieldId)}
               </button>
-            ))}
+              )
+            })}
           </div>
         </div>
       ) : null}

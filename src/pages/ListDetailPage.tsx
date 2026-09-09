@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Bell,
   BellOff,
@@ -8,9 +8,11 @@ import {
   ChevronRight,
   Copy,
   Download,
+  Eye,
   Keyboard,
   Link2,
   MoreHorizontal,
+  Pencil,
   Plus,
   Settings2,
   SlidersHorizontal,
@@ -23,7 +25,7 @@ import {
   createChart,
   createItem,
   createInvite,
-  createProposal,
+  deleteProposal,
   deleteChart,
   deleteItem,
   deleteList,
@@ -41,11 +43,13 @@ import {
   listPermissions,
   removeMember,
   reviewProposal,
+  saveProposal,
   searchProfiles,
   setSubscribed,
   updateItem,
   updateList,
   updateMemberRole,
+  syncRelatedListLinks,
 } from '../services/api'
 import { supabase } from '../services/supabase'
 import type {
@@ -64,7 +68,9 @@ import type {
   MemberRole,
   Profile,
   NamedView,
+  ItemOpenMode,
 } from '../types/domain'
+import { ITEM_OPEN_MODES } from '../types/domain'
 import Button from '../components/ui/Button'
 import Hint from '../components/ui/Hint'
 import Modal from '../components/ui/Modal'
@@ -74,6 +80,18 @@ import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import SchemaEditor from '../components/lists/SchemaEditor'
 import ListViews, { ViewSwitcher } from '../components/lists/ListViews'
 import ViewEditor, { ViewsManager } from '../components/lists/ViewEditor'
+import RelatedListsNav from '../components/lists/RelatedListsNav'
+import RelatedListsEditor from '../components/lists/RelatedListsEditor'
+import HighlightPicker from '../components/lists/HighlightPicker'
+import HighlightRulesEditor from '../components/lists/HighlightRulesEditor'
+import AgendaEditor from '../components/lists/AgendaEditor'
+import ItemReadView from '../components/lists/ItemReadView'
+import CoverSlot from '../components/lists/CoverSlot'
+import ListCoverEditor from '../components/lists/ListCoverEditor'
+import ProposalsPanel from '../components/lists/ProposalsPanel'
+import { proposalPreview, proposalValues } from '../lib/proposals'
+import { ratingInputLocked, usesItemRatings } from '../lib/ratings'
+import { readHighlightChoice, writeHighlightChoice } from '../lib/highlight'
 import { normalizeViewConfig, toViewConfig } from '../lib/views'
 import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
@@ -81,6 +99,7 @@ import { emptyValues, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
 import { applyFieldEquals, toggleChecked, transferItem } from '../lib/automations'
 import { asDatetimeInputValue, formatDateTime, titleFromValues } from '../lib/cn'
+import { effectiveAgendaConfig } from '../lib/agenda'
 import { useCommand } from '../context/CommandContext'
 import { CHART_TYPES as CHART_TYPE_LIST } from '../types/domain'
 import {
@@ -101,7 +120,7 @@ import ActivityFeed from '../components/lists/ActivityFeed'
 import FlowEditor from '../components/lists/FlowEditor'
 import { ItemNotesPanel } from '../components/lists/ItemNotes'
 import { readWorkspace, writeWorkspace } from '../lib/workspace'
-import { applyLinkAccess, joinShareUrl, listLinkAccess, listShareUrl } from '../lib/share'
+import { applyLinkAccess, joinShareUrl, listAcceptsProposals, listLinkAccess, listShareUrl } from '../lib/share'
 import ShareDialog from '../components/share/ShareDialog'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
@@ -136,7 +155,7 @@ function ListWorkspace({ id }: { id: string }) {
   const [sub, setSub] = useState(false)
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
-  const [tab, setTab] = useState<'items' | 'insights' | 'charts' | 'activity'>('items')
+  const [tab, setTab] = useState<'items' | 'insights' | 'charts' | 'activity' | 'proposals'>('items')
   const [openItemId, setOpenItemId] = useState<string | null>(null)
   const openItem = openItemId ? (items.find((row) => row.id === openItemId) ?? null) : null
   const setOpenItem = useCallback((item: ItemRow | null) => {
@@ -144,6 +163,7 @@ function ListWorkspace({ id }: { id: string }) {
   }, [])
   const [creating, setCreating] = useState(false)
   const [draftValues, setDraftValues] = useState<Record<string, unknown> | null>(null)
+  const [proposalDraft, setProposalDraft] = useState<ChangeProposal | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [customizeOpen, setCustomizeOpen] = useState(false)
   const [activeViewId, setActiveViewId] = useState<string | undefined>(storedWorkspace.viewId)
@@ -251,7 +271,10 @@ function ListWorkspace({ id }: { id: string }) {
     rows = applyListFilters(rows, schema, filters, ratings)
     return sortItems(rows, sort, schema, locale, ratings)
   }, [items, query, hideChecked, sort, schema, locale, filters, ratings])
-  const insights = useMemo(() => buildInsights(schema, items, ratings), [schema, items, ratings])
+  const insights = useMemo(
+    () => buildInsights(schema, items, ratings, list?.settings),
+    [schema, items, ratings, list?.settings],
+  )
 
   const overlayOpen =
     creating || Boolean(openItem) || settingsOpen || customizeOpen || helpOpen || paletteOpen || shareOpen
@@ -282,7 +305,10 @@ function ListWorkspace({ id }: { id: string }) {
       if (typing) return
       if (event.key === 'n' || event.key === 'N') {
         event.preventDefault()
-        if (perms?.edit || perms?.propose) setCreating(true)
+        if (perms?.edit || perms?.propose) {
+          setProposalDraft(null)
+          setCreating(true)
+        }
         return
       }
       if ((event.key === 'a' || event.key === 'A') && perms?.edit) {
@@ -354,7 +380,10 @@ function ListWorkspace({ id }: { id: string }) {
         const row = items.find((item) => item.id === itemId)
         if (row) setOpenItem(row)
       },
-      createItem: () => setCreating(true),
+      createItem: () => {
+        setProposalDraft(null)
+        setCreating(true)
+      },
     })
     return () => setWorkspace(null)
   }, [list, items, setWorkspace, setOpenItem])
@@ -380,6 +409,61 @@ function ListWorkspace({ id }: { id: string }) {
   const canEdit = Boolean(perms?.edit)
   const canPropose = Boolean(perms?.propose)
   const canConfigureViews = Boolean(perms?.owner || perms?.edit)
+  const canReviewProposals = Boolean(perms?.owner || perms?.edit)
+  const pendingCount = proposals.filter((row) => row.status === 'pending').length
+  const showProposalsTab = Boolean(
+    canPropose || canReviewProposals || (user && proposals.some((row) => row.user_id === user.id)),
+  )
+  const myPending = proposals.filter((row) => row.status === 'pending' && row.user_id === user?.id)
+
+  const closeItemModal = () => {
+    setCreating(false)
+    setOpenItem(null)
+    setDraftValues(null)
+    setProposalDraft(null)
+  }
+
+  const refreshProposals = async () => {
+    if (!user) return
+    setProposals(await fetchProposals(list.id).catch(() => []))
+  }
+
+  const startEditProposal = (proposal: ChangeProposal) => {
+    const values = proposalValues(proposal)
+    if (proposal.action === 'update' && proposal.item_id) {
+      const item = items.find((row) => row.id === proposal.item_id)
+      if (!item) {
+        toast(t('list.notFoundText'), 'err')
+        return
+      }
+      setProposalDraft(proposal)
+      setDraftValues(values ?? item.values)
+      setOpenItem(item)
+      setCreating(false)
+      setTab('items')
+      return
+    }
+    setProposalDraft(proposal)
+    setDraftValues(values ?? emptyValues(schema))
+    setOpenItem(null)
+    setCreating(true)
+    setTab('items')
+  }
+
+  const onRatingChange = (row: ItemRating, action?: 'upsert' | 'delete') => {
+    setRatings((prev) => {
+      const same = (entry: ItemRating) =>
+        entry.item_id === row.item_id && entry.field_id === row.field_id && entry.user_id === row.user_id
+      if (action === 'delete') return prev.filter((entry) => !same(entry))
+      const idx = prev.findIndex(same)
+      if (idx >= 0) {
+        return prev.map((entry, i) =>
+          i === idx ? { ...entry, ...row, profile: row.profile ?? entry.profile } : entry,
+        )
+      }
+      return [...prev, row]
+    })
+  }
 
   const saveViews = async (next: {
     views: NamedView[]
@@ -403,7 +487,7 @@ function ListWorkspace({ id }: { id: string }) {
   const onToggle = async (item: ItemRow, next: boolean) => {
     if (!user) return
     if (!canEdit && canPropose) {
-      await createProposal({
+      await saveProposal({
         list_id: list.id,
         item_id: item.id,
         user_id: user.id,
@@ -411,6 +495,7 @@ function ListWorkspace({ id }: { id: string }) {
         payload: {},
       })
       toast(t('list.proposed'))
+      setProposals(await fetchProposals(list.id).catch(() => []))
       return
     }
     if (!canEdit) return
@@ -429,6 +514,7 @@ function ListWorkspace({ id }: { id: string }) {
   const groupFieldId = view.groupFieldId ?? schema.groupFieldId
 
   const startCreate = (patch?: Record<string, unknown>) => {
+    setProposalDraft(null)
     setDraftValues({ ...emptyValues(schema), ...patch })
     setCreating(true)
   }
@@ -482,6 +568,13 @@ function ListWorkspace({ id }: { id: string }) {
 
   return (
     <div>
+      {list.cover_url ? (
+        <CoverSlot
+          value={list.cover_url}
+          className="mb-4 h-40 w-full max-w-3xl rounded-2xl sm:h-52"
+          alt=""
+        />
+      ) : null}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p className="text-xs uppercase tracking-wide text-muted">
@@ -495,6 +588,21 @@ function ListWorkspace({ id }: { id: string }) {
             {user ? <FavoriteButton id={list.id} /> : null}
           </div>
           {list.description ? <p className="mt-1 max-w-xl text-sm text-muted">{list.description}</p> : null}
+          <RelatedListsNav list={list} />
+          {canPropose && !canEdit ? (
+            <div className="mt-3 max-w-xl">
+              <Hint title={t('list.proposeHint')} example={t('list.proposeHintEx')} compact />
+            </div>
+          ) : null}
+          {!user && listAcceptsProposals(list) ? (
+            <p className="mt-3 max-w-xl text-sm text-muted">
+              <Link to="/login" state={{ from: `/lists/${list.id}` }} className="text-accent underline">
+                {t('nav.login')}
+              </Link>
+              {' — '}
+              {t('list.proposeSignIn')}
+            </p>
+          ) : null}
           {list.settings?.enableCheck && items.length ? (
             <div className="mt-3 max-w-sm">
               <div className="flex justify-between text-xs text-muted">
@@ -597,22 +705,33 @@ function ListWorkspace({ id }: { id: string }) {
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {(['items', 'insights', 'charts', 'activity'] as const).map((key) => (
+        {(
+          [
+            ['items', t('list.items')],
+            ['insights', t('list.insights')],
+            ['charts', t('list.charts')],
+            ['activity', t('list.activity')],
+          ] as const
+        ).map(([key, label]) => (
           <button
             key={key}
             type="button"
             onClick={() => setTab(key)}
             className={`rounded-full px-3 py-1 text-sm ${tab === key ? 'bg-ink text-paper' : 'bg-ink/5 text-muted'}`}
           >
-            {key === 'items'
-              ? t('list.items')
-              : key === 'insights'
-                ? t('list.insights')
-                : key === 'charts'
-                  ? t('list.charts')
-                  : t('list.activity')}
+            {label}
           </button>
         ))}
+        {showProposalsTab ? (
+          <button
+            type="button"
+            onClick={() => setTab('proposals')}
+            className={`rounded-full px-3 py-1 text-sm ${tab === 'proposals' ? 'bg-ink text-paper' : 'bg-ink/5 text-muted'}`}
+          >
+            {t('settingsModal.proposals')}
+            {pendingCount ? ` · ${pendingCount}` : ''}
+          </button>
+        ) : null}
       </div>
 
       {tab === 'items' ? (
@@ -636,7 +755,7 @@ function ListWorkspace({ id }: { id: string }) {
               />
               {canEdit || canPropose ? (
                 <Button size="sm" onClick={() => startCreate()}>
-                  <Plus size={14} /> {t('list.entry')}
+                  <Plus size={14} /> {canPropose && !canEdit ? t('list.suggestItem') : t('list.entry')}
                 </Button>
               ) : null}
               <label className="flex items-center gap-2 text-xs text-muted">
@@ -758,7 +877,10 @@ function ListWorkspace({ id }: { id: string }) {
               text={items.length ? t('filters.emptyText') : t('list.emptyText')}
               action={
                 !items.length && (canEdit || canPropose)
-                  ? { label: t('list.add'), onClick: () => setCreating(true) }
+                  ? {
+                      label: canPropose && !canEdit ? t('list.suggestItem') : t('list.add'),
+                      onClick: () => startCreate(),
+                    }
                   : undefined
               }
             />
@@ -773,7 +895,11 @@ function ListWorkspace({ id }: { id: string }) {
               userId={user?.id}
               canAddNote={Boolean(user)}
               canManageNotes={Boolean(perms?.owner)}
-              onOpen={setOpenItem}
+              onOpen={(item) => {
+                setProposalDraft(null)
+                setDraftValues(null)
+                setOpenItem(item)
+              }}
               onToggle={onToggle}
               onNoteCreated={(row) => setItemNotes((prev) => [...prev, row])}
               onNoteUpdated={(row) => setItemNotes((prev) => prev.map((n) => (n.id === row.id ? row : n)))}
@@ -790,6 +916,7 @@ function ListWorkspace({ id }: { id: string }) {
                 })
               }}
               canEdit={canEdit}
+              highlightRules={list.settings?.highlightRules}
               onCreateOnDate={(iso) => {
                 if (!dateFieldId) return
                 const field = schema.fields.find((row) => row.id === dateFieldId)
@@ -824,7 +951,13 @@ function ListWorkspace({ id }: { id: string }) {
       ) : null}
 
       {tab === 'insights' ? (
-        <ListInsights schema={schema} items={items} ratings={ratings} onOpen={setOpenItem} />
+        <ListInsights
+          schema={schema}
+          items={items}
+          ratings={ratings}
+          settings={list.settings}
+          onOpen={setOpenItem}
+        />
       ) : null}
 
       {tab === 'charts' ? (
@@ -849,38 +982,66 @@ function ListWorkspace({ id }: { id: string }) {
         <ActivityFeed events={activity} schema={schema} items={items} onOpen={setOpenItem} />
       ) : null}
 
+      {tab === 'proposals' && showProposalsTab ? (
+        <ProposalsPanel
+          proposals={proposals}
+          items={items}
+          schema={schema}
+          userId={user?.id}
+          canReview={canReviewProposals}
+          onReview={async (id, approve) => {
+            try {
+              await reviewProposal(id, approve)
+              await reload()
+            } catch (error) {
+              toast(error instanceof Error ? error.message : t('common.error'), 'err')
+            }
+          }}
+          onEdit={startEditProposal}
+          onWithdraw={async (id) => {
+            try {
+              await deleteProposal(id)
+              toast(t('list.proposalWithdrawn'))
+              await refreshProposals()
+            } catch (error) {
+              toast(error instanceof Error ? error.message : t('common.error'), 'err')
+            }
+          }}
+        />
+      ) : null}
+
       {creating || openItem ? (
         <ItemModal
-          key={openItem?.id ?? 'new'}
+          key={proposalDraft?.id ?? openItem?.id ?? 'new'}
           item={openItem}
           list={list}
           items={items}
           siblings={filtered}
-          initialValues={openItem ? undefined : draftValues ?? undefined}
+          initialValues={proposalDraft || !openItem ? (draftValues ?? undefined) : undefined}
           userId={user?.id}
-          ratings={ratings}
+          ratings={openItem ? ratings.filter((row) => row.item_id === openItem.id) : []}
           notes={openItem ? (notesByItem[openItem.id] ?? []) : []}
           canEdit={canEdit}
           canPropose={canPropose}
           canManageNotes={Boolean(perms?.owner)}
+          draftProposal={proposalDraft}
+          myPending={myPending}
           onNoteCreated={(row) => setItemNotes((prev) => [...prev, row])}
           onNoteUpdated={(row) => setItemNotes((prev) => prev.map((note) => (note.id === row.id ? row : note)))}
           onNoteDeleted={(noteId) => setItemNotes((prev) => prev.filter((note) => note.id !== noteId))}
-          onNavigate={setOpenItem}
-          onRatingChange={(row) =>
-            setRatings((prev) => {
-              const idx = prev.findIndex(
-                (r) => r.item_id === row.item_id && r.field_id === row.field_id && r.user_id === row.user_id,
-              )
-              if (idx >= 0) return prev.map((r, i) => (i === idx ? { ...r, ...row } : r))
-              return [...prev, row]
-            })
-          }
-          automations={automations}
-          onClose={() => {
-            setCreating(false)
-            setOpenItem(null)
+          onNavigate={(item) => {
+            setProposalDraft(null)
             setDraftValues(null)
+            setOpenItem(item)
+          }}
+          onRatingChange={onRatingChange}
+          automations={automations}
+          onItemPatch={(row) => {
+            setItems((prev) => prev.map((entry) => (entry.id === row.id ? row : entry)))
+            setOpenItem(row)
+          }}
+          onClose={() => {
+            closeItemModal()
             if (searchParams.has('item')) {
               const next = new URLSearchParams(searchParams)
               next.delete('item')
@@ -894,33 +1055,45 @@ function ListWorkspace({ id }: { id: string }) {
               setSearchParams(next, { replace: true })
             }
             await reload()
-            setCreating(false)
-            setOpenItem(null)
-            setDraftValues(null)
+            closeItemModal()
           }}
-          onPropose={async (payload) => {
+          onPropose={async (payload, proposalId) => {
             if (!user) return
-            await createProposal({
+            const result = await saveProposal({
               list_id: list.id,
-              item_id: openItem?.id,
+              item_id: openItem?.id ?? proposalDraft?.item_id,
               user_id: user.id,
-              action: openItem ? 'update' : 'create',
+              action: proposalDraft?.action ?? (openItem ? 'update' : 'create'),
               payload,
+              proposalId,
             })
-            toast(t('list.proposedOk'))
-            setCreating(false)
-            setOpenItem(null)
-            setDraftValues(null)
+            toast(result === 'updated' ? t('list.proposalUpdated') : t('list.proposedOk'))
+            closeItemModal()
+            await refreshProposals()
+          }}
+          onWithdrawProposal={async (id) => {
+            try {
+              await deleteProposal(id)
+              toast(t('list.proposalWithdrawn'))
+              closeItemModal()
+              await refreshProposals()
+            } catch (error) {
+              toast(error instanceof Error ? error.message : t('common.error'), 'err')
+            }
           }}
         />
       ) : null}
 
       {customizeOpen && canConfigureViews ? (
-        <Modal open title={t('viewEditor.edit')} onClose={() => setCustomizeOpen(false)} wide>
+        <Modal open title={t('viewEditor.edit')} onClose={() => setCustomizeOpen(false)} wide="xl">
           <ViewEditor
             schema={schema}
             view={view}
             allowedKinds={resolved.allowedKinds}
+            previewItems={filtered}
+            previewRatings={ratings}
+            enableCheck={list.settings?.enableCheck}
+            highlightRules={list.settings?.highlightRules}
             onChange={(next) => {
               const views = resolved.views.map((v) => (v.id === next.id ? next : v))
               setList({
@@ -961,6 +1134,8 @@ function ListWorkspace({ id }: { id: string }) {
         <SettingsModal
           open={settingsOpen}
           list={list}
+          items={items}
+          ratings={ratings}
           members={members}
           proposals={proposals}
           onClose={() => setSettingsOpen(false)}
@@ -985,6 +1160,8 @@ function ItemModal({
   canEdit,
   canPropose,
   canManageNotes,
+  draftProposal,
+  myPending,
   onNoteCreated,
   onNoteUpdated,
   onNoteDeleted,
@@ -993,7 +1170,9 @@ function ItemModal({
   onClose,
   onSaved,
   onPropose,
+  onWithdrawProposal,
   automations,
+  onItemPatch,
 }: {
   item: ItemRow | null
   list: ListRow
@@ -1006,46 +1185,76 @@ function ItemModal({
   canEdit: boolean
   canPropose: boolean
   canManageNotes?: boolean
+  draftProposal?: ChangeProposal | null
+  myPending?: ChangeProposal[]
   onNoteCreated: (row: ItemComment) => void
   onNoteUpdated: (row: ItemComment) => void
   onNoteDeleted: (id: string) => void
   onNavigate: (item: ItemRow) => void
-  onRatingChange?: (row: ItemRating) => void
+  onRatingChange?: (row: ItemRating, action?: 'upsert' | 'delete') => void
   onClose: () => void
   onSaved: () => Promise<void>
-  onPropose: (payload: Record<string, unknown>) => Promise<void>
+  onPropose: (payload: Record<string, unknown>, proposalId?: string) => Promise<void>
+  onWithdrawProposal?: (id: string) => Promise<void>
   automations: ListAutomation[]
+  onItemPatch?: (item: ItemRow) => void
 }) {
   const schema = list.schema
+  const write = canEdit || canPropose
+  const pendingHere =
+    draftProposal ??
+    (item && userId
+      ? (myPending ?? []).find(
+          (row) =>
+            row.item_id === item.id &&
+            (row.action === 'update' || row.action === 'delete' || row.action === 'check' || row.action === 'uncheck'),
+        )
+      : undefined)
+  const [mode, setMode] = useState<ItemOpenMode>(() => {
+    if (!item) return 'edit'
+    if (draftProposal) return 'edit'
+    if (!write) return 'view'
+    return list.settings?.itemOpenMode === 'edit' ? 'edit' : 'view'
+  })
   const [values, setValues] = useState<Record<string, unknown>>(
-    () => item?.values ?? initialValues ?? emptyValues(schema),
+    () => initialValues ?? item?.values ?? emptyValues(schema),
   )
+  const [activeProposalId, setActiveProposalId] = useState<string | undefined>(draftProposal?.id)
   const [errors, setErrors] = useState<string[]>([])
   const valuesBaseline = useRef(item?.values)
 
   useEffect(() => {
-    if (!item) return
+    if (!item || draftProposal) return
     const baseline = valuesBaseline.current
     const dirty = baseline != null && JSON.stringify(values) !== JSON.stringify(baseline)
     if (dirty) return
     valuesBaseline.current = item.values
     setValues(item.values)
     // eslint-disable-next-line react-hooks/exhaustive-deps -- sync from live item when the user has not edited
-  }, [item])
-  const write = canEdit || canPropose
+  }, [item, draftProposal])
   const { t } = usePrefs()
   const { toast } = useToast()
   const index = item ? siblings.findIndex((row) => row.id === item.id) : -1
   const prev = index > 0 ? siblings[index - 1] : undefined
   const next = index >= 0 && index < siblings.length - 1 ? siblings[index + 1] : undefined
+  const proposing = canPropose && !canEdit
+
+  const enterPropose = () => {
+    if (pendingHere?.action === 'update' || pendingHere?.action === 'create') {
+      const nextValues = proposalValues(pendingHere)
+      if (nextValues) setValues(nextValues)
+      setActiveProposalId(pendingHere.id)
+    }
+    setMode('edit')
+  }
 
   const save = async () => {
     const errs = validateItem(schema, values, { items, excludeId: item?.id })
     setErrors(errs)
     if (errs.length) return
     try {
-      if (canPropose && !canEdit) {
-        await onPropose({ values })
+      if (proposing) {
+        await onPropose({ values }, activeProposalId ?? pendingHere?.id)
         return
       }
       if (!userId) return
@@ -1092,29 +1301,88 @@ function ItemModal({
           </Button>
         </div>
       ) : null}
-      {errors.length ? (
+      {proposing ? (
+        <div className="mb-3">
+          <Hint
+            title={pendingHere ? t('list.pendingProposal') : t('list.proposeHint')}
+            example={pendingHere ? undefined : t('list.proposeHintEx')}
+            compact
+          />
+        </div>
+      ) : null}
+      {item && write ? (
+        <div className="mb-3 flex gap-1 rounded-2xl bg-ink/5 p-1">
+          {(['view', 'edit'] as const).map((key) => (
+            <button
+              key={key}
+              type="button"
+              className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-xs ${
+                mode === key ? 'bg-paper font-medium shadow-sm' : 'text-muted'
+              }`}
+              onClick={() => (key === 'edit' && proposing ? enterPropose() : setMode(key))}
+            >
+              {key === 'view' ? <Eye size={14} /> : <Pencil size={14} />}
+              {key === 'edit' && proposing ? t('list.suggestEdit') : t(`itemOpen.${key}`)}
+            </button>
+          ))}
+        </div>
+      ) : null}
+      {write || readHighlightChoice(values) !== 'auto' ? (
+        <div className="mb-4">
+          <HighlightPicker
+            value={readHighlightChoice(values)}
+            disabled={!write}
+            onChange={(choice) => {
+              const next = writeHighlightChoice(values, choice)
+              setValues(next)
+              if (item && canEdit && userId && mode === 'view') {
+                void updateItem(item.id, { values: next, updated_by: userId }).then((row) => {
+                  valuesBaseline.current = row.values
+                  onItemPatch?.(row)
+                })
+              }
+            }}
+          />
+        </div>
+      ) : null}
+      {errors.length && mode === 'edit' ? (
         <ul className="mb-3 text-sm text-rose-700">
           {errors.map((e) => (
             <li key={e}>{e}</li>
           ))}
         </ul>
       ) : null}
-      <div className="space-y-4">
-        {schema.fields.filter((f) => !f.hidden).map((field) => (
-          <FieldInput
-            key={field.id}
-            field={field}
-            value={values[field.id]}
-            disabled={!write}
-            listId={list.id}
-            userId={userId}
-            itemId={item?.id}
-            ratings={ratings}
-            onRatingChange={onRatingChange}
-            onChange={(v) => setValues((prev) => ({ ...prev, [field.id]: v }))}
-          />
-        ))}
-      </div>
+      {item && mode === 'view' ? (
+        <ItemReadView
+          schema={schema}
+          item={{ ...item, values }}
+          ratings={ratings}
+          userId={userId}
+          canEdit={canEdit}
+          onRatingChange={onRatingChange}
+        />
+      ) : (
+        <div className="space-y-4">
+          {schema.fields.filter((f) => !f.hidden).map((field) => (
+            <FieldInput
+              key={field.id}
+              field={field}
+              value={values[field.id]}
+              disabled={
+                usesItemRatings(field)
+                  ? ratingInputLocked(field, { userId, canEdit })
+                  : !write
+              }
+              listId={list.id}
+              userId={userId}
+              itemId={item?.id}
+              ratings={ratings}
+              onRatingChange={onRatingChange}
+              onChange={(v) => setValues((prev) => ({ ...prev, [field.id]: v }))}
+            />
+          ))}
+        </div>
+      )}
       {item ? (
         <p className="mt-4 text-xs text-muted">
           {t('list.created')} {formatDateTime(item.created_at)}
@@ -1212,6 +1480,16 @@ function ItemModal({
               <Copy size={14} /> {t('common.duplicate')}
             </Button>
           </div>
+        ) : proposing && pendingHere && onWithdrawProposal ? (
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (!window.confirm(t('list.withdrawConfirm'))) return
+              void onWithdrawProposal(pendingHere.id)
+            }}
+          >
+            <Trash2 size={14} /> {t('list.withdraw')}
+          </Button>
         ) : (
           <span />
         )}
@@ -1219,9 +1497,14 @@ function ItemModal({
           <Button variant="ghost" onClick={onClose}>
             {t('common.close')}
           </Button>
-          {write ? (
+          {write && mode === 'edit' ? (
             <Button onClick={() => void save()}>
-              {canPropose && !canEdit ? t('list.suggest') : t('common.save')}
+              {proposing ? t('list.suggest') : t('common.save')}
+            </Button>
+          ) : null}
+          {write && mode === 'view' && item ? (
+            <Button onClick={() => (proposing ? enterPropose() : setMode('edit'))}>
+              <Pencil size={14} /> {proposing ? t('list.suggestEdit') : t('itemOpen.edit')}
             </Button>
           ) : null}
         </div>
@@ -1250,21 +1533,25 @@ function ChartsTab({
   const { t } = usePrefs()
   const { toast } = useToast()
   const fields = list.schema.fields
+  const dateFields = fields.filter((f) => f.type === 'date' || f.type === 'datetime')
   const valueFields = fields.filter((f) =>
-    ['number', 'integer', 'rating', 'multi_rating'].includes(f.type),
+    ['number', 'integer', 'rating', 'multi_rating', 'community_rating'].includes(f.type),
   )
   const groupFields = fields.filter((f) =>
     ['select', 'multiselect', 'tags', 'boolean', 'checkbox', 'text'].includes(f.type),
   )
   const [name, setName] = useState(t('charts.newChart'))
   const [type, setType] = useState<ChartType>('timeline')
-  const [dateFieldId, setDateFieldId] = useState(fields[0]?.id ?? '')
+  const [dateFieldId, setDateFieldId] = useState(dateFields[0]?.id ?? fields[0]?.id ?? '')
   const [valueFieldId, setValueFieldId] = useState(valueFields[0]?.id ?? '')
   const [groupFieldId, setGroupFieldId] = useState(groupFields[0]?.id ?? '')
   const [aggregation, setAggregation] = useState<NonNullable<ListChart['config']['aggregation']>>('count')
+  const isTimeline = type === 'timeline'
   const usesDate = type !== 'pie' && type !== 'kpi'
-  const usesValue = type !== 'pie' && (type === 'kpi' || aggregation !== 'count')
+  const usesValue = !isTimeline && type !== 'pie' && (type === 'kpi' || aggregation !== 'count')
+  const usesAgg = usesDate && !isTimeline
   const usesGroup = type === 'pie'
+  const axisFields = isTimeline ? dateFields : fields
   const selectClass = 'w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm'
 
   return (
@@ -1285,7 +1572,9 @@ function ChartsTab({
                     dateName,
                     valueName,
                     groupName,
-                    c.config.aggregation ? t(`charts.agg.${c.config.aggregation}`) : null,
+                    c.chart_type === 'timeline' || !c.config.aggregation
+                      ? null
+                      : t(`charts.agg.${c.config.aggregation}`),
                   ]
                     .filter(Boolean)
                     .join(' · ')}
@@ -1309,7 +1598,17 @@ function ChartsTab({
               <Input value={name} onChange={(e) => setName(e.target.value)} />
             </FieldWrap>
             <FieldWrap label={t('schema.type')}>
-              <select className={selectClass} value={type} onChange={(e) => setType(e.target.value as ChartType)}>
+              <select
+                className={selectClass}
+                value={type}
+                onChange={(e) => {
+                  const next = e.target.value as ChartType
+                  setType(next)
+                  if (next === 'timeline' && dateFields.length && !dateFields.some((f) => f.id === dateFieldId)) {
+                    setDateFieldId(dateFields[0].id)
+                  }
+                }}
+              >
                 {CHART_TYPE_LIST.map((code) => (
                   <option key={code} value={code}>
                     {t(`charts.types.${code}`)}
@@ -1318,10 +1617,13 @@ function ChartsTab({
               </select>
             </FieldWrap>
             {usesDate ? (
-              <FieldWrap label={t('charts.dateField')}>
+              <FieldWrap
+                label={isTimeline ? t('charts.eventDate') : t('charts.dateField')}
+                hint={isTimeline ? t('charts.eventDateHint') : undefined}
+              >
                 <select className={selectClass} value={dateFieldId} onChange={(e) => setDateFieldId(e.target.value)}>
                   <option value="">—</option>
-                  {fields.map((f) => (
+                  {axisFields.map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.name}
                     </option>
@@ -1329,7 +1631,7 @@ function ChartsTab({
                 </select>
               </FieldWrap>
             ) : null}
-            {usesDate ? (
+            {usesAgg ? (
               <FieldWrap label={t('charts.aggregation')}>
                 <select
                   className={selectClass}
@@ -1373,7 +1675,11 @@ function ChartsTab({
             className="mt-4"
             onClick={() => {
               if (usesDate && !dateFieldId) {
-                toast(t('charts.needDate'), 'err')
+                toast(isTimeline ? t('charts.needEventDate') : t('charts.needDate'), 'err')
+                return
+              }
+              if (isTimeline && !dateFields.some((f) => f.id === dateFieldId)) {
+                toast(t('charts.needEventDate'), 'err')
                 return
               }
               if (usesValue && !valueFieldId) {
@@ -1392,7 +1698,7 @@ function ChartsTab({
                   dateFieldId: usesDate ? dateFieldId : undefined,
                   valueFieldId: usesValue ? valueFieldId || undefined : undefined,
                   groupFieldId: usesGroup ? groupFieldId || undefined : undefined,
-                  aggregation: usesDate ? aggregation : undefined,
+                  aggregation: usesAgg ? aggregation : undefined,
                 },
               })
             }}
@@ -1408,6 +1714,8 @@ function ChartsTab({
 function SettingsModal({
   open,
   list,
+  items,
+  ratings,
   members,
   proposals,
   onClose,
@@ -1417,6 +1725,8 @@ function SettingsModal({
 }: {
   open: boolean
   list: ListRow
+  items: ItemRow[]
+  ratings: ItemRating[]
   members: ListMember[]
   proposals: ChangeProposal[]
   onClose: () => void
@@ -1434,6 +1744,12 @@ function SettingsModal({
   const debouncedUsers = useDebouncedValue(userQuery)
   const userSearch = debouncedUsers.trim()
   const visibleFound = userSearch.length < 2 || foundFor !== userSearch ? [] : found
+  const relatedSnapshot = useRef<string[]>([])
+
+  useEffect(() => {
+    if (!open) return
+    relatedSnapshot.current = list.settings?.relatedListIds ?? []
+  }, [open, list.id])
 
   useEffect(() => {
     if (userSearch.length < 2) return
@@ -1455,7 +1771,7 @@ function SettingsModal({
   }
 
   return (
-    <Modal open={open} onClose={onClose} title={t('settingsModal.title')} wide>
+    <Modal open={open} onClose={onClose} title={t('settingsModal.title')} wide="xl">
       <div className="mb-4 flex flex-wrap gap-2">
         {(
           [
@@ -1492,6 +1808,14 @@ function SettingsModal({
           <FieldWrap label={t('settingsModal.icon')}>
             <Input value={list.icon ?? ''} onChange={(e) => onChange({ ...list, icon: e.target.value })} />
           </FieldWrap>
+          {user ? (
+            <ListCoverEditor
+              listId={list.id}
+              userId={user.id}
+              value={list.cover_url}
+              onChange={(cover_url) => onChange({ ...list, cover_url })}
+            />
+          ) : null}
           <label className="flex items-center gap-2 text-sm">
             <input
               type="checkbox"
@@ -1505,14 +1829,63 @@ function SettingsModal({
             />
             {t('settingsModal.enableCheck')}
           </label>
+          <AgendaEditor
+            schema={list.schema}
+            value={effectiveAgendaConfig(list.schema, list.settings)}
+            enableCheck={Boolean(list.settings?.enableCheck)}
+            onChange={(agenda) => onChange({ ...list, settings: { ...list.settings, agenda } })}
+          />
+          <FieldWrap label={t('itemOpen.label')}>
+            <select
+              className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
+              value={list.settings?.itemOpenMode === 'edit' ? 'edit' : 'view'}
+              onChange={(e) =>
+                onChange({
+                  ...list,
+                  settings: { ...list.settings, itemOpenMode: e.target.value as ItemOpenMode },
+                })
+              }
+            >
+              {ITEM_OPEN_MODES.map((mode) => (
+                <option key={mode} value={mode}>
+                  {t(`itemOpen.${mode}`)}
+                </option>
+              ))}
+            </select>
+            <p className="mt-1 text-xs text-muted">{t('itemOpen.hint')}</p>
+          </FieldWrap>
+          <HighlightRulesEditor
+            schema={list.schema}
+            rules={list.settings?.highlightRules ?? []}
+            enableCheck={Boolean(list.settings?.enableCheck)}
+            onChange={(highlightRules) =>
+              onChange({ ...list, settings: { ...list.settings, highlightRules } })
+            }
+          />
+          <div>
+            <p className="mb-2 text-sm font-medium">{t('relatedLists.title')}</p>
+            <RelatedListsEditor
+              list={list}
+              onChange={(relatedListIds) =>
+                onChange({ ...list, settings: { ...list.settings, relatedListIds } })
+              }
+            />
+          </div>
           <Button
             onClick={() =>
-              void save({
-                title: list.title,
-                description: list.description,
-                icon: list.icon,
-                settings: list.settings,
-              })
+              void (async () => {
+                const nextIds = list.settings?.relatedListIds ?? []
+                const prevIds = relatedSnapshot.current
+                await save({
+                  title: list.title,
+                  description: list.description,
+                  icon: list.icon,
+                  cover_url: list.cover_url,
+                  settings: list.settings,
+                })
+                await syncRelatedListLinks(list.id, nextIds, prevIds)
+                relatedSnapshot.current = nextIds
+              })()
             }
           >
             {t('common.save')}
@@ -1537,6 +1910,10 @@ function SettingsModal({
             views={normalizeViewConfig(list.view_config, list.schema).views}
             allowedKinds={normalizeViewConfig(list.view_config, list.schema).allowedKinds}
             activeViewId={normalizeViewConfig(list.view_config, list.schema).activeViewId}
+            previewItems={items}
+            previewRatings={ratings}
+            enableCheck={list.settings?.enableCheck}
+            highlightRules={list.settings?.highlightRules}
             onChange={(next) =>
               onChange({
                 ...list,
@@ -1589,16 +1966,6 @@ function SettingsModal({
       ) : null}
     </Modal>
   )
-}
-
-function proposalPreview(proposal: ChangeProposal): string {
-  const values = proposal.payload?.values
-  if (!values || typeof values !== 'object' || Array.isArray(values)) return ''
-  return Object.values(values as Record<string, unknown>)
-    .filter((value) => value != null && value !== '')
-    .slice(0, 3)
-    .map(String)
-    .join(' · ')
 }
 
 function SharePanel({

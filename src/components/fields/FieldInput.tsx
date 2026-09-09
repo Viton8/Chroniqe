@@ -16,6 +16,7 @@ import {
   searchProfiles,
   signedFileUrl,
   uploadListFile,
+  deleteRating,
   upsertRating,
 } from '../../services/api'
 import {
@@ -47,7 +48,7 @@ interface Props {
   userId?: string
   itemId?: string
   ratings?: ItemRating[]
-  onRatingChange?: (row: ItemRating) => void
+  onRatingChange?: (row: ItemRating, action?: 'upsert' | 'delete') => void
   error?: string
 }
 
@@ -213,6 +214,7 @@ export default function FieldInput(props: Props) {
         </FieldWrap>
       )
     case 'multi_rating':
+    case 'community_rating':
       return <MultiRating {...props} />
     case 'color': {
       const raw = String(value ?? '')
@@ -318,21 +320,50 @@ function Stars({
   )
 }
 
-function overlayRating(
-  ratings: ItemRating[],
-  pending: ItemRating,
-): ItemRating[] {
-  const idx = ratings.findIndex(
-    (r) => r.field_id === pending.field_id && r.user_id === pending.user_id,
+function ratingName(
+  row: ItemRating,
+  guest: string,
+  me?: { id: string; username: string; display_name: string } | null,
+): string {
+  return (
+    row.profile?.username ||
+    row.profile?.display_name ||
+    (me && row.user_id === me.id ? me.username || me.display_name : '') ||
+    guest
   )
-  if (idx >= 0) {
-    return ratings.map((r, i) =>
-      i === idx
-        ? { ...r, value: pending.value, updated_at: pending.updated_at }
-        : r,
+}
+
+function ratingsForField(rows: ItemRating[], fieldId: string, itemId?: string): ItemRating[] {
+  const filtered = rows.filter((row) => row.field_id === fieldId && (!itemId || row.item_id === itemId))
+  const byUser = new Map<string, ItemRating>()
+  for (const row of filtered) {
+    const prev = byUser.get(row.user_id)
+    if (!prev || row.updated_at > prev.updated_at) byUser.set(row.user_id, row)
+  }
+  return [...byUser.values()]
+}
+
+function sameRating(row: ItemRating, fieldId: string, userId: string, itemId?: string) {
+  return row.field_id === fieldId && row.user_id === userId && (!itemId || row.item_id === itemId)
+}
+
+type PendingRating =
+  | { kind: 'upsert'; row: ItemRating }
+  | { kind: 'delete'; row: Pick<ItemRating, 'field_id' | 'user_id' | 'item_id'> }
+
+function overlayRating(ratings: ItemRating[], pending: PendingRating): ItemRating[] {
+  if (pending.kind === 'delete') {
+    return ratings.filter(
+      (row) => !sameRating(row, pending.row.field_id, pending.row.user_id, pending.row.item_id),
     )
   }
-  return [...ratings, pending]
+  const idx = ratings.findIndex((row) =>
+    sameRating(row, pending.row.field_id, pending.row.user_id, pending.row.item_id),
+  )
+  if (idx >= 0) {
+    return ratings.map((row, i) => (i === idx ? { ...row, ...pending.row } : row))
+  }
+  return [...ratings, pending.row]
 }
 
 function MultiRating({
@@ -344,53 +375,62 @@ function MultiRating({
   onRatingChange,
 }: Props) {
   const { t } = usePrefs()
-  const [pending, setPending] = useState<ItemRating | null>(null)
+  const { profile } = useAuth()
+  const [pending, setPending] = useState<PendingRating | null>(null)
   const local =
-    pending && pending.field_id === field.id && pending.item_id === itemId
+    pending && pending.row.field_id === field.id && pending.row.item_id === itemId
       ? overlayRating(ratings, pending)
       : ratings
 
-  const mine = local.find(
-    (r) => r.field_id === field.id && r.user_id === userId,
-  )
-  const all = local.filter((r) => r.field_id === field.id)
-  const avg = all.length
-    ? all.reduce((s, r) => s + Number(r.value), 0) / all.length
-    : 0
+  const all = ratingsForField(local, field.id, itemId)
+  const mine = userId ? all.find((row) => row.user_id === userId) : undefined
+  const avg = all.length ? all.reduce((s, r) => s + Number(r.value), 0) / all.length : 0
   const max = field.config?.ratingMax ?? 10
+  const mineProfile = mine?.profile ?? (profile && profile.id === userId ? profile : undefined)
+
+  const apply = (n: number) => {
+    if (!itemId || !userId) return
+    const current = Number(mine?.value ?? 0)
+    if (mine && n === current) {
+      setPending({ kind: 'delete', row: { field_id: field.id, user_id: userId, item_id: itemId } })
+      void deleteRating({ item_id: itemId, field_id: field.id, user_id: userId })
+        .then(() => onRatingChange?.(mine, 'delete'))
+        .catch(() => setPending(null))
+      return
+    }
+    const next: ItemRating = {
+      item_id: itemId,
+      field_id: field.id,
+      user_id: userId,
+      value: n,
+      created_at: mine?.created_at ?? new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      profile: mineProfile,
+    }
+    setPending({ kind: 'upsert', row: next })
+    void upsertRating({ item_id: itemId, field_id: field.id, user_id: userId, value: n })
+      .then(() => onRatingChange?.(next, 'upsert'))
+      .catch(() => setPending(null))
+  }
 
   return (
     <FieldWrap
       label={field.name}
-      hint={fieldHint(field, t('fields.multiHint'))}
+      hint={fieldHint(
+        field,
+        [
+          t(field.type === 'community_rating' ? 'fields.communityHint' : 'fields.multiHint'),
+          userId && !disabled ? t('fields.changeRating') : null,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      )}
     >
       <Stars
         max={max}
         value={Number(mine?.value ?? 0)}
         disabled={disabled || !itemId || !userId}
-        onChange={(n) => {
-          if (!itemId || !userId) return
-          const next: ItemRating = {
-            item_id: itemId,
-            field_id: field.id,
-            user_id: userId,
-            value: n,
-            created_at: mine?.created_at ?? new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            profile: mine?.profile,
-          }
-          setPending(next)
-          void upsertRating({
-            item_id: itemId,
-            field_id: field.id,
-            user_id: userId,
-            value: n,
-          })
-            .then(() => onRatingChange?.(next))
-            .catch(() => {
-              setPending(null)
-            })
-        }}
+        onChange={apply}
       />
       <p className="mt-2 text-xs text-muted">
         {t('fields.avg', { avg: avg ? avg.toFixed(1) : '—', n: all.length })}
@@ -398,15 +438,23 @@ function MultiRating({
       <div className="mt-2 flex flex-wrap gap-2">
         {all.map((r) => (
           <span
-            key={r.user_id}
-            className="bg-ink/5 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs"
+            key={`${r.item_id}:${r.field_id}:${r.user_id}`}
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-xs',
+              r.user_id === userId && 'ring-1 ring-accent',
+            )}
           >
             <Avatar
-              name={r.profile?.display_name || r.profile?.username || '?'}
-              url={r.profile?.avatar_url}
+              name={
+                r.profile?.display_name ||
+                r.profile?.username ||
+                (r.user_id === userId ? mineProfile?.display_name || mineProfile?.username : undefined) ||
+                '?'
+              }
+              url={r.profile?.avatar_url ?? (r.user_id === userId ? mineProfile?.avatar_url : null)}
               size={16}
             />
-            {r.profile?.username ?? t('fields.guest')} · {r.value}
+            {ratingName(r, t('fields.guest'), mineProfile)} · {r.value}
           </span>
         ))}
       </div>

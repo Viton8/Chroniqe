@@ -151,6 +151,40 @@
     "following": "Gefolgt",
     "feed": "Freundes-Feed"
   },
+  "home": {
+    "customize": "Startseite anpassen",
+    "lead": "Wähle, welche Panels erscheinen und in welcher Reihenfolge. Setze Überfällig und Demnächst nebeneinander, um sie zweispaltig zu behalten.",
+    "leadEx": "Blende den Freundes-Feed aus, schiebe Überfällig nach oben oder bette eine eigene Liste ein.",
+    "add": "Panel hinzufügen",
+    "addKind": "Paneltyp",
+    "reset": "Layout zurücksetzen",
+    "resetConfirm": "Das Standard-Layout der Startseite wiederherstellen?",
+    "pickList": "Liste",
+    "pickView": "Ansicht",
+    "defaultView": "Standardansicht",
+    "limit": "Einträge",
+    "emptyList": "Diese Liste gibt es nicht mehr, oder du kannst sie nicht öffnen.",
+    "chooseList": "Wähle eine Liste für dieses Panel.",
+    "openList": "Liste öffnen",
+    "noPanels": "Alle Panels sind ausgeblendet.",
+    "emptyFollowing": "Du folgst noch keiner Liste.",
+    "emptyPinned": "Hefte eine Liste an, damit sie hier bleibt.",
+    "moveUp": "Nach oben",
+    "moveDown": "Nach unten",
+    "show": "Einblenden",
+    "hide": "Ausblenden",
+    "kind": {
+      "stats": "Zahlen",
+      "feed": "Freundes-Feed",
+      "following": "Gefolgt",
+      "pinned": "Angeheftete Listen",
+      "overdue": "Überfällig",
+      "upcoming": "Demnächst",
+      "recent": "Letzte Listen",
+      "activity": "Aktivität",
+      "list": "Eine Liste"
+    }
+  },
   "lists": {
     "title": "Listen",
     "mine": "Meine",
@@ -162,7 +196,95 @@
     "pinned": "Angeheftet",
     "noSearch": "Keine passenden Listen",
     "noSearchText": "Probiere einen anderen Titel oder eine andere Beschreibung.",
-    "lead": "Deine, mit dir geteilte und angepinnte Listen."
+    "lead": "Deine, mit dir geteilte und angepinnte Listen.",
+    "sortUpdated": "Zuletzt geändert",
+    "sortCreated": "Erstellt am",
+    "filterVisibility": "Sichtbarkeit",
+    "visibilityAll": "Jede Sichtbarkeit",
+    "filterPeople": "Personen",
+    "people": {
+      "all": "Alle",
+      "solo": "Nur ich",
+      "many": "Mehrere Personen"
+    },
+    "changed": "Geändert {when}",
+    "changedBy": "Geändert {when} von {name}"
+  },
+  "highlight": {
+    "label": "Hervorhebung",
+    "auto": "Auto",
+    "none": "Keine",
+    "custom": "Eigene Farbe",
+    "rules": "Automatische Farben",
+    "rulesHint": "Die erste passende Regel färbt den Eintrag, sofern du keine Farbe selbst wählst.",
+    "rulesEx": "Bewertung unter 5 → rot. Status „erledigt“ → grau.",
+    "matchAll": "Alle Bedingungen",
+    "matchAny": "Eine Bedingung",
+    "addCondition": "Bedingung hinzufügen",
+    "addRule": "Regel hinzufügen",
+    "field": "Feld",
+    "operator": "Vergleich",
+    "value": "Wert",
+    "checked": "Abgehakt",
+    "yes": "Ja",
+    "no": "Nein",
+    "color": {
+      "red": "Rot",
+      "orange": "Orange",
+      "yellow": "Gelb",
+      "green": "Grün",
+      "teal": "Türkis",
+      "blue": "Blau",
+      "purple": "Violett",
+      "pink": "Rosa",
+      "gray": "Grau"
+    },
+    "op": {
+      "eq": "ist",
+      "neq": "ist nicht",
+      "gt": "größer als",
+      "gte": "mindestens",
+      "lt": "kleiner als",
+      "lte": "höchstens",
+      "contains": "enthält",
+      "empty": "ist leer",
+      "not_empty": "ist nicht leer"
+    }
+  },
+  "agenda": {
+    "title": "Überfällig und demnächst",
+    "hint": "Diese Panels stehen unter Übersicht der Liste und auf der Startseite. Wähle das Frist-Datum und, wann ein Eintrag die Panels verlassen soll.",
+    "hintEx": "Fälligkeit + abgehakt, oder Status ist „erledigt“.",
+    "dateField": "Datum für Überfällig und Demnächst",
+    "dateHint": "Leer lassen, damit diese Liste nicht in diesen Panels erscheint.",
+    "dateOff": "Nicht in Überfällig und Demnächst zeigen",
+    "needDateField": "Füge zuerst ein Feld Datum oder Datum und Uhrzeit hinzu.",
+    "done": "Verlässt Überfällig und Demnächst, wenn",
+    "doneHint": "Liste öffnen und Nie, Abgehakt oder ein Feld (Status usw.) wählen.",
+    "doneNone": "Nie — nur nach Datum",
+    "doneChecked": "Abgehakt",
+    "doneField": "Ein Feld passt",
+    "match": "Treffer",
+    "matchAll": "Alle Bedingungen",
+    "matchAny": "Eine Bedingung",
+    "addCondition": "Bedingung hinzufügen",
+    "field": "Feld",
+    "operator": "Vergleich",
+    "value": "Wert",
+    "checked": "Abgehakt",
+    "yes": "Ja",
+    "no": "Nein",
+    "op": {
+      "eq": "ist",
+      "neq": "ist nicht",
+      "gt": "größer als",
+      "gte": "mindestens",
+      "lt": "kleiner als",
+      "lte": "höchstens",
+      "contains": "enthält",
+      "empty": "ist leer",
+      "not_empty": "ist nicht leer"
+    }
   },
   "newList": {
     "title": "Neue Liste",
@@ -331,6 +453,18 @@
     "comments": "Kommentare",
     "write": "Schreiben…",
     "suggest": "Vorschlagen",
+    "suggestItem": "Eintrag vorschlagen",
+    "suggestEdit": "Änderungen vorschlagen",
+    "proposeHint": "Du kannst einen neuen Eintrag oder Änderungen vorschlagen. Die Besitzenden nehmen sie an oder lehnen sie ab.",
+    "proposeHintEx": "Öffne einen Eintrag und wähle „Änderungen vorschlagen“, oder füge oben einen neuen hinzu.",
+    "proposeSignIn": "um Änderungen an dieser Liste vorzuschlagen.",
+    "noProposals": "Keine offenen Vorschläge",
+    "proposalUpdated": "Vorschlag aktualisiert",
+    "proposalWithdrawn": "Vorschlag zurückgezogen",
+    "withdraw": "Zurückziehen",
+    "withdrawConfirm": "Diesen Vorschlag zurückziehen?",
+    "editProposal": "Vorschlag bearbeiten",
+    "pendingProposal": "Du hast bereits einen offenen Vorschlag zu diesem Eintrag.",
     "someone": "jemand",
     "duplicated": "Liste dupliziert",
     "duplicateFail": "Duplizieren fehlgeschlagen",
@@ -343,6 +477,20 @@
     "updated": "Aktualisiert",
     "deleted": "Gelöscht",
     "moreActions": "More"
+  },
+  "itemOpen": {
+    "label": "Beim Klick auf einen Eintrag",
+    "view": "Lesekarte",
+    "edit": "Bearbeitungsformular",
+    "hint": "Neue Einträge öffnen immer das Formular. Bei bestehenden kannst du im Fenster wechseln."
+  },
+  "relatedLists": {
+    "title": "Verknüpfte Listen",
+    "hint": "Verknüpfte Listen erscheinen auf der Seite — ein Klick genügt zum Wechsel. Die Verbindung gilt in beide Richtungen.",
+    "hintEx": "„Ansehen“, „Gesehen“ und „Nicht ansehen“ als drei verknüpfte Listen.",
+    "search": "Liste finden",
+    "viaFlow": "über Verschieben",
+    "none": "Du hast noch keine anderen Listen"
   },
   "itemNotes": {
     "add": "Notiz hinzufügen",
@@ -391,7 +539,8 @@
     "kind": "Typ",
     "cardLayout": "Kartenlayout",
     "density": "Tabellendichte",
-    "groupField": "Spaltenfeld",
+    "groupField": "Spalten der Pinnwand",
+    "groupFieldHint": "Jeder Wert dieses Felds ist eine Spalte. Das Verschieben einer Karte schreibt diesen Wert ins Element.",
     "dateField": "Datumsfeld",
     "coverField": "Cover",
     "noCover": "Kein Cover",
@@ -415,6 +564,13 @@
     "customize": "Ansicht anpassen",
     "toggle": "Ansicht ein- oder ausklappen",
     "edit": "Ansichtseinstellungen",
+    "preview": "Vorschau",
+    "previewOn": "Vorschau ausblenden",
+    "previewOff": "Vorschau zeigen",
+    "previewEmpty": "Keine Einträge — Beispielansicht",
+    "previewItem": "Beispiel {n}",
+    "previewBody": "Längerer Text, damit du siehst, wie ein Eintrag in dieser Ansicht wirkt: Absätze, Umbrüche und Dichte.",
+    "previewTag": "beispiel",
     "layout": {
       "grid": "Raster",
       "media": "Poster",
@@ -445,6 +601,11 @@
     "name": "Titel",
     "description": "Beschreibung",
     "icon": "Symbol",
+    "cover": "Titelbild",
+    "coverHint": "Erscheint auf der Listenseite und auf Listenkarten. Nach dem Hochladen Speichern klicken.",
+    "coverEmpty": "Noch kein Titelbild",
+    "uploadCover": "Titelbild hochladen",
+    "removeCover": "Titelbild entfernen",
     "enableCheck": "Einträge abhaken",
     "deleteList": "Liste löschen",
     "deleteConfirm": "Diese Liste löschen?",
@@ -497,10 +658,14 @@
     "average": "Durchschnitt",
     "checked": "Abgehakt",
     "dateField": "Achsenfeld",
+    "eventDate": "Datumsfeld",
+    "eventDateHint": "Jeder Eintrag sitzt auf der Zeitlinie nach diesem Datum.",
     "valueField": "Wert",
     "groupField": "Gruppieren nach",
     "aggregation": "Aggregation",
     "needDate": "Wähle ein Feld für die Achse",
+    "needEventDate": "Wähle ein Datumsfeld",
+    "emptyTimeline": "Keine Einträge mit Datum in diesem Feld.",
     "needValue": "Wähle ein Wertefeld",
     "needGroup": "Wähle ein Feld zum Gruppieren",
     "agg": {
@@ -551,7 +716,8 @@
     "moveUp": "Nach oben",
     "moveDown": "Nach unten",
     "duplicateField": "Feld duplizieren",
-    "groupField": "Board- / Gruppierungsfeld",
+    "groupField": "Pinnwand-Spalten",
+    "groupFieldHint": "Aus diesem Feld entstehen die Spalten auf der Pinnwand (Status, Genre). Das Verschieben einer Karte ändert den Wert. Eine Pinnwand-Ansicht kann ein anderes Feld wählen.",
     "placeholder": "Platzhalter",
     "pattern": "Muster",
     "patternPh": "z. B. ^[A-Z].+",
@@ -586,7 +752,8 @@
     "multiselect": "Mehrfachauswahl",
     "tags": "Tags",
     "rating": "Bewertung",
-    "multi_rating": "Bewertungen von vielen Personen",
+    "multi_rating": "Bewertungen der Bearbeitenden",
+    "community_rating": "Bewertungen aller",
     "image": "Bild",
     "file": "Datei",
     "url": "Link",
@@ -622,7 +789,9 @@
     "delRow": "Zeile entfernen",
     "tagEnter": "Enter fügt ein Tag hinzu",
     "tagPh": "Tag, dann Enter",
-    "multiHint": "Jede Person kann bewerten — Durchschnitt und Einzelnoten erscheinen darunter.",
+    "multiHint": "Nur Personen, die diese Liste bearbeiten dürfen, können bewerten.",
+    "communityHint": "Jede angemeldete Person kann bewerten — ohne Bearbeitungsrecht und ohne Vorschlag.",
+    "changeRating": "Ein anderer Stern ändert die Note, ein erneuter Klick auf deinen entfernt sie.",
     "scanFail": "Datei hat die Inhaltsprüfung nicht bestanden",
     "scanReject": "Datei von der Sicherheitsprüfung abgelehnt",
     "uploadFail": "Upload fehlgeschlagen",
@@ -633,6 +802,7 @@
     "pickItem": "Eintrag wählen",
     "pickUser": "Person wählen",
     "noRelated": "Wähle zuerst eine verknüpfte Liste im Schema",
+    "openLinkedItem": "Verknüpften Eintrag öffnen",
     "nestedRow": "Row {n}: {error}",
     "sublistRow": "Zeile {n}",
     "sublistRows": "{n} Einträge",
@@ -647,8 +817,10 @@
     "numberEx": "eine Note von 2 bis 30.",
     "integer": "Nur ganze Zahlen.",
     "integerEx": "Jahr von 1888 bis 2100.",
-    "multi_rating": "Jede Person bewertet getrennt; der Durchschnitt wird berechnet.",
-    "multi_ratingEx": "ein Film mit 8, 9 und 7 → Durchschnitt 8.0.",
+    "multi_rating": "Jede Person mit Bearbeitungsrecht vergibt eine Note; der Durchschnitt wird berechnet.",
+    "multi_ratingEx": "eine Familienliste mit 8, 9 und 7 → Durchschnitt 8.0.",
+    "community_rating": "Jede angemeldete Person kann bewerten, auch ohne Bearbeitungsrecht. Das ist kein Änderungsvorschlag. Alle Noten zählen.",
+    "community_ratingEx": "ein öffentlicher Katalog mit 8, 9 und 7 → Durchschnitt 8.0.",
     "image": "Dateien werden nach Typ, Größe und Inhalt geprüft.",
     "imageEx": "Poster bis 2 MB, JPEG/PNG/WEBP.",
     "sublist": "Ein Eintrag kann eine Mini-Tabelle enthalten.",
@@ -667,79 +839,282 @@
       "title": "Leere Liste",
       "description": "Baue die Felder selbst — jeder Typ, jede Grenze.",
       "hint": "Starte mit einem Textfeld „Titel“, dann Daten, Bewertungen, Dateien.",
-      "example": "Vinylsammlung: Interpret, Jahr, Zustand, Coverfoto."
+      "example": "Vinylsammlung: Interpret, Jahr, Zustand, Coverfoto.",
+      "field": {
+        "title": "Titel"
+      }
     },
     "movies_watched": {
       "title": "Gesehen",
       "description": "Filme und Serien, die du schon gesehen hast. Jede Person kann bewerten.",
       "hint": "„Bewertungen“ sind kollektiv: jede Note zählt, der Durchschnitt wird berechnet.",
-      "example": "Dune, 2021, Film, Datum 12.03.2024, Noten 8 und 9 → Durchschnitt 8.5."
+      "example": "Dune, 2021, Film, Datum 12.03.2024, Noten 8 und 9 → Durchschnitt 8.5.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "poster": "Poster",
+        "watched_at": "Sehdatum",
+        "ratings": "Bewertungen",
+        "seasons": "Staffeln",
+        "review": "Kritik"
+      },
+      "sub": {
+        "seasons": {
+          "season": "Staffel",
+          "episodes": "Folgen",
+          "finished_at": "Zu Ende",
+          "score": "Staffelnote"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Dokumentation"
+        }
+      },
+      "chart": {
+        "timeline": "Seh-Zeitachse",
+        "ratings": "Durchschnittsnoten im Zeitverlauf"
+      }
     },
     "movies_watchlist": {
       "title": "Merkliste",
       "description": "Warteschlange aus Filmen und Serien. Verschiebe sie nach Gesehen oder Abgebrochen.",
       "hint": "Verschiebe-Buttons erscheinen, wenn du das Kino-Paket anlegst — es verknüpft drei Listen.",
-      "example": "Tippe „Gesehen“ → die Zeile wandert, Sehdatum ist heute."
+      "example": "Tippe „Gesehen“ → die Zeile wandert, Sehdatum ist heute.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "poster": "Poster",
+        "priority": "Priorität",
+        "note": "Notiz"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Dokumentation"
+        },
+        "priority": {
+          "now": "Dringend",
+          "soon": "Bald",
+          "someday": "Irgendwann"
+        }
+      }
     },
     "movies_dropped": {
       "title": "Abgebrochen",
       "description": "Titel, die du übersprungen oder abgelehnt hast — damit sie nicht wieder vorgeschlagen werden.",
       "hint": "Füge einen Grund hinzu: er erklärt, warum die Merkliste kürzer wurde.",
-      "example": "„Ton hat nicht gepasst“ + Entscheidungsdatum."
+      "example": "„Ton hat nicht gepasst“ + Entscheidungsdatum.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "reason": "Grund",
+        "decided_at": "Datum"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Dokumentation"
+        }
+      }
     },
     "games_done": {
       "title": "Spiele durchgespielt",
       "description": "Katalog beendeter Spiele mit Plattform, Stunden und Bewertung.",
       "hint": "Das Enddatum speist die Zeitachse „was wir in welchem Jahr gespielt haben“.",
-      "example": "Hades, Switch, 40 Std., Bewertung 9, beendet 02.2024."
+      "example": "Hades, Switch, 40 Std., Bewertung 9, beendet 02.2024.",
+      "field": {
+        "title": "Titel",
+        "platform": "Plattform",
+        "cover": "Cover",
+        "finished_at": "Durchgespielt",
+        "hours": "Stunden",
+        "ratings": "Bewertungen",
+        "status": "Status",
+        "note": "Notiz"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Handy",
+          "other": "Sonstiges"
+        },
+        "status": {
+          "completed": "Durchgespielt",
+          "main": "Story",
+          "hundred": "100%",
+          "dropped": "Abgebrochen"
+        }
+      },
+      "chart": {
+        "timeline": "Wann wir spielten",
+        "ratings": "Noten im Zeitverlauf"
+      }
     },
     "shopping": {
       "title": "Einkauf",
       "description": "Einkaufsliste mit Abhaken. Zeilen kannst du nach Gekauft schieben.",
       "hint": "Abhaken aktivieren: ein Haken kann Datum setzen und die Zeile verschieben.",
-      "example": "Milch ×2, Kategorie „Lebensmittel“."
+      "example": "Milch ×2, Kategorie „Lebensmittel“.",
+      "field": {
+        "name": "Artikel",
+        "qty": "Menge",
+        "category": "Kategorie",
+        "note": "Notiz",
+        "bought_at": "Gekauft"
+      },
+      "opt": {
+        "category": {
+          "food": "Lebensmittel",
+          "home": "Haus",
+          "tech": "Technik",
+          "other": "Sonstiges"
+        }
+      },
+      "checkLabel": "Gekauft"
     },
     "bought": {
       "title": "Gekauft",
       "description": "Kaufhistorie mit Datum und Preis.",
       "hint": "Verschiebe Einträge von der Einkaufsliste per Button oder Automatisierung hierher.",
-      "example": "Milch, 2 Stk., 04.09.2026, 1,20 €."
+      "example": "Milch, 2 Stk., 04.09.2026, 1,20 €.",
+      "field": {
+        "name": "Artikel",
+        "qty": "Menge",
+        "bought_at": "Datum",
+        "price": "Preis",
+        "category": "Kategorie"
+      },
+      "opt": {
+        "category": {
+          "food": "Lebensmittel",
+          "home": "Haus",
+          "tech": "Technik",
+          "other": "Sonstiges"
+        }
+      },
+      "chart": {
+        "spend": "Ausgaben nach Tag"
+      }
     },
     "later_shopping": {
       "title": "Für einen Anlass kaufen",
       "description": "Aufgeschobene Käufe — Silvester, Geburtstag, Reise.",
       "hint": "„Wann“ kann ein Datum oder ein freier Anlass sein.",
-      "example": "Lichterkette → „für Silvester“."
+      "example": "Lichterkette → „für Silvester“.",
+      "field": {
+        "name": "Artikel",
+        "qty": "Menge",
+        "when": "Wann",
+        "note": "Notiz"
+      },
+      "ph": {
+        "when": "zu Silvester"
+      }
     },
     "todo": {
       "title": "Aufgaben",
       "description": "Klassisches Todo: Abhaken, Priorität, Fälligkeit.",
       "hint": "Abhaken kann das Erledigungsdatum automatisch setzen.",
-      "example": "„Internetrechnung zahlen“ bis Freitag → Haken → Erledigt-Datum ist heute."
+      "example": "„Internetrechnung zahlen“ bis Freitag → Haken → Erledigt-Datum ist heute.",
+      "field": {
+        "title": "Aufgabe",
+        "due": "Frist",
+        "priority": "Priorität",
+        "done_at": "Erledigt",
+        "notes": "Notizen"
+      },
+      "opt": {
+        "priority": {
+          "high": "Hoch",
+          "mid": "Mittel",
+          "low": "Niedrig"
+        }
+      },
+      "checkLabel": "Fertig"
     },
     "books": {
       "title": "Bücher",
       "description": "Gelesen und laufend — mit Bewertungen und Daten.",
       "hint": "Die Zeitachse nutzt das Enddatum. Kollektive Bewertungen funktionieren wie bei Filmen.",
-      "example": "Der Meister und Margarita, beendet 01.06.2024, Bewertung 10."
+      "example": "Der Meister und Margarita, beendet 01.06.2024, Bewertung 10.",
+      "field": {
+        "title": "Titel",
+        "author": "Autor",
+        "finished_at": "Gelesen",
+        "ratings": "Bewertungen",
+        "status": "Status",
+        "note": "Notiz"
+      },
+      "opt": {
+        "status": {
+          "want": "Will ich",
+          "reading": "Lese",
+          "done": "Gelesen",
+          "dropped": "Abgebrochen"
+        }
+      }
     },
     "pack_cinema": {
       "title": "Kino",
       "description": "Drei verknüpfte Listen: Merkliste, gesehen, abgebrochen. Verschiebe-Buttons sind bereit.",
       "hint": "Legt drei Listen auf einmal an. Die Merkliste bekommt „Gesehen“ und „Schaue ich nicht“.",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "Paket anlegen → die Merkliste bekommt zwei Buttons: Gesehen und Abgebrochen.",
+      "transfer": {
+        "movies_watchlist__movies_watched": "Gesehen",
+        "movies_watchlist__movies_dropped": "Schaue ich nicht"
+      }
     },
     "catalog_items": {
       "title": "Katalog",
       "description": "Nachschlage-Liste ohne Duplikate — Filme, Bücher, Orte, alles Mögliche.",
       "hint": "Eine Zeile = ein Objekt. Wiederholte Ereignisse mit Datum und Bewertung gehören ins Journal aus dem Pack Katalog & Journal.",
-      "example": "Dune, 2021, Poster. Der Film einmal; Wiederschauen mit anderen Noten im Journal."
+      "example": "Dune, 2021, Poster. Der Film einmal; Wiederschauen mit anderen Noten im Journal.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "cover": "Cover",
+        "note": "Notiz"
+      },
+      "opt": {
+        "kind": {
+          "film": "Film",
+          "book": "Buch",
+          "game": "Spiel",
+          "place": "Ort",
+          "other": "Sonstiges"
+        }
+      }
     },
     "event_log": {
       "title": "Journal",
       "description": "Wiederholte Ereignisse: jedes Mal eigenes Datum, Bewertung und Notiz, verknüpft mit dem Katalog.",
       "hint": "Verknüpfe das Feld „Was“ mit einer Katalogliste. Ein Film kann oft vorkommen — jedes Mal eine eigene Zeile.",
-      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — zwei Sichtungen, zwei Noten."
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — zwei Sichtungen, zwei Noten.",
+      "field": {
+        "subject": "Was",
+        "happened_at": "Datum",
+        "score": "Note",
+        "note": "Notiz"
+      },
+      "chart": {
+        "timeline": "Ereignis-Zeitachse",
+        "ratings": "Noten im Zeitverlauf"
+      }
     },
     "pack_catalog_log": {
       "title": "Katalog & Journal",
@@ -751,31 +1126,378 @@
       "title": "Einkauf",
       "description": "Aktuelle Liste, Gekauftes und aufgeschobene Festtagskäufe.",
       "hint": "Hake einen Eintrag ab — oder sende ihn per Button nach Gekauft / Silvester.",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "Milch abhaken → sie wandert nach Gekauft mit heutigem Datum. Haken vor dem Verschieben lösen — das Datum verschwindet.",
+      "transfer": {
+        "shopping__bought": "Gekauft",
+        "shopping__later_shopping": "Zu Silvester",
+        "bought__shopping": "Zurück zum Einkauf"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "Zu spielen",
+      "description": "Spiele-Warteschlange. Verschiebe Titel per Button nach Durchgespielt.",
+      "hint": "Das Paket Spiele verknüpft die Warteschlange mit dem Katalog und setzt das Enddatum.",
+      "example": "Hades, Switch, dringend → Durchgespielt → Stunden und Note stehen in der anderen Liste.",
+      "field": {
+        "title": "Titel",
+        "platform": "Plattform",
+        "cover": "Cover",
+        "priority": "Priorität",
+        "note": "Notiz"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Handy",
+          "other": "Sonstiges"
+        },
+        "priority": {
+          "now": "Dringend",
+          "soon": "Bald",
+          "someday": "Irgendwann"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "Spiele",
+      "description": "Warteschlange und Katalog. Der Verschiebe-Button ist bereit.",
+      "hint": "Zu spielen bekommt den Button Durchgespielt — das Enddatum ist heute.",
+      "example": "Durchgespielt tippen → das Spiel ist im Katalog, Datum heute.",
+      "transfer": {
+        "games_backlog__games_done": "Durchgespielt"
+      }
     },
     "headache_diary": {
       "title": "Kopfschmerztagebuch",
       "description": "Attacken mit Schmerzverlauf, Symptomen, Medikamenten, Belastung und Verknüpfung zum Blutdruck.",
       "hint": "Die Intensität ist eine Unterliste: eingeklappt Spitze und Beginn–Ende, aufgeklappt jedes Intervall. Das Gesundheits-Paket verbindet den Blutdruck.",
-      "example": "Spitze 8 · 08:20–14:45; Aura und Übelkeit; Ibuprofen 400 mg um 08:40, Wirkung um 09:10."
+      "example": "Spitze 8 · 08:20–14:45; Aura und Übelkeit; Ibuprofen 400 mg um 08:40, Wirkung um 09:10.",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — kein Schmerz",
+            "1": "1 — kaum spürbar",
+            "2": "2 — leicht",
+            "3": "3 — spürbar",
+            "4": "4 — mäßig",
+            "5": "5 — störend",
+            "6": "6 — stark",
+            "7": "7 — sehr stark",
+            "8": "8 — heftig",
+            "9": "9 — unerträglich",
+            "10": "10 — Maximum"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "Kein Schmerz.",
+            "1": "Nur wenn man genau hinfühlt.",
+            "2": "Leicht zu ignorieren.",
+            "3": "Da, stört aber kaum.",
+            "4": "Lenkt ab, Arbeit geht noch.",
+            "5": "Schwer zu ignorieren; Fokus sinkt.",
+            "6": "Schwer zu denken und zu arbeiten.",
+            "7": "Alltägliche Dinge fallen schwer.",
+            "8": "Kaum etwas anderes kommt durch.",
+            "9": "Kaum noch etwas möglich.",
+            "10": "Der schlimmste vorstellbare Schmerz."
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
     },
     "blood_pressure": {
       "title": "Blutdruck",
       "description": "Messungen mit Puls, Foto, Haltung, Koffein, Schlaf, Stress und Link zur Kopfschmerzattacke.",
       "hint": "Systolisch, diastolisch und Puls speisen die Diagramme. Verknüpfen Sie eine Messung mit einem Tagebucheintrag.",
-      "example": "8. Sep. 08:15, 148/92, Puls 78, sitzend, etwas Kaffee, mit der Morgenmigräne verknüpft."
+      "example": "8. Sep. 08:15, 148/92, Puls 78, sitzend, etwas Kaffee, mit der Morgenmigräne verknüpft.",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
     },
     "pack_health": {
       "title": "Kopfschmerz und Blutdruck",
@@ -876,17 +1598,29 @@
     "tab": "Automationen",
     "moves": "Verschieben-Buttons",
     "movesHint": "Ein Button kopiert den Eintrag in eine andere deiner Listen.",
-    "automationsHint": "Beim Abhaken Datum setzen, Feld füllen oder Snapshot wiederherstellen.",
+    "automationsHint": "Beim Abhaken kannst du das heutige Datum stempeln, ein anderes Feld füllen oder später die beim Abhaken gespeicherten Werte zurückholen.",
     "automationsEx": "Einkauf: abhaken → „Gekauft am“ = heute.",
     "onCheck": "Beim Abhaken",
     "onUncheck": "Beim Zurücksetzen",
-    "named": "Benannte Regeln",
+    "onUncheckHint": "Läuft, wenn du das Häkchen entfernst. „Änderungen vom Abhaken rückgängig“ stellt die beim Abhaken gespeicherten Feldwerte wieder her.",
+    "named": "Eigene Regeln",
+    "namedHint": "Eine Regel wartet auf ein Ereignis und führt dann die gewählten Aktionen aus. Anders als die Abschnitte oben kann sie auch bei einem Verschieben-Button oder wenn ein Feld einen bestimmten Wert erhält auslösen.",
+    "namedEx": "Wenn Status zu Erledigt wird, Datum des Abschlusses stempeln.",
     "addRule": "Regel hinzufügen",
-    "trigger": "Auslöser",
+    "trigger": "Wenn dies passiert",
+    "triggerHint": {
+      "checked": "Läuft, nachdem du den Eintrag abgehakt hast.",
+      "unchecked": "Läuft, nachdem du das Häkchen entfernt hast.",
+      "button": "Läuft, wenn jemand den gewählten Verschieben-Button nutzt.",
+      "field_equals": "Läuft, wenn dieses Feld den Wert unten erhält — auch beim Verschieben einer Karte auf der Pinnwand."
+    },
     "addAction": "Aktion hinzufügen",
-    "setNow": "Datum jetzt setzen",
-    "setField": "Feld setzen",
-    "restore": "Snapshot wiederherstellen",
+    "setNow": "Datum stempeln",
+    "setNowHint": "Schreibt heute (oder jetzt, bei Datum-und-Uhrzeit-Feldern) in das gewählte Datumsfeld.",
+    "setField": "Feld füllen",
+    "setFieldHint": "Schreibt einen Wert deiner Wahl in ein anderes Feld — Status, Notiz, heutiges Datum usw.",
+    "restore": "Änderungen vom Abhaken rückgängig",
+    "restoreHint": "Stellt die Feldwerte wieder her, die beim Abhaken gespeichert wurden. Nutze das beim Entfernen des Häkchens.",
     "valueNow": "Jetzt (Datum & Zeit)",
     "valueToday": "Heute",
     "targetList": "Zielliste",

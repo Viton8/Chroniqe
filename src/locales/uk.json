@@ -151,6 +151,40 @@
     "following": "Стежу",
     "feed": "Стрічка друзів"
   },
+  "home": {
+    "customize": "Налаштувати головну",
+    "lead": "Оберіть, які панелі показувати і в якому порядку. Поставте «Прострочено» і «Незабаром» поруч, щоб вони лишилися в два стовпці.",
+    "leadEx": "Вимкніть стрічку друзів, підніміть прострочене вгору або вставте власний список.",
+    "add": "Додати панель",
+    "addKind": "Тип панелі",
+    "reset": "Скинути",
+    "resetConfirm": "Повернути стандартний вигляд головної?",
+    "pickList": "Список",
+    "pickView": "Вигляд",
+    "defaultView": "Вигляд за замовчуванням",
+    "limit": "Записів",
+    "emptyList": "Цього списку більше немає, або у вас немає доступу.",
+    "chooseList": "Оберіть список для цієї панелі.",
+    "openList": "Відкрити список",
+    "noPanels": "Усі панелі приховано.",
+    "emptyFollowing": "Ви ще ні за чим не стежите.",
+    "emptyPinned": "Закріпіть список, щоб він був тут.",
+    "moveUp": "Вище",
+    "moveDown": "Нижче",
+    "show": "Показати",
+    "hide": "Сховати",
+    "kind": {
+      "stats": "Цифри",
+      "feed": "Стрічка друзів",
+      "following": "Стежу",
+      "pinned": "Закріплені",
+      "overdue": "Прострочено",
+      "upcoming": "Незабаром",
+      "recent": "Нещодавні списки",
+      "activity": "Події",
+      "list": "Список"
+    }
+  },
   "lists": {
     "title": "Списки",
     "mine": "Мої",
@@ -162,7 +196,95 @@
     "pinned": "Закріплені",
     "noSearch": "Списків не знайдено",
     "noSearchText": "Спробуйте іншу назву або опис.",
-    "lead": "Ваші, доступні вам і закріплені."
+    "lead": "Ваші, доступні вам і закріплені.",
+    "sortUpdated": "За датою зміни",
+    "sortCreated": "За датою створення",
+    "filterVisibility": "Видимість",
+    "visibilityAll": "Будь-яка видимість",
+    "filterPeople": "Хто працює",
+    "people": {
+      "all": "Усі",
+      "solo": "Лише я",
+      "many": "Кілька людей"
+    },
+    "changed": "Змінено {when}",
+    "changedBy": "Змінено {when}, {name}"
+  },
+  "highlight": {
+    "label": "Підсвітка",
+    "auto": "Авто",
+    "none": "Немає",
+    "custom": "Свій колір",
+    "rules": "Автоматичні кольори",
+    "rulesHint": "Перше правило, що спрацьовує, фарбує запис, якщо ви не обрали колір вручну.",
+    "rulesEx": "Оцінка нижче 5 → червоний. Статус «готово» → сірий.",
+    "matchAll": "Усі умови",
+    "matchAny": "Будь-яка умова",
+    "addCondition": "Додати умову",
+    "addRule": "Додати правило",
+    "field": "Поле",
+    "operator": "Порівняння",
+    "value": "Значення",
+    "checked": "Позначено",
+    "yes": "Так",
+    "no": "Ні",
+    "color": {
+      "red": "Червоний",
+      "orange": "Помаранчевий",
+      "yellow": "Жовтий",
+      "green": "Зелений",
+      "teal": "Бірюзовий",
+      "blue": "Синій",
+      "purple": "Фіолетовий",
+      "pink": "Рожевий",
+      "gray": "Сірий"
+    },
+    "op": {
+      "eq": "дорівнює",
+      "neq": "не дорівнює",
+      "gt": "більше",
+      "gte": "не менше",
+      "lt": "менше",
+      "lte": "не більше",
+      "contains": "містить",
+      "empty": "порожнє",
+      "not_empty": "не порожнє"
+    }
+  },
+  "agenda": {
+    "title": "Прострочено і незабаром",
+    "hint": "Ці панелі на вкладці «Зведення» списку та на головній. Вкажіть поле з датою-терміном і умову, коли запис має звідти зникнути.",
+    "hintEx": "Дата + позначка або статус «готово».",
+    "dateField": "Дата для «Прострочено» і «Незабаром»",
+    "dateHint": "Порожньо — цей список не потрапляє в ці панелі.",
+    "dateOff": "Не показувати в «Прострочено» і «Незабаром»",
+    "needDateField": "Спочатку додайте поле «Дата» або «Дата і час».",
+    "done": "Зникає з «Прострочено» і «Незабаром», коли",
+    "doneHint": "Відкрийте список і виберіть «Ніколи», «Позначено» або поле (Статус тощо).",
+    "doneNone": "Ніколи — лише за датою",
+    "doneChecked": "Позначено",
+    "doneField": "Збігається поле",
+    "match": "Збіг",
+    "matchAll": "Усі умови",
+    "matchAny": "Будь-яка умова",
+    "addCondition": "Додати умову",
+    "field": "Поле",
+    "operator": "Порівняння",
+    "value": "Значення",
+    "checked": "Позначено",
+    "yes": "Так",
+    "no": "Ні",
+    "op": {
+      "eq": "дорівнює",
+      "neq": "не дорівнює",
+      "gt": "більше",
+      "gte": "не менше",
+      "lt": "менше",
+      "lte": "не більше",
+      "contains": "містить",
+      "empty": "порожнє",
+      "not_empty": "не порожнє"
+    }
   },
   "newList": {
     "title": "Новий список",
@@ -331,6 +453,18 @@
     "comments": "Коментарі",
     "write": "Написати…",
     "suggest": "Запропонувати",
+    "suggestItem": "Запропонувати запис",
+    "suggestEdit": "Запропонувати правки",
+    "proposeHint": "Можна запропонувати новий запис або правки. Власник списку прийме або відхилить їх.",
+    "proposeHintEx": "Відкрийте запис і натисніть «Запропонувати правки» або додайте новий кнопкою зверху.",
+    "proposeSignIn": "щоб пропонувати зміни в цьому списку.",
+    "noProposals": "Немає пропозицій, що очікують",
+    "proposalUpdated": "Пропозицію оновлено",
+    "proposalWithdrawn": "Пропозицію відкликано",
+    "withdraw": "Відкликати",
+    "withdrawConfirm": "Відкликати цю пропозицію?",
+    "editProposal": "Змінити пропозицію",
+    "pendingProposal": "У вас уже є пропозиція щодо цього запису, яку ще не розглянуто.",
     "someone": "хтось",
     "duplicated": "Список скопійовано",
     "duplicateFail": "Не вдалося скопіювати",
@@ -343,6 +477,20 @@
     "updated": "Оновлено",
     "deleted": "Видалено",
     "moreActions": "Ще"
+  },
+  "itemOpen": {
+    "label": "Коли натискаєте запис",
+    "view": "Картка для читання",
+    "edit": "Форма редагування",
+    "hint": "Новий запис завжди відкривається як форма. Для наявних можна перемкнутися у вікні."
+  },
+  "relatedLists": {
+    "title": "Пов’язані списки",
+    "hint": "Пов’язані списки видно на сторінці — можна перейти одним натисканням. Зв’язок двосторонній.",
+    "hintEx": "«До перегляду», «Переглянуто» і «Не буду» — три пов’язані списки.",
+    "search": "Знайти список",
+    "viaFlow": "через перенесення",
+    "none": "Поки немає інших списків"
   },
   "itemNotes": {
     "add": "Додати нотатку",
@@ -391,7 +539,8 @@
     "kind": "Тип",
     "cardLayout": "Макет карток",
     "density": "Щільність таблиці",
-    "groupField": "Поле стовпця",
+    "groupField": "Поле колонок дошки",
+    "groupFieldHint": "Кожне значення поля — окрема колонка. Перетягування картки записує це значення в елемент.",
     "dateField": "Поле дати",
     "coverField": "Обкладинка",
     "noCover": "Без обкладинки",
@@ -415,6 +564,13 @@
     "customize": "Налаштувати вигляд",
     "toggle": "Згорнути або розгорнути вигляд",
     "edit": "Налаштування вигляду",
+    "preview": "Попередній перегляд",
+    "previewOn": "Сховати перегляд",
+    "previewOff": "Показати перегляд",
+    "previewEmpty": "Записів немає — показано приклад",
+    "previewItem": "Приклад {n}",
+    "previewBody": "Довший текст, щоб одразу бачити, як запис читається в цьому вигляді: абзаци, переноси і щільність.",
+    "previewTag": "приклад",
     "layout": {
       "grid": "Сітка",
       "media": "Постер",
@@ -445,6 +601,11 @@
     "name": "Назва",
     "description": "Опис",
     "icon": "Іконка",
+    "cover": "Обкладинка",
+    "coverHint": "Показується на сторінці списку та на картках. Після завантаження натисніть «Зберегти».",
+    "coverEmpty": "Обкладинки ще немає",
+    "uploadCover": "Завантажити обкладинку",
+    "removeCover": "Прибрати обкладинку",
     "enableCheck": "Позначати записи",
     "deleteList": "Видалити список",
     "deleteConfirm": "Видалити цей список?",
@@ -497,10 +658,14 @@
     "average": "Середнє",
     "checked": "Позначено",
     "dateField": "Поле осі",
+    "eventDate": "Поле дати",
+    "eventDateHint": "Кожен запис ставиться на пряму часу за цією датою.",
     "valueField": "Значення",
     "groupField": "Групувати за",
     "aggregation": "Агрегація",
     "needDate": "Оберіть поле для осі",
+    "needEventDate": "Оберіть поле дати",
+    "emptyTimeline": "Немає записів із датою в цьому полі.",
     "needValue": "Оберіть поле значення",
     "needGroup": "Оберіть поле групування",
     "agg": {
@@ -551,7 +716,8 @@
     "moveUp": "Вище",
     "moveDown": "Нижче",
     "duplicateField": "Дублювати поле",
-    "groupField": "Поле для дошки / груп",
+    "groupField": "Колонки дошки",
+    "groupFieldHint": "З цього поля збираються колонки на дошці (Статус, Жанр). Перетягування картки змінює значення. У налаштуваннях вигляду можна вибрати інше поле.",
     "placeholder": "Підказка в полі",
     "pattern": "Шаблон",
     "patternPh": "напр. ^[A-Z].+",
@@ -586,7 +752,8 @@
     "multiselect": "Множинний вибір",
     "tags": "Теги",
     "rating": "Оцінка",
-    "multi_rating": "Оцінки від багатьох людей",
+    "multi_rating": "Оцінки редакторів",
+    "community_rating": "Оцінки всіх",
     "image": "Зображення",
     "file": "Файл",
     "url": "Посилання",
@@ -622,7 +789,9 @@
     "delRow": "Прибрати рядок",
     "tagEnter": "Enter додає тег",
     "tagPh": "тег і Enter",
-    "multiHint": "Оцінити може будь-хто — середнє й окремі оцінки з’являться нижче.",
+    "multiHint": "Оцінку ставлять лише ті, хто може редагувати цей список.",
+    "communityHint": "Оцінку може поставити будь-хто, хто ввійшов — без прав на правку і без пропозиції.",
+    "changeRating": "Інша зірка змінює оцінку, повторний клік по своїй знімає її.",
     "scanFail": "Файл не пройшов перевірку вмісту",
     "scanReject": "Файл відхилено перевіркою безпеки",
     "uploadFail": "Завантаження не вдалося",
@@ -633,6 +802,7 @@
     "pickItem": "Оберіть запис",
     "pickUser": "Оберіть людину",
     "noRelated": "Спочатку оберіть пов’язаний список у схемі",
+    "openLinkedItem": "Відкрити пов’язаний запис",
     "nestedRow": "Row {n}: {error}",
     "sublistRow": "Рядок {n}",
     "sublistRows": "{n} записів",
@@ -647,8 +817,10 @@
     "numberEx": "бал від 2 до 30.",
     "integer": "Лише цілі числа.",
     "integerEx": "рік від 1888 до 2100.",
-    "multi_rating": "Кожен глядач оцінює окремо; середнє рахується само.",
-    "multi_ratingEx": "фільм з оцінками 8, 9 і 7 → середнє 8.0.",
+    "multi_rating": "Кожен, хто може редагувати список, ставить свою оцінку; середнє рахується само.",
+    "multi_ratingEx": "сімейний список фільмів: 8, 9 і 7 → середнє 8.0.",
+    "community_rating": "Оцінку може поставити будь-хто, хто ввійшов, навіть без прав на правку. Це не пропозиція. Усі бали враховуються.",
+    "community_ratingEx": "публічний каталог: 8, 9 і 7 → середнє 8.0.",
     "image": "Файли перевіряють за типом, розміром і вмістом.",
     "imageEx": "постер до 2 МБ, JPEG/PNG/WEBP.",
     "sublist": "Запис може містити мінітаблицю.",
@@ -667,79 +839,282 @@
       "title": "Порожній список",
       "description": "Самі зберете поля — будь-який тип, будь-які обмеження.",
       "hint": "Почніть з одного текстового поля «Назва», далі дати, оцінки, файли.",
-      "example": "Колекція вінілу: виконавець, рік, стан, фото обкладинки."
+      "example": "Колекція вінілу: виконавець, рік, стан, фото обкладинки.",
+      "field": {
+        "title": "Назва"
+      }
     },
     "movies_watched": {
       "title": "Переглянуте",
       "description": "Фільми й серіали, які вже дивилися. Оцінити може будь-хто.",
       "hint": "«Оцінки» колективні: кожен ставить бал, середнє рахується само.",
-      "example": "Дюна, 2021, фільм, дата 12.03.2024, бали 8 і 9 → середнє 8.5."
+      "example": "Дюна, 2021, фільм, дата 12.03.2024, бали 8 і 9 → середнє 8.5.",
+      "field": {
+        "title": "Назва",
+        "year": "Рік",
+        "kind": "Тип",
+        "poster": "Постер",
+        "watched_at": "Дата перегляду",
+        "ratings": "Оцінки",
+        "seasons": "Сезони",
+        "review": "Відгук"
+      },
+      "sub": {
+        "seasons": {
+          "season": "Сезон",
+          "episodes": "Серії",
+          "finished_at": "Доглянуто",
+          "score": "Оцінка сезону"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "Фільм",
+          "series": "Серіал",
+          "anime": "Аніме",
+          "doc": "Документальний"
+        }
+      },
+      "chart": {
+        "timeline": "Стрічка переглядів",
+        "ratings": "Середні оцінки в часі"
+      }
     },
     "movies_watchlist": {
       "title": "До перегляду",
       "description": "Черга фільмів і серіалів. Перенесіть їх у Переглянуте або Відкладене.",
       "hint": "Кнопки перенесення з’являться, якщо створите набір Кіно — він зв’яже три списки.",
-      "example": "Натисніть «Переглянуте» → рядок переїде, дата перегляду — сьогодні."
+      "example": "Натисніть «Переглянуте» → рядок переїде, дата перегляду — сьогодні.",
+      "field": {
+        "title": "Назва",
+        "year": "Рік",
+        "kind": "Тип",
+        "poster": "Постер",
+        "priority": "Пріоритет",
+        "note": "Нотатка"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Фільм",
+          "series": "Серіал",
+          "anime": "Аніме",
+          "doc": "Документальний"
+        },
+        "priority": {
+          "now": "Терміново",
+          "soon": "Скоро",
+          "someday": "Колись"
+        }
+      }
     },
     "movies_dropped": {
       "title": "Відкладене",
       "description": "Назви, які пропустили чи відхилили — щоб їх більше не пропонували.",
       "hint": "Додайте причину: вона пояснює, чому черга стала коротшою.",
-      "example": "«Не зайшов тон» + дата рішення."
+      "example": "«Не зайшов тон» + дата рішення.",
+      "field": {
+        "title": "Назва",
+        "year": "Рік",
+        "kind": "Тип",
+        "reason": "Причина",
+        "decided_at": "Дата"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Фільм",
+          "series": "Серіал",
+          "anime": "Аніме",
+          "doc": "Документальний"
+        }
+      }
     },
     "games_done": {
       "title": "Пройдені ігри",
       "description": "Каталог завершених ігор із платформою, годинами й оцінкою.",
       "hint": "Дата завершення живить хронологію «у що грали якого року».",
-      "example": "Hades, Switch, 40 год, оцінка 9, завершено 02.2024."
+      "example": "Hades, Switch, 40 год, оцінка 9, завершено 02.2024.",
+      "field": {
+        "title": "Назва",
+        "platform": "Платформа",
+        "cover": "Обкладинка",
+        "finished_at": "Пройдено",
+        "hours": "Години",
+        "ratings": "Оцінки",
+        "status": "Статус",
+        "note": "Нотатка"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Телефон",
+          "other": "Інше"
+        },
+        "status": {
+          "completed": "Пройдено",
+          "main": "Сюжет",
+          "hundred": "100%",
+          "dropped": "Покинуто"
+        }
+      },
+      "chart": {
+        "timeline": "Коли проходили",
+        "ratings": "Оцінки в часі"
+      }
     },
     "shopping": {
       "title": "Покупки",
       "description": "Список покупок із позначками. Рядки можна перенести в Куплене.",
       "hint": "Увімкніть позначки: галочка може проставити дату й перенести рядок.",
-      "example": "Молоко ×2, категорія «їжа»."
+      "example": "Молоко ×2, категорія «їжа».",
+      "field": {
+        "name": "Позиція",
+        "qty": "Кількість",
+        "category": "Категорія",
+        "note": "Нотатка",
+        "bought_at": "Куплено"
+      },
+      "opt": {
+        "category": {
+          "food": "Їжа",
+          "home": "Дім",
+          "tech": "Техніка",
+          "other": "Інше"
+        }
+      },
+      "checkLabel": "Куплено"
     },
     "bought": {
       "title": "Куплене",
       "description": "Історія покупок із датою й ціною.",
       "hint": "Перенесіть сюди позиції зі списку покупок кнопкою або автоматизацією.",
-      "example": "Молоко, 2 шт., 04.09.2026, 48 ₴."
+      "example": "Молоко, 2 шт., 04.09.2026, 48 ₴.",
+      "field": {
+        "name": "Позиція",
+        "qty": "Кількість",
+        "bought_at": "Дата",
+        "price": "Ціна",
+        "category": "Категорія"
+      },
+      "opt": {
+        "category": {
+          "food": "Їжа",
+          "home": "Дім",
+          "tech": "Техніка",
+          "other": "Інше"
+        }
+      },
+      "chart": {
+        "spend": "Витрати по днях"
+      }
     },
     "later_shopping": {
       "title": "Купити на подію",
       "description": "Відкладені покупки — Новий рік, день народження, поїздка.",
       "hint": "«Коли» може бути датою або вільною назвою події.",
-      "example": "Гірлянди → «на Новий рік»."
+      "example": "Гірлянди → «на Новий рік».",
+      "field": {
+        "name": "Позиція",
+        "qty": "Кількість",
+        "when": "Коли",
+        "note": "Нотатка"
+      },
+      "ph": {
+        "when": "до Нового року"
+      }
     },
     "todo": {
       "title": "Завдання",
       "description": "Класичний todo: позначка, пріоритет, дедлайн.",
       "hint": "Позначка може автоматично проставити дату виконання.",
-      "example": "«Сплатити інтернет» до п’ятниці → галочка → дата виконання — сьогодні."
+      "example": "«Сплатити інтернет» до п’ятниці → галочка → дата виконання — сьогодні.",
+      "field": {
+        "title": "Завдання",
+        "due": "Строк",
+        "priority": "Пріоритет",
+        "done_at": "Виконано",
+        "notes": "Нотатки"
+      },
+      "opt": {
+        "priority": {
+          "high": "Високий",
+          "mid": "Середній",
+          "low": "Низький"
+        }
+      },
+      "checkLabel": "Готово"
     },
     "books": {
       "title": "Книги",
       "description": "Прочитані й у процесі — з оцінками й датами.",
       "hint": "Хронологія бере дату завершення. Колективні оцінки працюють як у фільмах.",
-      "example": "Майстер і Маргарита, завершено 01.06.2024, оцінка 10."
+      "example": "Майстер і Маргарита, завершено 01.06.2024, оцінка 10.",
+      "field": {
+        "title": "Назва",
+        "author": "Автор",
+        "finished_at": "Прочитано",
+        "ratings": "Оцінки",
+        "status": "Статус",
+        "note": "Нотатка"
+      },
+      "opt": {
+        "status": {
+          "want": "Хочу",
+          "reading": "Читаю",
+          "done": "Прочитано",
+          "dropped": "Покинуто"
+        }
+      }
     },
     "pack_cinema": {
       "title": "Кіно",
       "description": "Три пов’язані списки: черга, переглянуте, відкладене. Кнопки перенесення готові.",
       "hint": "Створює три списки одразу. До перегляду отримує «Переглянуте» і «Не дивитимусь».",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "Створили набір → у черзі дві кнопки: «Переглянуто» і «Не буду».",
+      "transfer": {
+        "movies_watchlist__movies_watched": "Переглянуто",
+        "movies_watchlist__movies_dropped": "Не буду дивитись"
+      }
     },
     "catalog_items": {
       "title": "Каталог",
       "description": "Довідник сутностей без повторів: фільми, книги, місця — що завгодно.",
       "hint": "Один рядок = один об’єкт. Повторні події з датами й оцінками — у журналі з набору «Каталог і журнал».",
-      "example": "«Дюна», 2021, постер. Фільм один; перегляди з різними оцінками — в журналі."
+      "example": "«Дюна», 2021, постер. Фільм один; перегляди з різними оцінками — в журналі.",
+      "field": {
+        "title": "Назва",
+        "year": "Рік",
+        "kind": "Тип",
+        "cover": "Обкладинка",
+        "note": "Нотатка"
+      },
+      "opt": {
+        "kind": {
+          "film": "Фільм",
+          "book": "Книга",
+          "game": "Гра",
+          "place": "Місце",
+          "other": "Інше"
+        }
+      }
     },
     "event_log": {
       "title": "Журнал",
       "description": "Повторювані події: щоразу своя дата, оцінка й нотатка, посилання на запис каталогу.",
       "hint": "Прив’яжіть поле «Що» до списку-каталогу. Один фільм можна відкрити багато разів — кожен перегляд окремим рядком.",
-      "example": "Дюна · 12.03.2024 · 9; Дюна · 01.09.2025 · 8 — два перегляди, дві оцінки."
+      "example": "Дюна · 12.03.2024 · 9; Дюна · 01.09.2025 · 8 — два перегляди, дві оцінки.",
+      "field": {
+        "subject": "Що",
+        "happened_at": "Дата",
+        "score": "Оцінка",
+        "note": "Нотатка"
+      },
+      "chart": {
+        "timeline": "Стрічка подій",
+        "ratings": "Оцінки в часі"
+      }
     },
     "pack_catalog_log": {
       "title": "Каталог і журнал",
@@ -751,31 +1126,378 @@
       "title": "Покупки",
       "description": "Поточний список, куплене й відкладені святкові покупки.",
       "hint": "Позначте позицію — або натисніть кнопку, щоб надіслати в Куплене / на Новий рік.",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "Позначка біля молока → позиція йде в «Куплено» з сьогоднішньою датою. Зняти позначку до перенесення — дата зникне.",
+      "transfer": {
+        "shopping__bought": "Куплено",
+        "shopping__later_shopping": "До Нового року",
+        "bought__shopping": "Повернути в покупки"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "До проходження",
+      "description": "Черга ігор. Перекидайте в «Пройдені» кнопкою.",
+      "hint": "Набір «Ігри» зв’яже чергу з каталогом пройденого — дата проходження ставиться сама.",
+      "example": "Hades, Switch, терміново → «Пройдено» → години й оцінка вже в іншому списку.",
+      "field": {
+        "title": "Назва",
+        "platform": "Платформа",
+        "cover": "Обкладинка",
+        "priority": "Пріоритет",
+        "note": "Нотатка"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Телефон",
+          "other": "Інше"
+        },
+        "priority": {
+          "now": "Терміново",
+          "soon": "Скоро",
+          "someday": "Колись"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "Ігри",
+      "description": "Черга і пройдене. Кнопка перенесення вже налаштована.",
+      "hint": "У «До проходження» з’явиться кнопка «Пройдено» — дата проходження ставиться сьогодні.",
+      "example": "Натиснули «Пройдено» → гра в каталозі, дата — сьогодні.",
+      "transfer": {
+        "games_backlog__games_done": "Пройдено"
+      }
     },
     "headache_diary": {
       "title": "Щоденник головного болю",
       "description": "Напади зі шкалою болю в часі, симптомами, ліками, навантаженням і зв’язком із тиском.",
       "hint": "Інтенсивність — вкладений список: згорнутий показує пік і початок–кінець, розкритий — кожен проміжок. Набір зв’яже щоденник із тиском.",
-      "example": "Пік 8 · 08:20–14:45; аура і нудота; ібупрофен 400 мг о 08:40, ефект о 09:10."
+      "example": "Пік 8 · 08:20–14:45; аура і нудота; ібупрофен 400 мг о 08:40, ефект о 09:10.",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — не болить",
+            "1": "1 — ледь помітно",
+            "2": "2 — слабка",
+            "3": "3 — помітна",
+            "4": "4 — помірна",
+            "5": "5 — заважає",
+            "6": "6 — сильна",
+            "7": "7 — дуже сильна",
+            "8": "8 — тяжка",
+            "9": "9 — нестерпна",
+            "10": "10 — максимум"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "Болю немає.",
+            "1": "Відчувається, лише якщо прислухатися.",
+            "2": "Легкий біль, можна не звертати уваги.",
+            "3": "Біль є, але майже не заважає.",
+            "4": "Відволікає, але працювати ще можна.",
+            "5": "Важко ігнорувати, концентрація падає.",
+            "6": "Важко думати і працювати.",
+            "7": "Звичайні дії даються важко.",
+            "8": "Майже ні про що інше не думається.",
+            "9": "Майже нічого не можна робити.",
+            "10": "Найгірший біль, який можна уявити."
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
     },
     "blood_pressure": {
       "title": "Тиск",
       "description": "Вимірювання з пульсом, фото, положенням, кофеїном, сном, стресом і посиланням на напад болю.",
       "hint": "Систолічний, діастолічний і пульс ідуть на графіки. Прив’яжіть вимірювання до запису щоденника.",
-      "example": "8 вер 08:15, 148/92, пульс 78, сидячи, трохи кави, зв’язок із ранковою мігренню."
+      "example": "8 вер 08:15, 148/92, пульс 78, сидячи, трохи кави, зв’язок із ранковою мігренню.",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
     },
     "pack_health": {
       "title": "Головний біль і тиск",
@@ -876,17 +1598,29 @@
     "tab": "Автоматизації",
     "moves": "Кнопки перенесення",
     "movesHint": "Кнопка на картці копіює запис в інший ваш список.",
-    "automationsHint": "Під час викреслення можна проставити дату, заповнити поле або повернути знімок.",
+    "automationsHint": "Під час викреслення можна проставити сьогоднішню дату, заповнити інше поле або пізніше повернути значення, збережені в момент позначки.",
     "automationsEx": "Покупки: викреслили → «Куплено» = сьогодні.",
     "onCheck": "Під час викреслення",
     "onUncheck": "Коли зняли позначку",
-    "named": "Іменовані правила",
+    "onUncheckHint": "Спрацьовує, коли знімають позначку. «Повернути значення до викреслення» відновлює поля, збережені в момент позначки.",
+    "named": "Свої правила",
+    "namedHint": "Правило чекає на подію і виконує обрані дії. На відміну від блоків вище, воно може спрацювати за кнопкою перенесення або коли поле стало потрібним значенням.",
+    "namedEx": "Коли «Статус» став «Готово», проставити дату завершення.",
     "addRule": "Додати правило",
-    "trigger": "Тригер",
+    "trigger": "Коли це відбувається",
+    "triggerHint": {
+      "checked": "Спрацьовує після викреслення запису.",
+      "unchecked": "Спрацьовує після зняття позначки.",
+      "button": "Спрацьовує, коли натискають обрану кнопку перенесення.",
+      "field_equals": "Спрацьовує, коли поле стає рівним значенню нижче — зокрема під час перетягування картки на дошці."
+    },
     "addAction": "Додати дію",
     "setNow": "Проставити дату",
+    "setNowHint": "Записує сьогодні (або зараз — для поля дати й часу) у вибране поле дати.",
     "setField": "Заповнити поле",
-    "restore": "Повернути знімок",
+    "setFieldHint": "Записує обране значення в інше поле — статус, нотатку, сьогоднішню дату тощо.",
+    "restore": "Повернути значення до викреслення",
+    "restoreHint": "Повертає значення полів, збережені під час викреслення. Використовуйте при знятті позначки.",
     "valueNow": "Зараз (дата і час)",
     "valueToday": "Сьогодні",
     "targetList": "Список призначення",

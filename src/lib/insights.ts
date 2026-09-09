@@ -1,7 +1,9 @@
+import { usesItemRatings } from './ratings'
 import { itemDateIso, itemScore } from './filters'
 import { isPeakSpanSublist } from './fields'
 import { todayIso } from './cn'
-import type { FieldDef, ItemRating, ItemRow, ListSchema } from '../types/domain'
+import { itemLeavesAgenda, resolveAgenda } from './agenda'
+import type { FieldDef, ItemRating, ItemRow, ListSchema, ListSettings } from '../types/domain'
 
 export interface InsightGroup {
   value: string
@@ -36,23 +38,21 @@ export function buildInsights(
   schema: ListSchema,
   items: ItemRow[],
   ratings: ItemRating[],
+  settings?: ListSettings | null,
 ): ListInsights {
   const now = Date.now()
   const weekAgo = now - 7 * 86_400_000
   const monthAgo = now - 30 * 86_400_000
   const checked = items.filter((item) => item.is_checked).length
   const ratingField =
-    schema.fields.find((field) => field.type === 'multi_rating') ??
+    schema.fields.find((field) => usesItemRatings(field)) ??
     schema.fields.find((field) => field.type === 'rating') ??
     schema.fields.find((field) => isPeakSpanSublist(field))
   const groupField =
     schema.fields.find((field) => field.id === schema.groupFieldId) ??
     schema.fields.find((field) => field.type === 'select')
-  const dateField =
-    schema.fields.find((field) => field.id === schema.dateFieldId) ??
-    schema.fields.find(
-      (field) => field.type === 'date' || field.type === 'datetime',
-    )
+  const agenda = resolveAgenda(schema, settings)
+  const dateField = agenda?.dateField
 
   let ratingSum = 0
   let ratingCount = 0
@@ -91,14 +91,13 @@ export function buildInsights(
   }
 
   const today = todayIso()
-  const dated: DatedInsight[] = dateField
-    ? items
-        .map((item) => ({
-          item,
-          date: itemDateIso(item.values[dateField.id]) ?? '',
-        }))
-        .filter((row) => row.date)
-    : []
+  const dated: DatedInsight[] =
+    agenda && dateField
+      ? items
+          .filter((item) => !itemLeavesAgenda(item, agenda, schema, ratings))
+          .map((item) => ({ item, date: itemDateIso(item.values[dateField.id]) ?? '' }))
+          .filter((row) => row.date)
+      : []
 
   return {
     total: items.length,
@@ -118,11 +117,11 @@ export function buildInsights(
     dateField,
     byGroup,
     upcoming: dated
-      .filter((row) => row.date >= today && !row.item.is_checked)
+      .filter((row) => row.date >= today)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 8),
     overdue: dated
-      .filter((row) => row.date < today && !row.item.is_checked)
+      .filter((row) => row.date < today)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 8),
   }

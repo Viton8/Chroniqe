@@ -654,79 +654,282 @@
       "title": "Leere Liste",
       "description": "Baue die Felder selbst — jeder Typ, jede Grenze.",
       "hint": "Starte mit einem Textfeld „Titel“, dann Daten, Bewertungen, Dateien.",
-      "example": "Vinylsammlung: Interpret, Jahr, Zustand, Coverfoto."
+      "example": "Vinylsammlung: Interpret, Jahr, Zustand, Coverfoto.",
+      "field": {
+        "title": "Titel"
+      }
     },
     "movies_watched": {
       "title": "Gesehen",
       "description": "Filme und Serien, die du schon gesehen hast. Jede Person kann bewerten.",
       "hint": "„Bewertungen“ sind kollektiv: jede Note zählt, der Durchschnitt wird berechnet.",
-      "example": "Dune, 2021, Film, Datum 12.03.2024, Noten 8 und 9 → Durchschnitt 8.5."
+      "example": "Dune, 2021, Film, Datum 12.03.2024, Noten 8 und 9 → Durchschnitt 8.5.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "poster": "Poster",
+        "watched_at": "Sehdatum",
+        "ratings": "Bewertungen",
+        "seasons": "Staffeln",
+        "review": "Kritik"
+      },
+      "sub": {
+        "seasons": {
+          "season": "Staffel",
+          "episodes": "Folgen",
+          "finished_at": "Zu Ende",
+          "score": "Staffelnote"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Dokumentation"
+        }
+      },
+      "chart": {
+        "timeline": "Seh-Zeitachse",
+        "ratings": "Durchschnittsnoten im Zeitverlauf"
+      }
     },
     "movies_watchlist": {
       "title": "Merkliste",
       "description": "Warteschlange aus Filmen und Serien. Verschiebe sie nach Gesehen oder Abgebrochen.",
       "hint": "Verschiebe-Buttons erscheinen, wenn du das Kino-Paket anlegst — es verknüpft drei Listen.",
-      "example": "Tippe „Gesehen“ → die Zeile wandert, Sehdatum ist heute."
+      "example": "Tippe „Gesehen“ → die Zeile wandert, Sehdatum ist heute.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "poster": "Poster",
+        "priority": "Priorität",
+        "note": "Notiz"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Dokumentation"
+        },
+        "priority": {
+          "now": "Dringend",
+          "soon": "Bald",
+          "someday": "Irgendwann"
+        }
+      }
     },
     "movies_dropped": {
       "title": "Abgebrochen",
       "description": "Titel, die du übersprungen oder abgelehnt hast — damit sie nicht wieder vorgeschlagen werden.",
       "hint": "Füge einen Grund hinzu: er erklärt, warum die Merkliste kürzer wurde.",
-      "example": "„Ton hat nicht gepasst“ + Entscheidungsdatum."
+      "example": "„Ton hat nicht gepasst“ + Entscheidungsdatum.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "reason": "Grund",
+        "decided_at": "Datum"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Serie",
+          "anime": "Anime",
+          "doc": "Dokumentation"
+        }
+      }
     },
     "games_done": {
       "title": "Spiele durchgespielt",
       "description": "Katalog beendeter Spiele mit Plattform, Stunden und Bewertung.",
       "hint": "Das Enddatum speist die Zeitachse „was wir in welchem Jahr gespielt haben“.",
-      "example": "Hades, Switch, 40 Std., Bewertung 9, beendet 02.2024."
+      "example": "Hades, Switch, 40 Std., Bewertung 9, beendet 02.2024.",
+      "field": {
+        "title": "Titel",
+        "platform": "Plattform",
+        "cover": "Cover",
+        "finished_at": "Durchgespielt",
+        "hours": "Stunden",
+        "ratings": "Bewertungen",
+        "status": "Status",
+        "note": "Notiz"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Handy",
+          "other": "Sonstiges"
+        },
+        "status": {
+          "completed": "Durchgespielt",
+          "main": "Story",
+          "hundred": "100%",
+          "dropped": "Abgebrochen"
+        }
+      },
+      "chart": {
+        "timeline": "Wann wir spielten",
+        "ratings": "Noten im Zeitverlauf"
+      }
     },
     "shopping": {
       "title": "Einkauf",
       "description": "Einkaufsliste mit Abhaken. Zeilen kannst du nach Gekauft schieben.",
       "hint": "Abhaken aktivieren: ein Haken kann Datum setzen und die Zeile verschieben.",
-      "example": "Milch ×2, Kategorie „Lebensmittel“."
+      "example": "Milch ×2, Kategorie „Lebensmittel“.",
+      "field": {
+        "name": "Artikel",
+        "qty": "Menge",
+        "category": "Kategorie",
+        "note": "Notiz",
+        "bought_at": "Gekauft"
+      },
+      "opt": {
+        "category": {
+          "food": "Lebensmittel",
+          "home": "Haus",
+          "tech": "Technik",
+          "other": "Sonstiges"
+        }
+      },
+      "checkLabel": "Gekauft"
     },
     "bought": {
       "title": "Gekauft",
       "description": "Kaufhistorie mit Datum und Preis.",
       "hint": "Verschiebe Einträge von der Einkaufsliste per Button oder Automatisierung hierher.",
-      "example": "Milch, 2 Stk., 04.09.2026, 1,20 €."
+      "example": "Milch, 2 Stk., 04.09.2026, 1,20 €.",
+      "field": {
+        "name": "Artikel",
+        "qty": "Menge",
+        "bought_at": "Datum",
+        "price": "Preis",
+        "category": "Kategorie"
+      },
+      "opt": {
+        "category": {
+          "food": "Lebensmittel",
+          "home": "Haus",
+          "tech": "Technik",
+          "other": "Sonstiges"
+        }
+      },
+      "chart": {
+        "spend": "Ausgaben nach Tag"
+      }
     },
     "later_shopping": {
       "title": "Für einen Anlass kaufen",
       "description": "Aufgeschobene Käufe — Silvester, Geburtstag, Reise.",
       "hint": "„Wann“ kann ein Datum oder ein freier Anlass sein.",
-      "example": "Lichterkette → „für Silvester“."
+      "example": "Lichterkette → „für Silvester“.",
+      "field": {
+        "name": "Artikel",
+        "qty": "Menge",
+        "when": "Wann",
+        "note": "Notiz"
+      },
+      "ph": {
+        "when": "zu Silvester"
+      }
     },
     "todo": {
       "title": "Aufgaben",
       "description": "Klassisches Todo: Abhaken, Priorität, Fälligkeit.",
       "hint": "Abhaken kann das Erledigungsdatum automatisch setzen.",
-      "example": "„Internetrechnung zahlen“ bis Freitag → Haken → Erledigt-Datum ist heute."
+      "example": "„Internetrechnung zahlen“ bis Freitag → Haken → Erledigt-Datum ist heute.",
+      "field": {
+        "title": "Aufgabe",
+        "due": "Frist",
+        "priority": "Priorität",
+        "done_at": "Erledigt",
+        "notes": "Notizen"
+      },
+      "opt": {
+        "priority": {
+          "high": "Hoch",
+          "mid": "Mittel",
+          "low": "Niedrig"
+        }
+      },
+      "checkLabel": "Fertig"
     },
     "books": {
       "title": "Bücher",
       "description": "Gelesen und laufend — mit Bewertungen und Daten.",
       "hint": "Die Zeitachse nutzt das Enddatum. Kollektive Bewertungen funktionieren wie bei Filmen.",
-      "example": "Der Meister und Margarita, beendet 01.06.2024, Bewertung 10."
+      "example": "Der Meister und Margarita, beendet 01.06.2024, Bewertung 10.",
+      "field": {
+        "title": "Titel",
+        "author": "Autor",
+        "finished_at": "Gelesen",
+        "ratings": "Bewertungen",
+        "status": "Status",
+        "note": "Notiz"
+      },
+      "opt": {
+        "status": {
+          "want": "Will ich",
+          "reading": "Lese",
+          "done": "Gelesen",
+          "dropped": "Abgebrochen"
+        }
+      }
     },
     "pack_cinema": {
       "title": "Kino",
       "description": "Drei verknüpfte Listen: Merkliste, gesehen, abgebrochen. Verschiebe-Buttons sind bereit.",
       "hint": "Legt drei Listen auf einmal an. Die Merkliste bekommt „Gesehen“ und „Schaue ich nicht“.",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "Paket anlegen → die Merkliste bekommt zwei Buttons: Gesehen und Abgebrochen.",
+      "transfer": {
+        "movies_watchlist__movies_watched": "Gesehen",
+        "movies_watchlist__movies_dropped": "Schaue ich nicht"
+      }
     },
     "catalog_items": {
       "title": "Katalog",
       "description": "Nachschlage-Liste ohne Duplikate — Filme, Bücher, Orte, alles Mögliche.",
       "hint": "Eine Zeile = ein Objekt. Wiederholte Ereignisse mit Datum und Bewertung gehören ins Journal aus dem Pack Katalog & Journal.",
-      "example": "Dune, 2021, Poster. Der Film einmal; Wiederschauen mit anderen Noten im Journal."
+      "example": "Dune, 2021, Poster. Der Film einmal; Wiederschauen mit anderen Noten im Journal.",
+      "field": {
+        "title": "Titel",
+        "year": "Jahr",
+        "kind": "Typ",
+        "cover": "Cover",
+        "note": "Notiz"
+      },
+      "opt": {
+        "kind": {
+          "film": "Film",
+          "book": "Buch",
+          "game": "Spiel",
+          "place": "Ort",
+          "other": "Sonstiges"
+        }
+      }
     },
     "event_log": {
       "title": "Journal",
       "description": "Wiederholte Ereignisse: jedes Mal eigenes Datum, Bewertung und Notiz, verknüpft mit dem Katalog.",
       "hint": "Verknüpfe das Feld „Was“ mit einer Katalogliste. Ein Film kann oft vorkommen — jedes Mal eine eigene Zeile.",
-      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — zwei Sichtungen, zwei Noten."
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — zwei Sichtungen, zwei Noten.",
+      "field": {
+        "subject": "Was",
+        "happened_at": "Datum",
+        "score": "Note",
+        "note": "Notiz"
+      },
+      "chart": {
+        "timeline": "Ereignis-Zeitachse",
+        "ratings": "Noten im Zeitverlauf"
+      }
     },
     "pack_catalog_log": {
       "title": "Katalog & Journal",
@@ -738,19 +941,49 @@
       "title": "Einkauf",
       "description": "Aktuelle Liste, Gekauftes und aufgeschobene Festtagskäufe.",
       "hint": "Hake einen Eintrag ab — oder sende ihn per Button nach Gekauft / Silvester.",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "Milch abhaken → sie wandert nach Gekauft mit heutigem Datum. Haken vor dem Verschieben lösen — das Datum verschwindet.",
+      "transfer": {
+        "shopping__bought": "Gekauft",
+        "shopping__later_shopping": "Zu Silvester",
+        "bought__shopping": "Zurück zum Einkauf"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "Zu spielen",
+      "description": "Spiele-Warteschlange. Verschiebe Titel per Button nach Durchgespielt.",
+      "hint": "Das Paket Spiele verknüpft die Warteschlange mit dem Katalog und setzt das Enddatum.",
+      "example": "Hades, Switch, dringend → Durchgespielt → Stunden und Note stehen in der anderen Liste.",
+      "field": {
+        "title": "Titel",
+        "platform": "Plattform",
+        "cover": "Cover",
+        "priority": "Priorität",
+        "note": "Notiz"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Handy",
+          "other": "Sonstiges"
+        },
+        "priority": {
+          "now": "Dringend",
+          "soon": "Bald",
+          "someday": "Irgendwann"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "Spiele",
+      "description": "Warteschlange und Katalog. Der Verschiebe-Button ist bereit.",
+      "hint": "Zu spielen bekommt den Button Durchgespielt — das Enddatum ist heute.",
+      "example": "Durchgespielt tippen → das Spiel ist im Katalog, Datum heute.",
+      "transfer": {
+        "games_backlog__games_done": "Durchgespielt"
+      }
     }
   },
   "filters": {

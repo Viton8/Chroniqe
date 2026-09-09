@@ -654,79 +654,282 @@
       "title": "空白列表",
       "description": "自己搭建字段——任意类型、任意约束。",
       "hint": "先加一个文本字段「标题」，再加日期、评分、文件。",
-      "example": "黑胶收藏：艺人、年份、成色、封面照片。"
+      "example": "黑胶收藏：艺人、年份、成色、封面照片。",
+      "field": {
+        "title": "名称"
+      }
     },
     "movies_watched": {
       "title": "已看",
       "description": "已经看过的电影和剧集。任何人都可以评分。",
       "hint": "「评分」是集体的：每人打分，再算平均。",
-      "example": "沙丘，2021，电影，日期 12.03.2024，分数 8 和 9 → 平均 8.5。"
+      "example": "沙丘，2021，电影，日期 12.03.2024，分数 8 和 9 → 平均 8.5。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "poster": "海报",
+        "watched_at": "观看日期",
+        "ratings": "评分",
+        "seasons": "季",
+        "review": "评论"
+      },
+      "sub": {
+        "seasons": {
+          "season": "季数",
+          "episodes": "集数",
+          "finished_at": "看完",
+          "score": "本季评分"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "电影",
+          "series": "剧集",
+          "anime": "动画",
+          "doc": "纪录片"
+        }
+      },
+      "chart": {
+        "timeline": "观看时间线",
+        "ratings": "平均评分随时间"
+      }
     },
     "movies_watchlist": {
       "title": "待看",
       "description": "电影和剧集队列。把它们移到已看或弃看。",
       "hint": "如果你创建「影视」套装，会出现转移按钮——它会连起三个列表。",
-      "example": "点「已看」→ 这一行被移走，观看日期设为今天。"
+      "example": "点「已看」→ 这一行被移走，观看日期设为今天。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "poster": "海报",
+        "priority": "优先级",
+        "note": "备注"
+      },
+      "opt": {
+        "kind": {
+          "movie": "电影",
+          "series": "剧集",
+          "anime": "动画",
+          "doc": "纪录片"
+        },
+        "priority": {
+          "now": "马上",
+          "soon": "不久",
+          "someday": "有空再说"
+        }
+      }
     },
     "movies_dropped": {
       "title": "弃看",
       "description": "你跳过或拒绝的片名——以免再次被推荐。",
       "hint": "加上原因：说明待看为何变短。",
-      "example": "「气质不对」+ 决定日期。"
+      "example": "「气质不对」+ 决定日期。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "reason": "原因",
+        "decided_at": "日期"
+      },
+      "opt": {
+        "kind": {
+          "movie": "电影",
+          "series": "剧集",
+          "anime": "动画",
+          "doc": "纪录片"
+        }
+      }
     },
     "games_done": {
       "title": "已通关游戏",
       "description": "已完成游戏目录，含平台、时长和评分。",
       "hint": "完成日期会进入「哪年玩了什么」时间线。",
-      "example": "哈迪斯，Switch，40 小时，评分 9，完成于 02.2024。"
+      "example": "哈迪斯，Switch，40 小时，评分 9，完成于 02.2024。",
+      "field": {
+        "title": "名称",
+        "platform": "平台",
+        "cover": "封面",
+        "finished_at": "通关",
+        "hours": "时长",
+        "ratings": "评分",
+        "status": "状态",
+        "note": "备注"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "手机",
+          "other": "其他"
+        },
+        "status": {
+          "completed": "已通关",
+          "main": "主线",
+          "hundred": "100%",
+          "dropped": "弃坑"
+        }
+      },
+      "chart": {
+        "timeline": "何时通关",
+        "ratings": "评分随时间"
+      }
     },
     "shopping": {
       "title": "购物",
       "description": "可勾选的购物清单。可以把行移到已买。",
       "hint": "开启勾选：打钩可以盖上日期并转移这一行。",
-      "example": "牛奶 ×2，分类「食品」。"
+      "example": "牛奶 ×2，分类「食品」。",
+      "field": {
+        "name": "条目",
+        "qty": "数量",
+        "category": "分类",
+        "note": "备注",
+        "bought_at": "已买"
+      },
+      "opt": {
+        "category": {
+          "food": "食品",
+          "home": "家居",
+          "tech": "数码",
+          "other": "其他"
+        }
+      },
+      "checkLabel": "已买"
     },
     "bought": {
       "title": "已买",
       "description": "带日期和价格的购买记录。",
       "hint": "用按钮或自动化把购物清单里的条目移到这里。",
-      "example": "牛奶，2 件，04.09.2026，12 元。"
+      "example": "牛奶，2 件，04.09.2026，12 元。",
+      "field": {
+        "name": "条目",
+        "qty": "数量",
+        "bought_at": "日期",
+        "price": "价格",
+        "category": "分类"
+      },
+      "opt": {
+        "category": {
+          "food": "食品",
+          "home": "家居",
+          "tech": "数码",
+          "other": "其他"
+        }
+      },
+      "chart": {
+        "spend": "每日花费"
+      }
     },
     "later_shopping": {
       "title": "为活动采购",
       "description": "延后的购买——新年、生日、旅行。",
       "hint": "「何时」可以是日期，也可以是自由文本活动。",
-      "example": "彩灯 →「给新年」。"
+      "example": "彩灯 →「给新年」。",
+      "field": {
+        "name": "条目",
+        "qty": "数量",
+        "when": "何时",
+        "note": "备注"
+      },
+      "ph": {
+        "when": "新年前"
+      }
     },
     "todo": {
       "title": "任务",
       "description": "经典待办：勾选、优先级、截止日期。",
       "hint": "勾选可以自动盖上完成日期。",
-      "example": "「交网费」截止周五 → 勾选 → 完成日是今天。"
+      "example": "「交网费」截止周五 → 勾选 → 完成日是今天。",
+      "field": {
+        "title": "任务",
+        "due": "截止",
+        "priority": "优先级",
+        "done_at": "完成",
+        "notes": "备注"
+      },
+      "opt": {
+        "priority": {
+          "high": "高",
+          "mid": "中",
+          "low": "低"
+        }
+      },
+      "checkLabel": "完成"
     },
     "books": {
       "title": "书籍",
       "description": "已读和在读——带评分和日期。",
       "hint": "时间线使用读完日期。集体评分和电影一样。",
-      "example": "大师和玛格丽特，读完 01.06.2024，评分 10。"
+      "example": "大师和玛格丽特，读完 01.06.2024，评分 10。",
+      "field": {
+        "title": "名称",
+        "author": "作者",
+        "finished_at": "读完",
+        "ratings": "评分",
+        "status": "状态",
+        "note": "备注"
+      },
+      "opt": {
+        "status": {
+          "want": "想读",
+          "reading": "在读",
+          "done": "已读",
+          "dropped": "弃读"
+        }
+      }
     },
     "pack_cinema": {
       "title": "影视",
       "description": "三个相连的列表：队列、已看、弃看。转移按钮已就绪。",
       "hint": "一次创建三个列表。待看会有「已看」和「不看」。",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "创建套装后，待看列表会出现两个按钮：已看和不看。",
+      "transfer": {
+        "movies_watchlist__movies_watched": "已看",
+        "movies_watchlist__movies_dropped": "不看"
+      }
     },
     "catalog_items": {
       "title": "目录",
       "description": "无重复的实体参考列表：电影、书籍、地点等任意对象。",
       "hint": "一行 = 一个对象。带日期与评分的重复事件放在「目录与日志」套装中的日志里。",
-      "example": "《沙丘》，2021，海报。影片只一条；不同评分的多次观看在日志中。"
+      "example": "《沙丘》，2021，海报。影片只一条；不同评分的多次观看在日志中。",
+      "field": {
+        "title": "名称",
+        "year": "年份",
+        "kind": "类型",
+        "cover": "封面",
+        "note": "备注"
+      },
+      "opt": {
+        "kind": {
+          "film": "电影",
+          "book": "书",
+          "game": "游戏",
+          "place": "地点",
+          "other": "其他"
+        }
+      }
     },
     "event_log": {
       "title": "日志",
       "description": "重复事件：每次各自的日期、评分与备注，并链接到目录中的一行。",
       "hint": "将「对象」字段指向目录列表。同一部影片可出现多次——每次观看单独一行。",
-      "example": "沙丘 · 12.03.2024 · 9；沙丘 · 01.09.2025 · 8 —— 两次观看，两个评分。"
+      "example": "沙丘 · 12.03.2024 · 9；沙丘 · 01.09.2025 · 8 —— 两次观看，两个评分。",
+      "field": {
+        "subject": "对象",
+        "happened_at": "日期",
+        "score": "评分",
+        "note": "备注"
+      },
+      "chart": {
+        "timeline": "事件时间线",
+        "ratings": "评分随时间"
+      }
     },
     "pack_catalog_log": {
       "title": "目录与日志",
@@ -738,19 +941,49 @@
       "title": "购物",
       "description": "当前清单、已买，以及延后的节日采购。",
       "hint": "勾选一条——或点按钮送到已买 / 新年。",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "勾选牛奶 → 转到已买并记下今天。在转移前取消勾选，日期会清掉。",
+      "transfer": {
+        "shopping__bought": "已买",
+        "shopping__later_shopping": "留到新年",
+        "bought__shopping": "退回购物清单"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "待玩",
+      "description": "游戏队列。用按钮移到已通关。",
+      "hint": "「游戏」套装会把队列和已通关目录连起来，并自动填入通关日期。",
+      "example": "Hades，Switch，马上 → 已通关 → 时长和评分在另一个列表里。",
+      "field": {
+        "title": "名称",
+        "platform": "平台",
+        "cover": "封面",
+        "priority": "优先级",
+        "note": "备注"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "手机",
+          "other": "其他"
+        },
+        "priority": {
+          "now": "马上",
+          "soon": "不久",
+          "someday": "有空再说"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "游戏",
+      "description": "待玩队列和已通关目录。转移按钮已就绪。",
+      "hint": "待玩会有「已通关」按钮，通关日期设为今天。",
+      "example": "点已通关 → 游戏进入目录，日期是今天。",
+      "transfer": {
+        "games_backlog__games_done": "已通关"
+      }
     }
   },
   "filters": {

@@ -64,6 +64,114 @@ for (const code of required) {
   }
 }
 
+const templatesPath = join(root, 'src', 'lib', 'templates.ts')
+const templatesSource = readFileSync(templatesPath, 'utf8')
+
+function optionValuesFromCall(kind, inner) {
+  if (kind === 'optsColored') {
+    return [...inner.matchAll(/\['([^']+)'/g)].map((match) => match[1])
+  }
+  return [...inner.matchAll(/'([^']+)'/g)].map((match) => match[1])
+}
+
+function parseNamedOptionGroups(source) {
+  const groups = {}
+  const re = /const (\w+) = \{\s*options: (opts(?:Colored)?)\(([\s\S]*?)\)\s*,?\s*\}/g
+  let match
+  while ((match = re.exec(source))) {
+    groups[match[1]] = optionValuesFromCall(match[2], match[3])
+  }
+  return groups
+}
+
+function sliceExport(source, name, endName) {
+  const start = source.indexOf(`export const ${name}`)
+  if (start < 0) return ''
+  const from = source.indexOf('[', start)
+  const end = source.indexOf(endName, from)
+  return end < 0 ? source.slice(from) : source.slice(from, end)
+}
+
+function splitBlocks(section) {
+  const re = /\n  \{\n    key: '([^']+)'/g
+  const hits = []
+  let match
+  while ((match = re.exec(section))) {
+    hits.push({ key: match[1], index: match.index })
+  }
+  return hits.map((hit, i) => ({
+    key: hit.key,
+    body: section.slice(hit.index, i + 1 < hits.length ? hits[i + 1].index : section.length),
+  }))
+}
+
+function lastFieldId(body, index) {
+  const matches = [...body.slice(0, index).matchAll(/\bf\('([^']+)'/g)]
+  return matches.at(-1)?.[1]
+}
+
+function extractTemplateI18nKeys(source) {
+  const keys = []
+  const normalized = source.replace(/\r\n/g, '\n')
+  const groups = parseNamedOptionGroups(normalized)
+  const templatesPart = sliceExport(normalized, 'TEMPLATES', 'export const TEMPLATE_PACKS')
+  const packsPart = sliceExport(normalized, 'TEMPLATE_PACKS', 'export function')
+
+  for (const block of splitBlocks(templatesPart)) {
+    const prefix = `tpl.${block.key}`
+    for (const suffix of ['title', 'description', 'hint', 'example']) keys.push(`${prefix}.${suffix}`)
+
+    for (const match of block.body.matchAll(/\bf\('([^']+)'/g)) {
+      keys.push(`${prefix}.field.${match[1]}`)
+    }
+    for (const match of block.body.matchAll(/\bsf\('([^']+)'/g)) {
+      const parent = lastFieldId(block.body, match.index)
+      if (parent) keys.push(`${prefix}.sub.${parent}.${match[1]}`)
+    }
+
+    const addOpts = (fieldId, values) => {
+      if (!fieldId) return
+      for (const value of values) keys.push(`${prefix}.opt.${fieldId}.${value}`)
+    }
+    for (const match of block.body.matchAll(/\bopts(Colored)?\(([\s\S]*?)\)/g)) {
+      addOpts(lastFieldId(block.body, match.index), optionValuesFromCall(match[1] ? 'optsColored' : 'opts', match[2]))
+    }
+    for (const match of block.body.matchAll(/config: ([A-Za-z_][A-Za-z0-9_]*)/g)) {
+      addOpts(lastFieldId(block.body, match.index), groups[match[1]] ?? [])
+    }
+    for (const match of block.body.matchAll(/placeholder:/g)) {
+      const fieldId = lastFieldId(block.body, match.index)
+      if (fieldId) keys.push(`${prefix}.ph.${fieldId}`)
+    }
+    if (block.body.includes('enableCheck: true')) keys.push(`${prefix}.checkLabel`)
+    for (const match of block.body.matchAll(/key: '([^']+)',\s*chart_type:/g)) {
+      keys.push(`${prefix}.chart.${match[1]}`)
+    }
+  }
+
+  for (const block of splitBlocks(packsPart)) {
+    const prefix = `tpl.pack_${block.key}`
+    for (const suffix of ['title', 'description', 'hint', 'example']) keys.push(`${prefix}.${suffix}`)
+    const transfers = block.body.match(/transfers:\s*\[([\s\S]*?)\]/)
+    if (transfers) {
+      for (const match of transfers[1].matchAll(/fromKey: '([^']+)',\s*toKey: '([^']+)'/g)) {
+        keys.push(`${prefix}.transfer.${match[1]}__${match[2]}`)
+      }
+    }
+  }
+
+  return unique(keys)
+}
+
+if (/\p{Script=Cyrillic}/u.test(templatesSource)) {
+  errors.push('src/lib/templates.ts still has Cyrillic text; put user-facing strings in locale files')
+}
+
+const templateKeys = extractTemplateI18nKeys(templatesSource)
+if (templateKeys.length === 0) {
+  errors.push('Could not extract template i18n keys from src/lib/templates.ts')
+}
+
 const catalogs = {}
 for (const code of files) {
   catalogs[code] = flatten(JSON.parse(readFileSync(join(localesDir, `${code}.json`), 'utf8')))
@@ -105,6 +213,11 @@ for (const code of required) {
       errors.push(`${code}: missing language name ${nameKey}`)
     }
   }
+
+  const missingTpl = templateKeys.filter((key) => !(key in catalog))
+  if (missingTpl.length) {
+    errors.push(`${code}: missing template keys\n  ${missingTpl.join('\n  ')}`)
+  }
 }
 
 if (errors.length) {
@@ -113,4 +226,6 @@ if (errors.length) {
   process.exit(1)
 }
 
-console.log(`i18n ok: ${required.length} locales, ${unionKeys.length} keys`)
+console.log(
+  `i18n ok: ${required.length} locales, ${unionKeys.length} keys, ${templateKeys.length} template keys`,
+)

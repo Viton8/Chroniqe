@@ -6,38 +6,36 @@ import type {
   FieldType,
   ListSchema,
   ListSettings,
+  SelectOption,
+  SublistField,
   TransferAction,
   ViewConfig,
 } from '../types/domain'
 
+type TranslateFn = (key: string) => string
+
+export interface TemplateChartSpec {
+  key: string
+  chart_type: 'timeline' | 'stem' | 'bar' | 'pie' | 'kpi' | 'line'
+  config: { dateFieldId?: string; valueFieldId?: string; aggregation?: 'count' | 'avg' | 'sum' }
+}
+
 export interface TemplateSpec {
   key: string
-  title: string
   icon: string
-  description: string
-  hint: string
-  example: string
   schema: ListSchema
   settings?: ListSettings
   view?: ViewConfig
-  charts?: Array<{
-    name: string
-    chart_type: 'timeline' | 'stem' | 'bar' | 'pie' | 'kpi' | 'line'
-    config: { dateFieldId?: string; valueFieldId?: string; aggregation?: 'count' | 'avg' | 'sum' }
-  }>
+  charts?: TemplateChartSpec[]
 }
 
 export interface TemplatePack {
   key: string
-  title: string
   icon: string
-  description: string
-  hint: string
   lists: TemplateSpec[]
   transfers?: Array<{
     fromKey: string
     toKey: string
-    label: string
     fieldMap: Record<string, string>
   }>
   onCheckMoves?: Array<{
@@ -53,87 +51,60 @@ export interface TemplatePack {
   }>
 }
 
-function f(
-  id: string,
-  name: string,
-  type: FieldType,
-  extra: Partial<FieldDef> = {},
-): FieldDef {
-  return { id, key: id, name, type, ...extra }
+function f(id: string, type: FieldType, extra: Partial<FieldDef> = {}): FieldDef {
+  return { id, key: id, name: id, type, ...extra }
 }
 
-const movieKind = {
-  options: [
-    { value: 'movie', label: 'Фильм' },
-    { value: 'series', label: 'Сериал' },
-    { value: 'anime', label: 'Аниме' },
-    { value: 'doc', label: 'Документальный' },
-  ],
+function sf(id: string, type: FieldType, extra: Partial<SublistField> = {}): SublistField {
+  return { id, key: id, name: id, type, ...extra }
+}
+
+function opts(...values: string[]): SelectOption[] {
+  return values.map((value) => ({ value, label: value }))
+}
+
+function optsColored(...rows: Array<[string, string]>): SelectOption[] {
+  return rows.map(([value, color]) => ({ value, label: value, color }))
+}
+
+const movieKind = { options: opts('movie', 'series', 'anime', 'doc') }
+const gamePlatform = { options: opts('pc', 'ps', 'xbox', 'switch', 'mobile', 'other') }
+const shopCategory = { options: opts('food', 'home', 'tech', 'other') }
+const playPriority = {
+  options: optsColored(['now', '#be123c'], ['soon', '#b45309'], ['someday', '#6e6578']),
 }
 
 export const TEMPLATES: TemplateSpec[] = [
   {
     key: 'blank',
-    title: 'Пустой список',
     icon: '✨',
-    description: 'Соберите поля сами — любой тип, любые ограничения.',
-    hint: 'Начните с одного текстового поля «Название», затем добавьте даты, оценки, файлы.',
-    example: 'Например: коллекция винила — исполнитель, год, состояние, фото обложки.',
     schema: {
-      fields: [f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } })],
+      fields: [f('title', 'text', { required: true, config: { maxLength: 200 } })],
       titleFieldId: 'title',
     },
   },
   {
     key: 'movies_watched',
-    title: 'Просмотрено',
     icon: '🎬',
-    description: 'Фильмы и сериалы, которые уже посмотрели. Оценки может ставить кто угодно.',
-    hint: 'Поле «Оценки» — коллективное: каждый зритель ставит свою оценку, считается среднее.',
-    example: '«Дюна», 2021, фильм, дата 12.03.2024, оценки 8 и 9 → среднее 8.5.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('year', 'Год', 'integer', { config: { min: 1888, max: 2100 } }),
-        f('kind', 'Тип', 'select', { config: movieKind }),
-        f('poster', 'Постер', 'image', { config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] } }),
-        f('watched_at', 'Дата просмотра', 'date'),
-        f('ratings', 'Оценки', 'multi_rating', { config: { min: 1, max: 10, ratingMax: 10 } }),
-        f('seasons', 'Сезоны', 'sublist', {
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('year', 'integer', { config: { min: 1888, max: 2100 } }),
+        f('kind', 'select', { config: movieKind }),
+        f('poster', 'image', { config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] } }),
+        f('watched_at', 'date'),
+        f('ratings', 'multi_rating', { config: { min: 1, max: 10, ratingMax: 10 } }),
+        f('seasons', 'sublist', {
           config: {
             subfields: [
-              {
-                id: 'season',
-                key: 'season',
-                name: 'Сезон',
-                type: 'integer',
-                required: true,
-                config: { min: 1, max: 80 },
-              },
-              {
-                id: 'episodes',
-                key: 'episodes',
-                name: 'Серии',
-                type: 'integer',
-                config: { min: 1, max: 200 },
-              },
-              {
-                id: 'finished_at',
-                key: 'finished_at',
-                name: 'Досмотрен',
-                type: 'date',
-              },
-              {
-                id: 'score',
-                key: 'score',
-                name: 'Оценка сезона',
-                type: 'rating',
-                config: { ratingMax: 10, min: 1, max: 10 },
-              },
+              sf('season', 'integer', { required: true, config: { min: 1, max: 80 } }),
+              sf('episodes', 'integer', { config: { min: 1, max: 200 } }),
+              sf('finished_at', 'date'),
+              sf('score', 'rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
             ],
           },
         }),
-        f('review', 'Отзыв', 'textarea', { config: { maxLength: 2000 } }),
+        f('review', 'textarea', { config: { maxLength: 2000 } }),
       ],
       titleFieldId: 'title',
       imageFieldId: 'poster',
@@ -141,13 +112,9 @@ export const TEMPLATES: TemplateSpec[] = [
     },
     view: { mode: 'table', dateFieldId: 'watched_at', imageFieldId: 'poster' },
     charts: [
+      { key: 'timeline', chart_type: 'timeline', config: { dateFieldId: 'watched_at', aggregation: 'count' } },
       {
-        name: 'Лента просмотров',
-        chart_type: 'timeline',
-        config: { dateFieldId: 'watched_at', aggregation: 'count' },
-      },
-      {
-        name: 'Средние оценки во времени',
+        key: 'ratings',
         chart_type: 'stem',
         config: { dateFieldId: 'watched_at', valueFieldId: 'ratings', aggregation: 'avg' },
       },
@@ -155,27 +122,15 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'movies_watchlist',
-    title: 'К просмотру',
     icon: '🍿',
-    description: 'Очередь фильмов и сериалов. Перекидывайте в «Просмотрено» или «Не буду».',
-    hint: 'Кнопки переноса появятся, если создать набор «Кино» — он свяжет три списка.',
-    example: 'Нажали «Просмотрено» → запись уходит в другой список, дата просмотра ставится сегодня.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('year', 'Год', 'integer', { config: { min: 1888, max: 2100 } }),
-        f('kind', 'Тип', 'select', { config: movieKind }),
-        f('poster', 'Постер', 'image', { config: { maxSizeMb: 2 } }),
-        f('priority', 'Приоритет', 'select', {
-          config: {
-            options: [
-              { value: 'now', label: 'Срочно', color: '#be123c' },
-              { value: 'soon', label: 'Скоро', color: '#b45309' },
-              { value: 'someday', label: 'Когда-нибудь', color: '#6e6578' },
-            ],
-          },
-        }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 500 } }),
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('year', 'integer', { config: { min: 1888, max: 2100 } }),
+        f('kind', 'select', { config: movieKind }),
+        f('poster', 'image', { config: { maxSizeMb: 2 } }),
+        f('priority', 'select', { config: playPriority }),
+        f('note', 'textarea', { config: { maxLength: 500 } }),
       ],
       titleFieldId: 'title',
       imageFieldId: 'poster',
@@ -185,18 +140,14 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'movies_dropped',
-    title: 'Не буду смотреть',
     icon: '🚫',
-    description: 'Отложенные или отвергнутые тайтлы — чтобы не предлагать их снова.',
-    hint: 'Укажите причину: так проще понять, почему список «к просмотру» сократился.',
-    example: '«Не зашёл тон» + дата решения.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('year', 'Год', 'integer', { config: { min: 1888, max: 2100 } }),
-        f('kind', 'Тип', 'select', { config: movieKind }),
-        f('reason', 'Причина', 'textarea', { config: { maxLength: 500 } }),
-        f('decided_at', 'Дата', 'date'),
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('year', 'integer', { config: { min: 1888, max: 2100 } }),
+        f('kind', 'select', { config: movieKind }),
+        f('reason', 'textarea', { config: { maxLength: 500 } }),
+        f('decided_at', 'date'),
       ],
       titleFieldId: 'title',
       dateFieldId: 'decided_at',
@@ -204,41 +155,17 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'games_done',
-    title: 'Пройденные игры',
     icon: '🎮',
-    description: 'Каталог пройденного с платформой, часами и оценкой.',
-    hint: 'Дата прохождения нужна для таймлайна «во что играли в каком году».',
-    example: 'Hades, Switch, 40 ч, оценка 9, пройдено 02.2024.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('platform', 'Платформа', 'select', {
-          config: {
-            options: [
-              { value: 'pc', label: 'PC' },
-              { value: 'ps', label: 'PlayStation' },
-              { value: 'xbox', label: 'Xbox' },
-              { value: 'switch', label: 'Switch' },
-              { value: 'mobile', label: 'Телефон' },
-              { value: 'other', label: 'Другое' },
-            ],
-          },
-        }),
-        f('cover', 'Обложка', 'image', { config: { maxSizeMb: 2 } }),
-        f('finished_at', 'Пройдено', 'date'),
-        f('hours', 'Часы', 'number', { config: { min: 0, max: 10000 } }),
-        f('ratings', 'Оценки', 'multi_rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
-        f('status', 'Статус', 'select', {
-          config: {
-            options: [
-              { value: 'completed', label: 'Пройдено' },
-              { value: 'main', label: 'Сюжет' },
-              { value: 'hundred', label: '100%' },
-              { value: 'dropped', label: 'Брошено' },
-            ],
-          },
-        }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 1000 } }),
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('platform', 'select', { config: gamePlatform }),
+        f('cover', 'image', { config: { maxSizeMb: 2 } }),
+        f('finished_at', 'date'),
+        f('hours', 'number', { config: { min: 0, max: 10000 } }),
+        f('ratings', 'multi_rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
+        f('status', 'select', { config: { options: opts('completed', 'main', 'hundred', 'dropped') } }),
+        f('note', 'textarea', { config: { maxLength: 1000 } }),
       ],
       titleFieldId: 'title',
       imageFieldId: 'cover',
@@ -247,13 +174,9 @@ export const TEMPLATES: TemplateSpec[] = [
     },
     view: { mode: 'gallery', imageFieldId: 'cover', dateFieldId: 'finished_at' },
     charts: [
+      { key: 'timeline', chart_type: 'timeline', config: { dateFieldId: 'finished_at', aggregation: 'count' } },
       {
-        name: 'Когда проходили',
-        chart_type: 'timeline',
-        config: { dateFieldId: 'finished_at', aggregation: 'count' },
-      },
-      {
-        name: 'Оценки по времени',
+        key: 'ratings',
         chart_type: 'stem',
         config: { dateFieldId: 'finished_at', valueFieldId: 'ratings', aggregation: 'avg' },
       },
@@ -261,37 +184,14 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'games_backlog',
-    title: 'К прохождению',
     icon: '🕹️',
-    description: 'Очередь игр. Перекидывайте в «Пройденные» кнопкой.',
-    hint: 'Набор «Игры» свяжет очередь и каталог пройденного — дата прохождения поставится сама.',
-    example: 'Hades, Switch, срочно → «Пройдено» → часы и оценка уже в другом списке.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('platform', 'Платформа', 'select', {
-          config: {
-            options: [
-              { value: 'pc', label: 'PC' },
-              { value: 'ps', label: 'PlayStation' },
-              { value: 'xbox', label: 'Xbox' },
-              { value: 'switch', label: 'Switch' },
-              { value: 'mobile', label: 'Телефон' },
-              { value: 'other', label: 'Другое' },
-            ],
-          },
-        }),
-        f('cover', 'Обложка', 'image', { config: { maxSizeMb: 2 } }),
-        f('priority', 'Приоритет', 'select', {
-          config: {
-            options: [
-              { value: 'now', label: 'Срочно', color: '#be123c' },
-              { value: 'soon', label: 'Скоро', color: '#b45309' },
-              { value: 'someday', label: 'Когда-нибудь', color: '#6e6578' },
-            ],
-          },
-        }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 500 } }),
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('platform', 'select', { config: gamePlatform }),
+        f('cover', 'image', { config: { maxSizeMb: 2 } }),
+        f('priority', 'select', { config: playPriority }),
+        f('note', 'textarea', { config: { maxLength: 500 } }),
       ],
       titleFieldId: 'title',
       imageFieldId: 'cover',
@@ -301,27 +201,14 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'shopping',
-    title: 'Покупки',
     icon: '🛒',
-    description: 'Список покупок с вычёркиванием. Можно переносить в «Куплено».',
-    hint: 'Включите вычёркивание: при галочке можно ставить дату и двигать позицию в другой список.',
-    example: 'Молоко ×2 → галочка → уходит в «Куплено» с сегодняшней датой.',
     schema: {
       fields: [
-        f('name', 'Позиция', 'text', { required: true, config: { maxLength: 120 } }),
-        f('qty', 'Количество', 'number', { config: { min: 0, max: 9999 } }),
-        f('category', 'Категория', 'select', {
-          config: {
-            options: [
-              { value: 'food', label: 'Еда' },
-              { value: 'home', label: 'Дом' },
-              { value: 'tech', label: 'Техника' },
-              { value: 'other', label: 'Другое' },
-            ],
-          },
-        }),
-        f('note', 'Заметка', 'text', { config: { maxLength: 200 } }),
-        f('bought_at', 'Куплено', 'date', { hidden: true }),
+        f('name', 'text', { required: true, config: { maxLength: 120 } }),
+        f('qty', 'number', { config: { min: 0, max: 9999 } }),
+        f('category', 'select', { config: shopCategory }),
+        f('note', 'text', { config: { maxLength: 200 } }),
+        f('bought_at', 'date', { hidden: true }),
       ],
       titleFieldId: 'name',
       dateFieldId: 'bought_at',
@@ -329,7 +216,6 @@ export const TEMPLATES: TemplateSpec[] = [
     },
     settings: {
       enableCheck: true,
-      checkLabel: 'Куплено',
       onCheck: [{ type: 'set_now', fieldId: 'bought_at' }],
       onUncheck: [{ type: 'restore_snapshot' }],
     },
@@ -337,78 +223,49 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'bought',
-    title: 'Куплено',
     icon: '📦',
-    description: 'История покупок с датой и ценой.',
-    hint: 'Сюда удобно перекидывать позиции из списка покупок кнопкой или автоматизацией.',
-    example: 'Молоко, 2 шт, 04.09.2026, 120 ₽.',
     schema: {
       fields: [
-        f('name', 'Позиция', 'text', { required: true, config: { maxLength: 120 } }),
-        f('qty', 'Количество', 'number', { config: { min: 0 } }),
-        f('bought_at', 'Дата', 'date'),
-        f('price', 'Цена', 'number', { config: { min: 0 } }),
-        f('category', 'Категория', 'select', {
-          config: {
-            options: [
-              { value: 'food', label: 'Еда' },
-              { value: 'home', label: 'Дом' },
-              { value: 'tech', label: 'Техника' },
-              { value: 'other', label: 'Другое' },
-            ],
-          },
-        }),
+        f('name', 'text', { required: true, config: { maxLength: 120 } }),
+        f('qty', 'number', { config: { min: 0 } }),
+        f('bought_at', 'date'),
+        f('price', 'number', { config: { min: 0 } }),
+        f('category', 'select', { config: shopCategory }),
       ],
       titleFieldId: 'name',
       dateFieldId: 'bought_at',
     },
     charts: [
-      {
-        name: 'Траты по дням',
-        chart_type: 'bar',
-        config: { dateFieldId: 'bought_at', valueFieldId: 'price', aggregation: 'sum' },
-      },
+      { key: 'spend', chart_type: 'bar', config: { dateFieldId: 'bought_at', valueFieldId: 'price', aggregation: 'sum' } },
     ],
   },
   {
     key: 'later_shopping',
-    title: 'Купить к событию',
     icon: '🎄',
-    description: 'Отложенные покупки — к Новому году, дню рождения, отпуску.',
-    hint: 'Поле «Когда» можно сделать датой или выбором события.',
-    example: 'Гирлянда → «к Новому году».',
     schema: {
       fields: [
-        f('name', 'Позиция', 'text', { required: true, config: { maxLength: 120 } }),
-        f('qty', 'Количество', 'number', { config: { min: 0 } }),
-        f('when', 'Когда', 'text', { config: { maxLength: 80, placeholder: 'к Новому году' } }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 400 } }),
+        f('name', 'text', { required: true, config: { maxLength: 120 } }),
+        f('qty', 'number', { config: { min: 0 } }),
+        f('when', 'text', { config: { maxLength: 80, placeholder: '' } }),
+        f('note', 'textarea', { config: { maxLength: 400 } }),
       ],
       titleFieldId: 'name',
     },
   },
   {
     key: 'todo',
-    title: 'Дела',
     icon: '✅',
-    description: 'Классический todo: вычёркивание, приоритет, срок.',
-    hint: 'При вычёркивании можно автоматически проставлять дату выполнения.',
-    example: '«Оплатить интернет» до пятницы → галочка → дата выполнения сегодня.',
     schema: {
       fields: [
-        f('title', 'Задача', 'text', { required: true, config: { maxLength: 200 } }),
-        f('due', 'Срок', 'date'),
-        f('priority', 'Приоритет', 'select', {
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('due', 'date'),
+        f('priority', 'select', {
           config: {
-            options: [
-              { value: 'high', label: 'Высокий', color: '#be123c' },
-              { value: 'mid', label: 'Средний', color: '#b45309' },
-              { value: 'low', label: 'Низкий', color: '#0f766e' },
-            ],
+            options: optsColored(['high', '#be123c'], ['mid', '#b45309'], ['low', '#0f766e']),
           },
         }),
-        f('done_at', 'Выполнено', 'date', { hidden: true }),
-        f('notes', 'Заметки', 'textarea', { config: { maxLength: 1000 } }),
+        f('done_at', 'date', { hidden: true }),
+        f('notes', 'textarea', { config: { maxLength: 1000 } }),
       ],
       titleFieldId: 'title',
       dateFieldId: 'due',
@@ -416,7 +273,6 @@ export const TEMPLATES: TemplateSpec[] = [
     },
     settings: {
       enableCheck: true,
-      checkLabel: 'Готово',
       onCheck: [{ type: 'set_now', fieldId: 'done_at' }],
       onUncheck: [{ type: 'restore_snapshot' }],
     },
@@ -424,28 +280,15 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'books',
-    title: 'Книги',
     icon: '📚',
-    description: 'Прочитанное и в процессе — с оценками и датами.',
-    hint: 'Таймлайн строится по дате окончания. Коллективные оценки работают так же, как у фильмов.',
-    example: '«Мастер и Маргарита», закончили 01.06.2024, оценка 10.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('author', 'Автор', 'text', { config: { maxLength: 120 } }),
-        f('finished_at', 'Прочитано', 'date'),
-        f('ratings', 'Оценки', 'multi_rating', { config: { ratingMax: 10 } }),
-        f('status', 'Статус', 'select', {
-          config: {
-            options: [
-              { value: 'want', label: 'Хочу' },
-              { value: 'reading', label: 'Читаю' },
-              { value: 'done', label: 'Прочитано' },
-              { value: 'dropped', label: 'Брошено' },
-            ],
-          },
-        }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('author', 'text', { config: { maxLength: 120 } }),
+        f('finished_at', 'date'),
+        f('ratings', 'multi_rating', { config: { ratingMax: 10 } }),
+        f('status', 'select', { config: { options: opts('want', 'reading', 'done', 'dropped') } }),
+        f('note', 'textarea', { config: { maxLength: 2000 } }),
       ],
       titleFieldId: 'title',
       dateFieldId: 'finished_at',
@@ -455,30 +298,16 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'catalog_items',
-    title: 'Каталог',
     icon: '📚',
-    description: 'Справочник сущностей без повторов: фильмы, книги, места, блюда — что угодно.',
-    hint: 'Одна запись = один объект. Повторные события с датами и оценками ведите в журнале из набора «Каталог и журнал».',
-    example: '«Дюна», 2021, постер. Сам фильм один — просмотры с разными оценками живут в журнале.',
     schema: {
       fields: [
-        f('title', 'Название', 'text', { required: true, config: { maxLength: 200 } }),
-        f('year', 'Год', 'integer', { config: { min: 1, max: 2100 } }),
-        f('kind', 'Тип', 'select', {
-          config: {
-            options: [
-              { value: 'film', label: 'Фильм' },
-              { value: 'book', label: 'Книга' },
-              { value: 'game', label: 'Игра' },
-              { value: 'place', label: 'Место' },
-              { value: 'other', label: 'Другое' },
-            ],
-          },
-        }),
-        f('cover', 'Обложка', 'image', {
+        f('title', 'text', { required: true, config: { maxLength: 200 } }),
+        f('year', 'integer', { config: { min: 1, max: 2100 } }),
+        f('kind', 'select', { config: { options: opts('film', 'book', 'game', 'place', 'other') } }),
+        f('cover', 'image', {
           config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] },
         }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+        f('note', 'textarea', { config: { maxLength: 2000 } }),
       ],
       titleFieldId: 'title',
       imageFieldId: 'cover',
@@ -488,33 +317,25 @@ export const TEMPLATES: TemplateSpec[] = [
   },
   {
     key: 'event_log',
-    title: 'Журнал',
     icon: '🗒️',
-    description: 'Повторяющиеся события: каждый раз — своя дата, оценка и заметка, ссылка на запись каталога.',
-    hint: 'Свяжите поле «Что» со списком-каталогом. Один фильм можно открыть много раз — каждый просмотр отдельной строкой.',
-    example: 'Дюна · 12.03.2024 · 9; Дюна · 01.09.2025 · 8 — два просмотра, две оценки.',
     schema: {
       fields: [
-        f('subject', 'Что', 'relation', {
+        f('subject', 'relation', {
           required: true,
           config: { relationDisplay: 'title_cover', allowMultiple: false },
         }),
-        f('happened_at', 'Дата', 'date', { required: true }),
-        f('score', 'Оценка', 'rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
-        f('note', 'Заметка', 'textarea', { config: { maxLength: 2000 } }),
+        f('happened_at', 'date', { required: true }),
+        f('score', 'rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
+        f('note', 'textarea', { config: { maxLength: 2000 } }),
       ],
       titleFieldId: 'subject',
       dateFieldId: 'happened_at',
     },
     view: { mode: 'table', dateFieldId: 'happened_at' },
     charts: [
+      { key: 'timeline', chart_type: 'timeline', config: { dateFieldId: 'happened_at', aggregation: 'count' } },
       {
-        name: 'Лента событий',
-        chart_type: 'timeline',
-        config: { dateFieldId: 'happened_at', aggregation: 'count' },
-      },
-      {
-        name: 'Оценки во времени',
+        key: 'ratings',
         chart_type: 'stem',
         config: { dateFieldId: 'happened_at', valueFieldId: 'score', aggregation: 'avg' },
       },
@@ -525,10 +346,7 @@ export const TEMPLATES: TemplateSpec[] = [
 export const TEMPLATE_PACKS: TemplatePack[] = [
   {
     key: 'catalog_log',
-    title: 'Каталог и журнал',
     icon: '📖',
-    description: 'Справочник объектов + журнал повторений: одна сущность — много дат и оценок.',
-    hint: 'Создаются «Каталог» и «Журнал». В журнале поле «Что» уже связано с каталогом и показывает название с обложкой.',
     lists: [
       TEMPLATES.find((t) => t.key === 'catalog_items')!,
       TEMPLATES.find((t) => t.key === 'event_log')!,
@@ -537,10 +355,7 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
   },
   {
     key: 'cinema',
-    title: 'Кино и сериалы',
     icon: '🎬',
-    description: 'Три связанных списка: очередь, просмотрено, отказ. Кнопки переноса уже настроены.',
-    hint: 'Создаётся сразу три списка. В «К просмотру» появятся кнопки «Просмотрено» и «Не буду».',
     lists: [
       TEMPLATES.find((t) => t.key === 'movies_watchlist')!,
       TEMPLATES.find((t) => t.key === 'movies_watched')!,
@@ -550,23 +365,18 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
       {
         fromKey: 'movies_watchlist',
         toKey: 'movies_watched',
-        label: 'Просмотрено',
         fieldMap: { title: 'title', year: 'year', kind: 'kind', poster: 'poster' },
       },
       {
         fromKey: 'movies_watchlist',
         toKey: 'movies_dropped',
-        label: 'Не буду смотреть',
         fieldMap: { title: 'title', year: 'year', kind: 'kind' },
       },
     ],
   },
   {
     key: 'groceries',
-    title: 'Покупки',
     icon: '🛒',
-    description: 'Текущий список, купленное и отложенное к празднику.',
-    hint: 'Вычеркните позицию — или нажмите кнопку, чтобы отправить её в «Куплено» / «к Новому году».',
     lists: [
       TEMPLATES.find((t) => t.key === 'shopping')!,
       TEMPLATES.find((t) => t.key === 'bought')!,
@@ -576,19 +386,16 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
       {
         fromKey: 'shopping',
         toKey: 'bought',
-        label: 'Куплено',
         fieldMap: { name: 'name', qty: 'qty', category: 'category' },
       },
       {
         fromKey: 'shopping',
         toKey: 'later_shopping',
-        label: 'К Новому году',
         fieldMap: { name: 'name', qty: 'qty' },
       },
       {
         fromKey: 'bought',
         toKey: 'shopping',
-        label: 'Вернуть в покупки',
         fieldMap: { name: 'name', qty: 'qty', category: 'category' },
       },
     ],
@@ -602,10 +409,7 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
   },
   {
     key: 'games',
-    title: 'Игры',
     icon: '🎮',
-    description: 'Очередь и пройденное. Кнопка переноса уже настроена.',
-    hint: 'В «К прохождению» появится кнопка «Пройдено» — дата прохождения ставится сегодня.',
     lists: [
       TEMPLATES.find((t) => t.key === 'games_backlog')!,
       TEMPLATES.find((t) => t.key === 'games_done')!,
@@ -614,35 +418,102 @@ export const TEMPLATE_PACKS: TemplatePack[] = [
       {
         fromKey: 'games_backlog',
         toKey: 'games_done',
-        label: 'Пройдено',
         fieldMap: { title: 'title', platform: 'platform', cover: 'cover' },
       },
     ],
   },
 ]
 
+function localizeField(templateKey: string, field: FieldDef, t: TranslateFn, parentId?: string): FieldDef {
+  const nameKey = parentId
+    ? `tpl.${templateKey}.sub.${parentId}.${field.id}`
+    : `tpl.${templateKey}.field.${field.id}`
+  const config = field.config ? { ...field.config } : undefined
+  if (config?.options) {
+    config.options = config.options.map((opt) => ({
+      ...opt,
+      label: t(`tpl.${templateKey}.opt.${field.id}.${opt.value}`),
+    }))
+  }
+  if (config && Object.prototype.hasOwnProperty.call(config, 'placeholder')) {
+    config.placeholder = t(`tpl.${templateKey}.ph.${field.id}`)
+  }
+  if (config?.subfields) {
+    config.subfields = config.subfields.map((sub) => {
+      const loc = localizeField(templateKey, sub as FieldDef, t, field.id)
+      return {
+        id: loc.id,
+        key: loc.key,
+        name: loc.name,
+        type: loc.type,
+        required: loc.required,
+        config: loc.config,
+      }
+    })
+  }
+  return { ...field, name: t(nameKey), config }
+}
+
+export function localizeSchema(templateKey: string, schema: ListSchema, t: TranslateFn = msg): ListSchema {
+  return {
+    ...schema,
+    fields: schema.fields.map((field) => localizeField(templateKey, field, t)),
+  }
+}
+
+export function localizeTemplate(
+  spec: TemplateSpec,
+  t: TranslateFn = msg,
+): {
+  title: string
+  schema: ListSchema
+  settings: ListSettings
+  charts: Array<{ name: string; chart_type: TemplateChartSpec['chart_type']; config: TemplateChartSpec['config'] }>
+} {
+  const settings = structuredClone(spec.settings ?? {})
+  if (settings.enableCheck) {
+    settings.checkLabel = t(`tpl.${spec.key}.checkLabel`)
+  }
+  return {
+    title: t(`tpl.${spec.key}.title`),
+    schema: localizeSchema(spec.key, structuredClone(spec.schema), t),
+    settings,
+    charts: (spec.charts ?? []).map((chart) => ({
+      name: t(`tpl.${spec.key}.chart.${chart.key}`),
+      chart_type: chart.chart_type,
+      config: chart.config,
+    })),
+  }
+}
+
 export function blankSchema(titleFieldName: string): ListSchema {
   return {
-    fields: [f('title', titleFieldName, 'text', { required: true, config: { maxLength: 200 } })],
+    fields: [f('title', 'text', { required: true, config: { maxLength: 200 }, name: titleFieldName })],
     titleFieldId: 'title',
   }
 }
 
-export function cloneTemplate(spec: TemplateSpec): {
+export function cloneTemplate(
+  spec: TemplateSpec,
+  t: TranslateFn = msg,
+): {
   title: string
   icon: string
   schema: ListSchema
   settings: ListSettings
   view_config: ViewConfig
   template_key: string
+  charts: Array<{ name: string; chart_type: TemplateChartSpec['chart_type']; config: TemplateChartSpec['config'] }>
 } {
+  const localized = localizeTemplate(spec, t)
   return {
-    title: spec.title,
+    title: localized.title,
     icon: spec.icon,
-    schema: structuredClone(spec.schema),
-    settings: structuredClone(spec.settings ?? {}),
+    schema: localized.schema,
+    settings: localized.settings,
     view_config: structuredClone(spec.view ?? { mode: 'table' }),
     template_key: spec.key,
+    charts: localized.charts,
   }
 }
 
@@ -678,12 +549,14 @@ function stampFieldsFor(target: TemplateSpec | undefined): Record<string, unknow
 export function applyPackSettings(
   pack: TemplatePack,
   created: Record<string, string>,
+  t: TranslateFn = msg,
 ): Array<{ listId: string; settings: ListSettings; schema?: ListSchema }> {
   const byKey: Record<string, ListSettings> = {}
   const schemaByKey: Record<string, ListSchema> = {}
   for (const spec of pack.lists) {
-    byKey[spec.key] = structuredClone(spec.settings ?? {})
-    schemaByKey[spec.key] = structuredClone(spec.schema)
+    const localized = localizeTemplate(spec, t)
+    byKey[spec.key] = localized.settings
+    schemaByKey[spec.key] = localized.schema
   }
 
   for (const link of pack.relations ?? []) {
@@ -705,7 +578,7 @@ export function applyPackSettings(
       ...(settings.transferActions ?? []),
       {
         id: crypto.randomUUID(),
-        label: transfer.label,
+        label: t(`tpl.pack_${pack.key}.transfer.${transfer.fromKey}__${transfer.toKey}`),
         targetListId: toId,
         fieldMap: transfer.fieldMap,
         deleteSource: true,
@@ -736,7 +609,7 @@ export function applyPackSettings(
       return {
         listId,
         settings: byKey[spec.key] ?? {},
-        schema: linked ? schema : undefined,
+        ...(linked ? { schema } : {}),
       }
     })
     .filter((row): row is { listId: string; settings: ListSettings; schema?: ListSchema } => Boolean(row))

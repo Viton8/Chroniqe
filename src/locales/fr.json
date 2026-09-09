@@ -654,79 +654,282 @@
       "title": "Liste vide",
       "description": "Vous construisez les champs — tout type, toute contrainte.",
       "hint": "Commencez par un champ texte « Titre », puis dates, notes, fichiers.",
-      "example": "Collection de vinyles : artiste, année, état, photo de pochette."
+      "example": "Collection de vinyles : artiste, année, état, photo de pochette.",
+      "field": {
+        "title": "Titre"
+      }
     },
     "movies_watched": {
       "title": "Vus",
       "description": "Films et séries déjà vus. Tout le monde peut noter.",
       "hint": "« Notes » est collectif : chacun note, la moyenne se calcule.",
-      "example": "Dune, 2021, film, date 12.03.2024, notes 8 et 9 → moyenne 8.5."
+      "example": "Dune, 2021, film, date 12.03.2024, notes 8 et 9 → moyenne 8.5.",
+      "field": {
+        "title": "Titre",
+        "year": "Année",
+        "kind": "Type",
+        "poster": "Affiche",
+        "watched_at": "Date de visionnage",
+        "ratings": "Notes",
+        "seasons": "Saisons",
+        "review": "Critique"
+      },
+      "sub": {
+        "seasons": {
+          "season": "Saison",
+          "episodes": "Épisodes",
+          "finished_at": "Terminée",
+          "score": "Note de saison"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Série",
+          "anime": "Animé",
+          "doc": "Documentaire"
+        }
+      },
+      "chart": {
+        "timeline": "Frise des visionnages",
+        "ratings": "Notes moyennes dans le temps"
+      }
     },
     "movies_watchlist": {
       "title": "À voir",
       "description": "File de films et séries. Déplacez-les vers Vus ou Abandonnés.",
       "hint": "Les boutons de déplacement apparaissent si vous créez le pack Cinéma — il relie trois listes.",
-      "example": "Touchez « Vus » → la ligne part, la date de visionnage est aujourd’hui."
+      "example": "Touchez « Vus » → la ligne part, la date de visionnage est aujourd’hui.",
+      "field": {
+        "title": "Titre",
+        "year": "Année",
+        "kind": "Type",
+        "poster": "Affiche",
+        "priority": "Priorité",
+        "note": "Note"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Série",
+          "anime": "Animé",
+          "doc": "Documentaire"
+        },
+        "priority": {
+          "now": "Urgent",
+          "soon": "Bientôt",
+          "someday": "Un jour"
+        }
+      }
     },
     "movies_dropped": {
       "title": "Abandonnés",
       "description": "Titres sautés ou refusés — pour qu’ils ne soient plus proposés.",
       "hint": "Ajoutez une raison : elle explique pourquoi la file a raccourci.",
-      "example": "« Le ton ne passait pas » + date de décision."
+      "example": "« Le ton ne passait pas » + date de décision.",
+      "field": {
+        "title": "Titre",
+        "year": "Année",
+        "kind": "Type",
+        "reason": "Raison",
+        "decided_at": "Date"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Film",
+          "series": "Série",
+          "anime": "Animé",
+          "doc": "Documentaire"
+        }
+      }
     },
     "games_done": {
       "title": "Jeux terminés",
       "description": "Catalogue de jeux finis avec plateforme, heures et note.",
       "hint": "La date de fin alimente la chronologie « ce qu’on a joué quelle année ».",
-      "example": "Hades, Switch, 40 h, note 9, terminé 02.2024."
+      "example": "Hades, Switch, 40 h, note 9, terminé 02.2024.",
+      "field": {
+        "title": "Titre",
+        "platform": "Plateforme",
+        "cover": "Couverture",
+        "finished_at": "Terminé",
+        "hours": "Heures",
+        "ratings": "Notes",
+        "status": "Statut",
+        "note": "Note"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Téléphone",
+          "other": "Autre"
+        },
+        "status": {
+          "completed": "Terminé",
+          "main": "Histoire",
+          "hundred": "100%",
+          "dropped": "Abandonné"
+        }
+      },
+      "chart": {
+        "timeline": "Quand on a joué",
+        "ratings": "Notes dans le temps"
+      }
     },
     "shopping": {
       "title": "Courses",
       "description": "Liste de courses avec cases. Vous pouvez déplacer les lignes vers Achetés.",
       "hint": "Activez le cochage : cocher peut dater et déplacer la ligne.",
-      "example": "Lait ×2, catégorie « nourriture »."
+      "example": "Lait ×2, catégorie « nourriture ».",
+      "field": {
+        "name": "Article",
+        "qty": "Quantité",
+        "category": "Catégorie",
+        "note": "Note",
+        "bought_at": "Acheté"
+      },
+      "opt": {
+        "category": {
+          "food": "Nourriture",
+          "home": "Maison",
+          "tech": "Tech",
+          "other": "Autre"
+        }
+      },
+      "checkLabel": "Acheté"
     },
     "bought": {
       "title": "Achetés",
       "description": "Historique d’achats avec date et prix.",
       "hint": "Déplacez ici les éléments de la liste de courses avec un bouton ou une automatisation.",
-      "example": "Lait, 2 pcs, 04.09.2026, 1,20 €."
+      "example": "Lait, 2 pcs, 04.09.2026, 1,20 €.",
+      "field": {
+        "name": "Article",
+        "qty": "Quantité",
+        "bought_at": "Date",
+        "price": "Prix",
+        "category": "Catégorie"
+      },
+      "opt": {
+        "category": {
+          "food": "Nourriture",
+          "home": "Maison",
+          "tech": "Tech",
+          "other": "Autre"
+        }
+      },
+      "chart": {
+        "spend": "Dépenses par jour"
+      }
     },
     "later_shopping": {
       "title": "Acheter pour un événement",
       "description": "Achats reportés — Nouvel An, un anniversaire, un voyage.",
       "hint": "« Quand » peut être une date ou un événement en texte libre.",
-      "example": "Guirlandes → « pour le Nouvel An »."
+      "example": "Guirlandes → « pour le Nouvel An ».",
+      "field": {
+        "name": "Article",
+        "qty": "Quantité",
+        "when": "Quand",
+        "note": "Note"
+      },
+      "ph": {
+        "when": "pour le Nouvel An"
+      }
     },
     "todo": {
       "title": "Tâches",
       "description": "Todo classique : case, priorité, échéance.",
       "hint": "Cocher peut tamponner automatiquement la date de fin.",
-      "example": "« Payer Internet » pour vendredi → coche → la date de fin est aujourd’hui."
+      "example": "« Payer Internet » pour vendredi → coche → la date de fin est aujourd’hui.",
+      "field": {
+        "title": "Tâche",
+        "due": "Échéance",
+        "priority": "Priorité",
+        "done_at": "Fait",
+        "notes": "Notes"
+      },
+      "opt": {
+        "priority": {
+          "high": "Haute",
+          "mid": "Moyenne",
+          "low": "Basse"
+        }
+      },
+      "checkLabel": "Fait"
     },
     "books": {
       "title": "Livres",
       "description": "Lus et en cours — avec notes et dates.",
       "hint": "La chronologie utilise la date de fin. Les notes collectives marchent comme pour les films.",
-      "example": "Le Maître et Marguerite, terminé 01.06.2024, note 10."
+      "example": "Le Maître et Marguerite, terminé 01.06.2024, note 10.",
+      "field": {
+        "title": "Titre",
+        "author": "Auteur",
+        "finished_at": "Lu le",
+        "ratings": "Notes",
+        "status": "Statut",
+        "note": "Note"
+      },
+      "opt": {
+        "status": {
+          "want": "À lire",
+          "reading": "En cours",
+          "done": "Lu",
+          "dropped": "Abandonné"
+        }
+      }
     },
     "pack_cinema": {
       "title": "Cinéma",
       "description": "Trois listes liées : file, vus, abandonnés. Les boutons de déplacement sont prêts.",
       "hint": "Crée trois listes d’un coup. À voir reçoit « Vus » et « Je ne regarderai pas ».",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "Créez le pack → la file reçoit deux boutons : Vus et Abandonnés.",
+      "transfer": {
+        "movies_watchlist__movies_watched": "Vu",
+        "movies_watchlist__movies_dropped": "Je ne regarderai pas"
+      }
     },
     "catalog_items": {
       "title": "Catalogue",
       "description": "Liste de référence sans doublons — films, livres, lieux, n’importe quoi.",
       "hint": "Une ligne = un objet. Les événements répétés avec dates et notes vont dans le journal du pack Catalogue et journal.",
-      "example": "Dune, 2021, affiche. Le film une fois ; les visionnages avec notes différentes vivent dans le journal."
+      "example": "Dune, 2021, affiche. Le film une fois ; les visionnages avec notes différentes vivent dans le journal.",
+      "field": {
+        "title": "Titre",
+        "year": "Année",
+        "kind": "Type",
+        "cover": "Couverture",
+        "note": "Note"
+      },
+      "opt": {
+        "kind": {
+          "film": "Film",
+          "book": "Livre",
+          "game": "Jeu",
+          "place": "Lieu",
+          "other": "Autre"
+        }
+      }
     },
     "event_log": {
       "title": "Journal",
       "description": "Événements répétés : chaque fois sa date, note et commentaire, liés à une fiche du catalogue.",
       "hint": "Pointez le champ « Quoi » vers un catalogue. Un film peut apparaître plusieurs fois — chaque visionnage est une ligne.",
-      "example": "Dune · 12.03.2024 · 9 ; Dune · 01.09.2025 · 8 — deux visionnages, deux notes."
+      "example": "Dune · 12.03.2024 · 9 ; Dune · 01.09.2025 · 8 — deux visionnages, deux notes.",
+      "field": {
+        "subject": "Quoi",
+        "happened_at": "Date",
+        "score": "Note",
+        "note": "Note"
+      },
+      "chart": {
+        "timeline": "Frise des événements",
+        "ratings": "Notes dans le temps"
+      }
     },
     "pack_catalog_log": {
       "title": "Catalogue et journal",
@@ -738,19 +941,49 @@
       "title": "Courses",
       "description": "Liste du moment, achetés, et achats de fêtes reportés.",
       "hint": "Cochez un élément — ou envoyez-le vers Achetés / Nouvel An d’un bouton.",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "Cochez le lait → il passe dans Achetés avec la date du jour. Décochez avant le déplacement et la date disparaît.",
+      "transfer": {
+        "shopping__bought": "Acheté",
+        "shopping__later_shopping": "Pour le Nouvel An",
+        "bought__shopping": "Remettre aux courses"
+      }
     },
     "games_backlog": {
-      "title": "To play",
-      "description": "A game queue. Move titles to Finished with a button.",
-      "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "title": "À jouer",
+      "description": "File de jeux. Déplacez-les vers Terminés d’un bouton.",
+      "hint": "Le pack Jeux relie la file au catalogue terminé et pose la date de fin.",
+      "example": "Hades, Switch, urgent → Terminé → heures et note sont dans l’autre liste.",
+      "field": {
+        "title": "Titre",
+        "platform": "Plateforme",
+        "cover": "Couverture",
+        "priority": "Priorité",
+        "note": "Note"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Téléphone",
+          "other": "Autre"
+        },
+        "priority": {
+          "now": "Urgent",
+          "soon": "Bientôt",
+          "someday": "Un jour"
+        }
+      }
     },
     "pack_games": {
-      "title": "Games",
-      "description": "Queue and finished catalogue. The move button is ready.",
-      "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "title": "Jeux",
+      "description": "File et catalogue terminé. Le bouton de déplacement est prêt.",
+      "hint": "À jouer reçoit le bouton Terminé — la date de fin est aujourd’hui.",
+      "example": "Appuyez sur Terminé → le jeu est dans le catalogue, daté d’aujourd’hui.",
+      "transfer": {
+        "games_backlog__games_done": "Terminé"
+      }
     }
   },
   "filters": {

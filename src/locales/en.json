@@ -654,79 +654,282 @@
       "title": "Blank list",
       "description": "Build the fields yourself — any type, any constraints.",
       "hint": "Start with one text field “Title”, then add dates, ratings, files.",
-      "example": "A vinyl collection: artist, year, condition, cover photo."
+      "example": "A vinyl collection: artist, year, condition, cover photo.",
+      "field": {
+        "title": "Title"
+      }
     },
     "movies_watched": {
       "title": "Watched",
       "description": "Films and series you already watched. Anyone can rate.",
       "hint": "“Ratings” is collective. For a series, the nested “Seasons” list holds number, episodes, date and a season score.",
-      "example": "Dune, 2021, film, date 12.03.2024, scores 8 and 9 → average 8.5. A series: season 1, 8 episodes, score 9."
+      "example": "Dune, 2021, film, date 12.03.2024, scores 8 and 9 → average 8.5. A series: season 1, 8 episodes, score 9.",
+      "field": {
+        "title": "Title",
+        "year": "Year",
+        "kind": "Type",
+        "poster": "Poster",
+        "watched_at": "Watch date",
+        "ratings": "Ratings",
+        "seasons": "Seasons",
+        "review": "Review"
+      },
+      "sub": {
+        "seasons": {
+          "season": "Season",
+          "episodes": "Episodes",
+          "finished_at": "Finished",
+          "score": "Season score"
+        }
+      },
+      "opt": {
+        "kind": {
+          "movie": "Movie",
+          "series": "Series",
+          "anime": "Anime",
+          "doc": "Documentary"
+        }
+      },
+      "chart": {
+        "timeline": "Watch timeline",
+        "ratings": "Average ratings over time"
+      }
     },
     "movies_watchlist": {
       "title": "Watchlist",
       "description": "Queue of films and series. Move them to Watched or Dropped.",
       "hint": "Move buttons appear if you create the Cinema pack — it links three lists.",
-      "example": "Tap “Watched” → the row moves, watch date is set to today."
+      "example": "Tap “Watched” → the row moves, watch date is set to today.",
+      "field": {
+        "title": "Title",
+        "year": "Year",
+        "kind": "Type",
+        "poster": "Poster",
+        "priority": "Priority",
+        "note": "Note"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Movie",
+          "series": "Series",
+          "anime": "Anime",
+          "doc": "Documentary"
+        },
+        "priority": {
+          "now": "Now",
+          "soon": "Soon",
+          "someday": "Someday"
+        }
+      }
     },
     "movies_dropped": {
       "title": "Dropped",
       "description": "Titles you skipped or rejected — so they are not suggested again.",
       "hint": "Add a reason: it explains why the watchlist got shorter.",
-      "example": "“Tone didn’t land” + decision date."
+      "example": "“Tone didn’t land” + decision date.",
+      "field": {
+        "title": "Title",
+        "year": "Year",
+        "kind": "Type",
+        "reason": "Reason",
+        "decided_at": "Date"
+      },
+      "opt": {
+        "kind": {
+          "movie": "Movie",
+          "series": "Series",
+          "anime": "Anime",
+          "doc": "Documentary"
+        }
+      }
     },
     "games_done": {
       "title": "Games finished",
       "description": "Catalogue of finished games with platform, hours and rating.",
       "hint": "Finish date feeds the “what we played which year” timeline.",
-      "example": "Hades, Switch, 40 h, rating 9, finished 02.2024."
+      "example": "Hades, Switch, 40 h, rating 9, finished 02.2024.",
+      "field": {
+        "title": "Title",
+        "platform": "Platform",
+        "cover": "Cover",
+        "finished_at": "Finished",
+        "hours": "Hours",
+        "ratings": "Ratings",
+        "status": "Status",
+        "note": "Note"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Phone",
+          "other": "Other"
+        },
+        "status": {
+          "completed": "Finished",
+          "main": "Story",
+          "hundred": "100%",
+          "dropped": "Dropped"
+        }
+      },
+      "chart": {
+        "timeline": "When we played",
+        "ratings": "Ratings over time"
+      }
     },
     "shopping": {
       "title": "Shopping",
       "description": "A grocery list with check-off. You can move rows to Bought.",
       "hint": "Enable check-off: ticking can stamp a date and move the row.",
-      "example": "Milk ×2, category “food”."
+      "example": "Milk ×2, category “food”.",
+      "field": {
+        "name": "Item",
+        "qty": "Quantity",
+        "category": "Category",
+        "note": "Note",
+        "bought_at": "Bought"
+      },
+      "opt": {
+        "category": {
+          "food": "Food",
+          "home": "Home",
+          "tech": "Tech",
+          "other": "Other"
+        }
+      },
+      "checkLabel": "Bought"
     },
     "bought": {
       "title": "Bought",
       "description": "Purchase history with date and price.",
       "hint": "Move items here from the shopping list with a button or automation.",
-      "example": "Milk, 2 pcs, 04.09.2026, 120 ₽."
+      "example": "Milk, 2 pcs, 04.09.2026, 120 ₽.",
+      "field": {
+        "name": "Item",
+        "qty": "Quantity",
+        "bought_at": "Date",
+        "price": "Price",
+        "category": "Category"
+      },
+      "opt": {
+        "category": {
+          "food": "Food",
+          "home": "Home",
+          "tech": "Tech",
+          "other": "Other"
+        }
+      },
+      "chart": {
+        "spend": "Spending by day"
+      }
     },
     "later_shopping": {
       "title": "Buy for an event",
       "description": "Deferred purchases — New Year, a birthday, a trip.",
       "hint": "“When” can be a date or a free-text event.",
-      "example": "Fairy lights → “for New Year”."
+      "example": "Fairy lights → “for New Year”.",
+      "field": {
+        "name": "Item",
+        "qty": "Quantity",
+        "when": "When",
+        "note": "Note"
+      },
+      "ph": {
+        "when": "for New Year"
+      }
     },
     "todo": {
       "title": "Tasks",
       "description": "Classic todo: check-off, priority, due date.",
       "hint": "Checking off can stamp the completion date automatically.",
-      "example": "“Pay the internet bill” by Friday → tick → done date is today."
+      "example": "“Pay the internet bill” by Friday → tick → done date is today.",
+      "field": {
+        "title": "Task",
+        "due": "Due",
+        "priority": "Priority",
+        "done_at": "Done",
+        "notes": "Notes"
+      },
+      "opt": {
+        "priority": {
+          "high": "High",
+          "mid": "Medium",
+          "low": "Low"
+        }
+      },
+      "checkLabel": "Done"
     },
     "books": {
       "title": "Books",
       "description": "Read and in-progress — with ratings and dates.",
       "hint": "The timeline uses the finish date. Collective ratings work like films.",
-      "example": "The Master and Margarita, finished 01.06.2024, rating 10."
+      "example": "The Master and Margarita, finished 01.06.2024, rating 10.",
+      "field": {
+        "title": "Title",
+        "author": "Author",
+        "finished_at": "Read on",
+        "ratings": "Ratings",
+        "status": "Status",
+        "note": "Note"
+      },
+      "opt": {
+        "status": {
+          "want": "Want to read",
+          "reading": "Reading",
+          "done": "Read",
+          "dropped": "Dropped"
+        }
+      }
     },
     "pack_cinema": {
       "title": "Cinema",
       "description": "Three linked lists: queue, watched, dropped. Move buttons are ready.",
       "hint": "Creates three lists at once. Watchlist gets “Watched” and “Won’t watch”.",
-      "example": "Create the pack → the queue gets two buttons: Watched and Dropped."
+      "example": "Create the pack → the queue gets two buttons: Watched and Dropped.",
+      "transfer": {
+        "movies_watchlist__movies_watched": "Watched",
+        "movies_watchlist__movies_dropped": "Won’t watch"
+      }
     },
     "catalog_items": {
       "title": "Catalog",
       "description": "A reference list of things without duplicates — films, books, places, dishes, anything.",
       "hint": "One row = one object. Put repeated events with dates and scores in the Journal from the Catalog & journal pack.",
-      "example": "Dune, 2021, poster. The film exists once; rewatches with different scores live in the journal."
+      "example": "Dune, 2021, poster. The film exists once; rewatches with different scores live in the journal.",
+      "field": {
+        "title": "Title",
+        "year": "Year",
+        "kind": "Type",
+        "cover": "Cover",
+        "note": "Note"
+      },
+      "opt": {
+        "kind": {
+          "film": "Film",
+          "book": "Book",
+          "game": "Game",
+          "place": "Place",
+          "other": "Other"
+        }
+      }
     },
     "event_log": {
       "title": "Journal",
       "description": "Repeating events: each time gets its own date, score, and note, linked to a catalog row.",
       "hint": "Point the “What” field at a catalog list. One film can appear many times — each viewing is its own row.",
-      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — two viewings, two scores."
+      "example": "Dune · 12.03.2024 · 9; Dune · 01.09.2025 · 8 — two viewings, two scores.",
+      "field": {
+        "subject": "What",
+        "happened_at": "Date",
+        "score": "Score",
+        "note": "Note"
+      },
+      "chart": {
+        "timeline": "Event timeline",
+        "ratings": "Ratings over time"
+      }
     },
     "pack_catalog_log": {
       "title": "Catalog & journal",
@@ -738,19 +941,49 @@
       "title": "Shopping",
       "description": "Current list, bought items, and deferred holiday buys.",
       "hint": "Check an item off — or tap a button to send it to Bought / New Year.",
-      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared."
+      "example": "Tick milk → it moves to Bought with today’s date. Untick before the move and the date is cleared.",
+      "transfer": {
+        "shopping__bought": "Bought",
+        "shopping__later_shopping": "For New Year",
+        "bought__shopping": "Back to shopping"
+      }
     },
     "games_backlog": {
       "title": "To play",
       "description": "A game queue. Move titles to Finished with a button.",
       "hint": "The Games pack links the queue to the finished catalogue and stamps the finish date.",
-      "example": "Hades, Switch, now → Finished → hours and rating live on the other list."
+      "example": "Hades, Switch, now → Finished → hours and rating live on the other list.",
+      "field": {
+        "title": "Title",
+        "platform": "Platform",
+        "cover": "Cover",
+        "priority": "Priority",
+        "note": "Note"
+      },
+      "opt": {
+        "platform": {
+          "pc": "PC",
+          "ps": "PlayStation",
+          "xbox": "Xbox",
+          "switch": "Switch",
+          "mobile": "Phone",
+          "other": "Other"
+        },
+        "priority": {
+          "now": "Now",
+          "soon": "Soon",
+          "someday": "Someday"
+        }
+      }
     },
     "pack_games": {
       "title": "Games",
       "description": "Queue and finished catalogue. The move button is ready.",
       "hint": "To play gets a Finished button — the finish date is set to today.",
-      "example": "Tap Finished → the game is in the catalogue, dated today."
+      "example": "Tap Finished → the game is in the catalogue, dated today.",
+      "transfer": {
+        "games_backlog__games_done": "Finished"
+      }
     }
   },
   "filters": {

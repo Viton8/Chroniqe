@@ -1,10 +1,11 @@
+import { usesItemRatings } from './ratings'
 import type { FieldDef, FieldViewStyle, ItemRating, ListSchema, NumberDisplay } from '../types/domain'
 import { formatDate, formatDateTime } from './cn'
 import { subfieldAsDef } from './fields'
 import { evalFormula } from './formula'
 import { msg } from './i18n'
 
-const NUMERIC_TYPES = new Set(['number', 'integer', 'rating', 'multi_rating'])
+const NUMERIC_TYPES = new Set(['number', 'integer', 'rating', 'multi_rating', 'community_rating'])
 
 export function isNumericField(field: FieldDef): boolean {
   return NUMERIC_TYPES.has(field.type)
@@ -12,7 +13,7 @@ export function isNumericField(field: FieldDef): boolean {
 
 export function fieldBounds(field: FieldDef): { min?: number; max?: number } {
   const cfg = field.config ?? {}
-  if (field.type === 'rating' || field.type === 'multi_rating') {
+  if (field.type === 'rating' || usesItemRatings(field)) {
     return {
       min: cfg.min ?? 1,
       max: cfg.ratingMax ?? cfg.max ?? 10,
@@ -29,7 +30,7 @@ export function displaysForField(field: FieldDef): NumberDisplay[] {
   const modes: NumberDisplay[] = ['number']
   if (min != null || max != null) modes.push('range')
   if (max != null) modes.push('fraction')
-  if (field.type === 'rating' || field.type === 'multi_rating') modes.push('stars')
+  if (field.type === 'rating' || usesItemRatings(field)) modes.push('stars')
   return modes
 }
 
@@ -50,7 +51,7 @@ export function resolveNumericValue(
     })
     if (n != null) return n
   }
-  if (field.type === 'multi_rating' && ratings && itemId) {
+  if (usesItemRatings(field) && ratings && itemId) {
     const all = ratings.filter((r) => r.field_id === field.id && r.item_id === itemId)
     if (!all.length) return null
     return all.reduce((s, r) => s + Number(r.value), 0) / all.length
@@ -87,7 +88,7 @@ export function displayValue(
   ratings?: ItemRating[],
   itemId?: string,
 ): string {
-  if (field.type === 'multi_rating' && ratings && itemId) {
+  if (usesItemRatings(field) && ratings && itemId) {
     const all = ratings.filter((r) => r.field_id === field.id && r.item_id === itemId)
     if (!all.length) return '—'
     const avg = all.reduce((s, r) => s + Number(r.value), 0) / all.length
@@ -158,7 +159,7 @@ export function displayStyledValue(
       style?.numberDisplay === 'stars'
         ? formatNumberText(numeric, field, { ...style, numberDisplay: 'fraction' })
         : formatNumberText(numeric, field, style)
-    if (field.type === 'multi_rating' && ratings && itemId) {
+    if (usesItemRatings(field) && ratings && itemId) {
       const count = ratings.filter((r) => r.field_id === field.id && r.item_id === itemId).length
       if (count) return `${asText} (${count})`
     }

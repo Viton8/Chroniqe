@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
@@ -9,17 +9,20 @@ import Avatar from '../components/ui/Avatar'
 import Button from '../components/ui/Button'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import ListCard from '../components/lists/ListCard'
+import ListCatalogBar from '../components/lists/ListCatalogBar'
 import ForkListButton from '../components/lists/ForkListButton'
+import { sortLists, type ListSortKey } from '../lib/listCatalog'
 import { friendRelation } from '../lib/friends'
 import { appUrl } from '../lib/share'
 
 export default function PublicUserPage() {
   const { username } = useParams()
   const { user } = useAuth()
-  const { t } = usePrefs()
+  const { t, locale } = usePrefs()
   const { toast } = useToast()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [lists, setLists] = useState<ListRow[]>([])
+  const [sort, setSort] = useState<ListSortKey>('updated')
   const [friends, setFriends] = useState<Friendship[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -47,6 +50,8 @@ export default function PublicUserPage() {
       cancelled = true
     }
   }, [username, user])
+
+  const sortedLists = useMemo(() => sortLists(lists, sort, locale), [lists, sort, locale])
 
   if (loading) return <Spinner />
   if (!profile) {
@@ -120,9 +125,10 @@ export default function PublicUserPage() {
       </div>
       {profile.bio ? <p className="mt-4 max-w-xl text-sm text-muted">{profile.bio}</p> : null}
       <h2 className="mt-8 font-serif text-2xl">{t('profile.publicLists')}</h2>
-      {lists.length ? (
+      {lists.length ? <ListCatalogBar sort={sort} onSort={setSort} /> : null}
+      {sortedLists.length ? (
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-          {lists.map((l) => (
+          {sortedLists.map((l) => (
             <ListCard
               key={l.id}
               list={l}

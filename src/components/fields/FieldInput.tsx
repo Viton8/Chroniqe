@@ -10,6 +10,7 @@ import {
   searchProfiles,
   signedFileUrl,
   uploadListFile,
+  deleteRating,
   upsertRating,
 } from '../../services/api'
 import { asDateInputValue, asDatetimeInputValue, cn, titleFromValues } from '../../lib/cn'
@@ -31,7 +32,7 @@ interface Props {
   userId?: string
   itemId?: string
   ratings?: ItemRating[]
-  onRatingChange?: (row: ItemRating) => void
+  onRatingChange?: (row: ItemRating, action?: 'upsert' | 'delete') => void
   error?: string
 }
 
@@ -163,6 +164,7 @@ export default function FieldInput(props: Props) {
         </FieldWrap>
       )
     case 'multi_rating':
+    case 'community_rating':
       return <MultiRating {...props} />
     case 'color': {
       const raw = String(value ?? '')
@@ -258,6 +260,33 @@ function Stars({
   )
 }
 
+function ratingName(
+  row: ItemRating,
+  guest: string,
+  me?: { id: string; username: string; display_name: string } | null,
+): string {
+  return (
+    row.profile?.username ||
+    row.profile?.display_name ||
+    (me && row.user_id === me.id ? me.username || me.display_name : '') ||
+    guest
+  )
+}
+
+function ratingsForField(rows: ItemRating[], fieldId: string, itemId?: string): ItemRating[] {
+  const filtered = rows.filter((row) => row.field_id === fieldId && (!itemId || row.item_id === itemId))
+  const byUser = new Map<string, ItemRating>()
+  for (const row of filtered) {
+    const prev = byUser.get(row.user_id)
+    if (!prev || row.updated_at > prev.updated_at) byUser.set(row.user_id, row)
+  }
+  return [...byUser.values()]
+}
+
+function sameRating(row: ItemRating, fieldId: string, userId: string, itemId?: string) {
+  return row.field_id === fieldId && row.user_id === userId && (!itemId || row.item_id === itemId)
+}
+
 function MultiRating({
   field,
   itemId,
@@ -267,57 +296,90 @@ function MultiRating({
   onRatingChange,
 }: Props) {
   const { t } = usePrefs()
+  const { profile } = useAuth()
   const [local, setLocal] = useState(ratings)
 
   useEffect(() => {
     setLocal(ratings)
   }, [ratings])
 
-  const mine = local.find((r) => r.field_id === field.id && r.user_id === userId)
-  const all = local.filter((r) => r.field_id === field.id)
+  const all = ratingsForField(local, field.id, itemId)
+  const mine = userId ? all.find((row) => row.user_id === userId) : undefined
   const avg = all.length ? all.reduce((s, r) => s + Number(r.value), 0) / all.length : 0
   const max = field.config?.ratingMax ?? 10
+  const mineProfile = mine?.profile ?? (profile && profile.id === userId ? profile : undefined)
+
+  const apply = (n: number) => {
+    if (!itemId || !userId) return
+    const current = Number(mine?.value ?? 0)
+    if (mine && n === current) {
+      setLocal((prev) => prev.filter((row) => !sameRating(row, field.id, userId, itemId)))
+      void deleteRating({ item_id: itemId, field_id: field.id, user_id: userId })
+        .then(() => onRatingChange?.(mine, 'delete'))
+        .catch(() => setLocal(ratings))
+      return
+    }
+    const next: ItemRating = {
+      item_id: itemId,
+      field_id: field.id,
+      user_id: userId,
+      value: n,
+      created_at: mine?.created_at ?? new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      profile: mineProfile,
+    }
+    setLocal((prev) => {
+      const idx = prev.findIndex((row) => sameRating(row, field.id, userId, itemId))
+      if (idx >= 0) return prev.map((row, i) => (i === idx ? { ...row, ...next } : row))
+      return [...prev, next]
+    })
+    void upsertRating({ item_id: itemId, field_id: field.id, user_id: userId, value: n })
+      .then(() => onRatingChange?.(next, 'upsert'))
+      .catch(() => setLocal(ratings))
+  }
 
   return (
     <FieldWrap
       label={field.name}
-      hint={fieldHint(field, t('fields.multiHint'))}
+      hint={fieldHint(
+        field,
+        [
+          t(field.type === 'community_rating' ? 'fields.communityHint' : 'fields.multiHint'),
+          userId && !disabled ? t('fields.changeRating') : null,
+        ]
+          .filter(Boolean)
+          .join(' '),
+      )}
     >
       <Stars
         max={max}
         value={Number(mine?.value ?? 0)}
         disabled={disabled || !itemId || !userId}
-        onChange={(n) => {
-          if (!itemId || !userId) return
-          const next: ItemRating = {
-            item_id: itemId,
-            field_id: field.id,
-            user_id: userId,
-            value: n,
-            created_at: mine?.created_at ?? new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            profile: mine?.profile,
-          }
-          setLocal((prev) => {
-            const idx = prev.findIndex((r) => r.field_id === field.id && r.user_id === userId)
-            if (idx >= 0) return prev.map((r, i) => (i === idx ? { ...r, value: n, updated_at: next.updated_at } : r))
-            return [...prev, next]
-          })
-          void upsertRating({ item_id: itemId, field_id: field.id, user_id: userId, value: n })
-            .then(() => onRatingChange?.(next))
-            .catch(() => {
-              setLocal(ratings)
-            })
-        }}
+        onChange={apply}
       />
       <p className="mt-2 text-xs text-muted">
         {t('fields.avg', { avg: avg ? avg.toFixed(1) : '—', n: all.length })}
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
         {all.map((r) => (
-          <span key={r.user_id} className="inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-xs">
-            <Avatar name={r.profile?.display_name || r.profile?.username || '?'} url={r.profile?.avatar_url} size={16} />
-            {r.profile?.username ?? t('fields.guest')} · {r.value}
+          <span
+            key={`${r.item_id}:${r.field_id}:${r.user_id}`}
+            className={cn(
+              'inline-flex items-center gap-1 rounded-full bg-ink/5 px-2 py-0.5 text-xs',
+              r.user_id === userId && 'ring-1 ring-accent',
+            )}
+          >
+            <Avatar
+              name={
+                r.profile?.display_name ||
+                r.profile?.username ||
+                (r.user_id === userId ? mineProfile?.display_name || mineProfile?.username : undefined) ||
+                '?'
+              }
+              url={r.profile?.avatar_url ?? (r.user_id === userId ? mineProfile?.avatar_url : null)}
+              size={16}
+            />
+            {ratingName(r, t('fields.guest'), mineProfile)} · {r.value}
           </span>
         ))}
       </div>

@@ -1,3 +1,4 @@
+import { usesItemRatings } from './ratings'
 import { civilDateFromValue, titleFromValues } from './cn'
 import type { FieldDef, ItemRating, ItemRow, ListSchema } from '../types/domain'
 
@@ -33,7 +34,7 @@ export function facetFields(schema: ListSchema): FieldDef[] {
 
 export function sortableFields(schema: ListSchema): FieldDef[] {
   return schema.fields.filter((field) =>
-    ['text', 'number', 'integer', 'date', 'datetime', 'rating', 'multi_rating', 'select'].includes(
+    ['text', 'number', 'integer', 'date', 'datetime', 'rating', 'multi_rating', 'community_rating', 'select'].includes(
       field.type,
     ),
   )
@@ -45,7 +46,7 @@ export function filterDateFields(schema: ListSchema): FieldDef[] {
 
 export function scoreFields(schema: ListSchema): FieldDef[] {
   return schema.fields.filter((field) =>
-    ['rating', 'multi_rating', 'number', 'integer'].includes(field.type),
+    ['rating', 'multi_rating', 'community_rating', 'number', 'integer'].includes(field.type),
   )
 }
 
@@ -151,7 +152,7 @@ function compareField(
     field.type === 'number' ||
     field.type === 'integer' ||
     field.type === 'rating' ||
-    field.type === 'multi_rating'
+    usesItemRatings(field)
   ) {
     const left = itemScore(a, field.id, ratings) ?? -Infinity
     const right = itemScore(b, field.id, ratings) ?? -Infinity

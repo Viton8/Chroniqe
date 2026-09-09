@@ -21,6 +21,10 @@ export function listLinkAccess(list: ListRow): LinkAccess {
   return 'view'
 }
 
+export function listAcceptsProposals(list: ListRow): boolean {
+  return list.edit_mode === 'proposals' || listLinkAccess(list) === 'propose'
+}
+
 export function applyLinkAccess(list: ListRow, access: LinkAccess): Pick<ListRow, 'visibility' | 'settings'> {
   const settings: ListSettings = { ...list.settings }
   if (access === 'off') {

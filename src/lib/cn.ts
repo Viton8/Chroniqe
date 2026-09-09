@@ -100,12 +100,14 @@ export function formatDateTime(value: string | null | undefined): string {
   if (!value) return '—'
   const d = parseWallOrInstant(value)
   if (!d) return value
-  return d.toLocaleString(dateLocale(), {
+  const opts: Intl.DateTimeFormatOptions = {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
     minute: '2-digit',
-  })
+  }
+  if (d.getFullYear() !== new Date().getFullYear()) opts.year = 'numeric'
+  return d.toLocaleString(dateLocale(), opts)
 }
 
 export function formatRelativeTime(value: string | null | undefined): string {

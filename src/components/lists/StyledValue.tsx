@@ -1,3 +1,4 @@
+import { usesItemRatings } from '../../lib/ratings'
 import { Star } from 'lucide-react'
 import type { FieldDef, FieldViewStyle, ItemRating, ListSchema } from '../../types/domain'
 import { displayStyledValue, fieldBounds, formatNumberBody, resolveNumericValue } from '../../lib/display'
@@ -24,13 +25,13 @@ export default function StyledValue({
   className?: string
 }) {
   if (field.type === 'relation') {
-    return <RelationValue field={field} value={value} className={className} />
+    return <RelationValue field={field} value={value} className={className} size="sm" />
   }
   const numeric = resolveNumericValue(field, value, style, ratings, itemId, values, schema)
   if (numeric != null && style?.numberDisplay === 'stars') {
     const { max } = fieldBounds(field)
     const count =
-      field.type === 'multi_rating' && ratings && itemId
+      usesItemRatings(field) && ratings && itemId
         ? ratings.filter((r) => r.field_id === field.id && r.item_id === itemId).length
         : 0
     return (

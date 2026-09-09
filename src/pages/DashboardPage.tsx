@@ -1,17 +1,39 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { SlidersHorizontal } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
-import { fetchFriendFeed, fetchFriendships, fetchItems, fetchMyInvites, fetchMyLists, fetchNotifications, fetchSharedLists, fetchSubscribedLists } from '../services/api'
+import {
+  fetchFriendFeed,
+  fetchFriendships,
+  fetchItems,
+  fetchListsByIds,
+  fetchMyInvites,
+  fetchMyLists,
+  fetchNotifications,
+  fetchRatings,
+  fetchSharedLists,
+  fetchSubscribedLists,
+} from '../services/api'
 import { NotificationsFeed } from '../components/notifications/NotificationsModal'
-import type { AppNotification, FriendFeedEvent, ItemRow, ListRow } from '../types/domain'
+import type { AppNotification, FriendFeedEvent, ItemRating, ItemRow, ListRow } from '../types/domain'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import Button from '../components/ui/Button'
 import { SearchField } from '../components/ui/Input'
 import PageHeader from '../components/ui/PageHeader'
 import ListCard from '../components/lists/ListCard'
 import FriendFeed from '../components/lists/FriendFeed'
+import HomeLayoutEditor from '../components/dash/HomeLayoutEditor'
+import HomeListPanel from '../components/dash/HomeListPanel'
 import { readFavorites } from '../lib/favorites'
+import {
+  patchHomeBlock,
+  readHomeLayout,
+  subscribeHomeLayout,
+  writeHomeLayout,
+  type HomeBlock,
+  type HomeLayout,
+} from '../lib/homeLayout'
 import { buildInsights } from '../lib/insights'
 import { formatDate, titleFromValues } from '../lib/cn'
 import { matchesQuery } from '../lib/search'
@@ -23,6 +45,7 @@ export default function DashboardPage() {
   const navigate = useNavigate()
   const [lists, setLists] = useState<ListRow[]>([])
   const [shared, setShared] = useState<ListRow[]>([])
+  const [extraLists, setExtraLists] = useState<ListRow[]>([])
   const [notes, setNotes] = useState<AppNotification[]>([])
   const [upcoming, setUpcoming] = useState<Array<{ list: ListRow; item: ItemRow; date: string }>>([])
   const [overdue, setOverdue] = useState<Array<{ list: ListRow; item: ItemRow; date: string }>>([])
@@ -35,10 +58,25 @@ export default function DashboardPage() {
   const [favIds, setFavIds] = useState(() => readFavorites())
   const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(true)
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [layout, setLayout] = useState<HomeLayout>(() => readHomeLayout())
+  const [itemsByList, setItemsByList] = useState<Record<string, ItemRow[]>>({})
+  const [ratingsByList, setRatingsByList] = useState<Record<string, ItemRating[]>>({})
+  const fetchedItems = useRef(new Set<string>())
   const debounced = useDebouncedValue(query)
+
+  const saveLayout = (next: HomeLayout) => {
+    writeHomeLayout(next)
+    setLayout(readHomeLayout())
+  }
+
+  useEffect(() => subscribeHomeLayout(() => setLayout(readHomeLayout())), [])
 
   useEffect(() => {
     if (!user) return
+    let cancelled = false
+    fetchedItems.current = new Set()
+    setLoading(true)
     void (async () => {
       const [owned, sharedRows, inbox, friends, listInvites, subscribed, friendEvents] = await Promise.all([
         fetchMyLists(user.id),
@@ -49,6 +87,7 @@ export default function DashboardPage() {
         fetchSubscribedLists(user.id).catch(() => [] as ListRow[]),
         fetchFriendFeed(12).catch(() => [] as FriendFeedEvent[]),
       ])
+      if (cancelled) return
       setLists(owned)
       setShared(sharedRows)
       setFollowing(subscribed.filter((row) => row.owner_id !== user.id))
@@ -57,25 +96,112 @@ export default function DashboardPage() {
       setFriendCount(friends.filter((row) => row.status === 'accepted').length)
       setRequests(friends.filter((row) => row.status === 'pending' && row.addressee_id === user.id).length)
       setInvites(listInvites.length)
-      const sample = [...owned, ...sharedRows].slice(0, 12)
-      const itemSets = await Promise.all(sample.map((list) => fetchItems(list.id).catch(() => [] as ItemRow[])))
+
+      const layoutNow = readHomeLayout()
+      const widgetIds = layoutNow.blocks
+        .filter((block) => block.kind === 'list' && block.listId)
+        .map((block) => block.listId as string)
+      const known = new Map([...owned, ...sharedRows, ...subscribed].map((row) => [row.id, row]))
+      const extra = await fetchListsByIds(widgetIds.filter((id) => !known.has(id))).catch(() => [] as ListRow[])
+      if (cancelled) return
+      setExtraLists(extra)
+      for (const row of extra) known.set(row.id, row)
+
+      const insightLists = [...owned, ...sharedRows].slice(0, 12)
+      const itemIds = [...new Set([...insightLists.map((row) => row.id), ...widgetIds])]
+      const payloads = await Promise.all(itemIds.map((id) => loadListPayload(id)))
+      if (cancelled) return
+      const nextItems: Record<string, ItemRow[]> = {}
+      const nextRatings: Record<string, ItemRating[]> = {}
+      itemIds.forEach((id, index) => {
+        fetchedItems.current.add(id)
+        nextItems[id] = payloads[index].rows
+        nextRatings[id] = payloads[index].ratings
+      })
+      setItemsByList(nextItems)
+      setRatingsByList(nextRatings)
+
       const soon: Array<{ list: ListRow; item: ItemRow; date: string }> = []
       const late: Array<{ list: ListRow; item: ItemRow; date: string }> = []
       let open = 0
-      sample.forEach((list, index) => {
-        const rows = itemSets[index]
-        const stats = buildInsights(list.schema, rows, [])
+      for (const list of insightLists) {
+        const rows = nextItems[list.id] ?? []
+        const stats = buildInsights(list.schema, rows, nextRatings[list.id] ?? [], list.settings)
         open += stats.open
         for (const row of stats.upcoming) soon.push({ list, item: row.item, date: row.date })
         for (const row of stats.overdue) late.push({ list, item: row.item, date: row.date })
-      })
+      }
       soon.sort((a, b) => a.date.localeCompare(b.date))
       late.sort((a, b) => a.date.localeCompare(b.date))
       setUpcoming(soon.slice(0, 6))
       setOverdue(late.slice(0, 6))
       setOpenCount(open)
-    })().finally(() => setLoading(false))
+    })().finally(() => {
+      if (!cancelled) setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [user])
+
+  const widgetIds = useMemo(
+    () =>
+      [...new Set(layout.blocks.filter((block) => block.kind === 'list' && block.listId).map((block) => block.listId as string))],
+    [layout],
+  )
+
+  const catalog = useMemo(() => {
+    const seen = new Set<string>()
+    return [...lists, ...shared, ...following, ...extraLists].filter((list) => {
+      if (seen.has(list.id)) return false
+      seen.add(list.id)
+      return true
+    })
+  }, [lists, shared, following, extraLists])
+
+  useEffect(() => {
+    if (!user || loading) return
+    let cancelled = false
+    void (async () => {
+      const known = new Set(catalog.map((row) => row.id))
+      const missing = widgetIds.filter((id) => !known.has(id))
+      if (missing.length) {
+        const extra = await fetchListsByIds(missing).catch(() => [] as ListRow[])
+        if (!cancelled && extra.length) {
+          setExtraLists((prev) => {
+            const map = new Map(prev.map((row) => [row.id, row]))
+            for (const row of extra) map.set(row.id, row)
+            return [...map.values()]
+          })
+        }
+      }
+      const need = widgetIds.filter((id) => !fetchedItems.current.has(id))
+      if (!need.length) return
+      need.forEach((id) => fetchedItems.current.add(id))
+      const payloads = await Promise.all(need.map((id) => loadListPayload(id)))
+      if (cancelled) {
+        need.forEach((id) => fetchedItems.current.delete(id))
+        return
+      }
+      setItemsByList((prev) => {
+        const next = { ...prev }
+        need.forEach((id, index) => {
+          next[id] = payloads[index].rows
+        })
+        return next
+      })
+      setRatingsByList((prev) => {
+        const next = { ...prev }
+        need.forEach((id, index) => {
+          next[id] = payloads[index].ratings
+        })
+        return next
+      })
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [user, loading, widgetIds, catalog])
 
   const allLists = useMemo(() => {
     const seen = new Set<string>()
@@ -86,10 +212,17 @@ export default function DashboardPage() {
     })
   }, [lists, shared])
 
+  const listsById = useMemo(() => new Map(catalog.map((row) => [row.id, row])), [catalog])
+
   const favorites = useMemo(() => {
     const ids = new Set(favIds)
-    return allLists.filter((list) => ids.has(list.id))
-  }, [allLists, favIds])
+    const seen = new Set<string>()
+    return [...allLists, ...following].filter((list) => {
+      if (!ids.has(list.id) || seen.has(list.id)) return false
+      seen.add(list.id)
+      return true
+    })
+  }, [allLists, following, favIds])
 
   const visibleLists = useMemo(
     () => allLists.filter((list) => matchesQuery(debounced, list.title, list.description, list.icon)),
@@ -104,6 +237,168 @@ export default function DashboardPage() {
   if (loading) return <Spinner />
 
   const greet = profile ? `${t('dash.hi')}, ${profile.display_name || profile.username}` : t('dash.hi')
+  const visibleBlocks = layout.blocks.filter((block) => block.on)
+
+  const refreshFav = () => setFavIds(readFavorites())
+
+  const listGrid = (rows: ListRow[], empty: ReactNode, badgeFor?: (list: ListRow) => string) =>
+    rows.length ? (
+      <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+        {rows.map((list) => (
+          <ListCard
+            key={list.id}
+            list={list}
+            badge={
+              badgeFor
+                ? badgeFor(list)
+                : list.owner_id !== user?.id
+                  ? t('dash.shared')
+                  : t(`visibility.${list.visibility}`)
+            }
+            favorite
+            onFav={refreshFav}
+          />
+        ))}
+      </ul>
+    ) : (
+      empty
+    )
+
+  const panel = (block: HomeBlock) => {
+    switch (block.kind) {
+      case 'stats':
+        return (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <Stat label={t('dash.lists')} value={lists.length} />
+            <Stat label={t('insights.open')} value={openCount} />
+            <Stat label={t('dash.unread')} value={notes.filter((n) => !n.read_at).length} />
+            <Stat label={t('dash.public')} value={lists.filter((l) => l.visibility === 'public').length} />
+          </div>
+        )
+      case 'feed':
+        return (
+          <section>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-serif text-2xl">{t('dash.feed')}</h2>
+              <Link to="/feed" className="text-sm text-accent hover:underline">
+                {t('feed.seeAll')}
+              </Link>
+            </div>
+            <div className="mt-3">
+              <FriendFeed
+                compact
+                events={feed}
+                empty={friendCount === 0 ? 'nofriends' : feed.length ? 'none' : 'quiet'}
+              />
+            </div>
+          </section>
+        )
+      case 'following':
+        return (
+          <section>
+            <h2 className="font-serif text-2xl">{t('dash.following')}</h2>
+            {listGrid(
+              visibleFollowing.slice(0, 6),
+              <div className="mt-3">
+                <EmptyState
+                  compact
+                  title={debounced ? t('dash.noSearch') : t('home.emptyFollowing')}
+                  text={debounced ? t('dash.noSearchText') : undefined}
+                />
+              </div>,
+              () => t('list.following'),
+            )}
+          </section>
+        )
+      case 'pinned':
+        return (
+          <section>
+            <h2 className="font-serif text-2xl">{t('dash.pinned')}</h2>
+            {listGrid(
+              favorites,
+              <div className="mt-3">
+                <EmptyState compact title={t('home.emptyPinned')} />
+              </div>,
+            )}
+          </section>
+        )
+      case 'overdue':
+        return <DateBlock title={t('insights.overdue')} rows={overdue} empty={t('insights.noOverdue')} />
+      case 'upcoming':
+        return <DateBlock title={t('dash.upcoming')} rows={upcoming} empty={t('dash.noUpcoming')} />
+      case 'recent':
+        return (
+          <section>
+            <h2 className="font-serif text-2xl">{t('dash.recent')}</h2>
+            {visibleLists.length ? (
+              listGrid(visibleLists.slice(0, 8), null)
+            ) : (
+              <div className="mt-4">
+                <EmptyState
+                  icon="✨"
+                  title={debounced ? t('dash.noSearch') : t('lists.emptyTitle')}
+                  text={debounced ? t('dash.noSearchText') : t('dash.startCinema')}
+                  action={!debounced ? { label: t('dash.newList'), onClick: () => navigate('/lists/new') } : undefined}
+                />
+              </div>
+            )}
+          </section>
+        )
+      case 'activity':
+        return (
+          <section>
+            <div className="flex items-center justify-between">
+              <h2 className="font-serif text-2xl">{t('dash.events')}</h2>
+              <Link to="/notifications" className="text-sm text-accent hover:underline">
+                {t('dash.openNotes')}
+              </Link>
+            </div>
+            <div className="mt-3">
+              <NotificationsFeed rows={notes} />
+            </div>
+          </section>
+        )
+      case 'list': {
+        const list = block.listId ? listsById.get(block.listId) : undefined
+        return (
+          <HomeListPanel
+            block={block}
+            list={list}
+            items={block.listId ? itemsByList[block.listId] : []}
+            ratings={block.listId ? ratingsByList[block.listId] : []}
+            loading={Boolean(block.listId && itemsByList[block.listId] === undefined)}
+            onViewChange={(viewId) => saveLayout(patchHomeBlock(layout, block.id, { viewId }))}
+          />
+        )
+      }
+      default:
+        return null
+    }
+  }
+
+  const panels: ReactNode[] = []
+  for (let i = 0; i < visibleBlocks.length; i++) {
+    const a = visibleBlocks[i]
+    const b = visibleBlocks[i + 1]
+    if (
+      b &&
+      ((a.kind === 'overdue' && b.kind === 'upcoming') || (a.kind === 'upcoming' && b.kind === 'overdue'))
+    ) {
+      panels.push(
+        <div key={`${a.id}:${b.id}`} className="mt-8 grid gap-6 lg:grid-cols-2">
+          {panel(a)}
+          {panel(b)}
+        </div>,
+      )
+      i += 1
+      continue
+    }
+    panels.push(
+      <div key={a.id} className={a.kind === 'stats' ? 'mt-6' : 'mt-8'}>
+        {panel(a)}
+      </div>,
+    )
+  }
 
   return (
     <div>
@@ -111,9 +406,14 @@ export default function DashboardPage() {
         kicker={greet}
         title={t('dash.title')}
         action={
-          <Link to="/lists/new">
-            <Button size="sm">{t('dash.newList')}</Button>
-          </Link>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="soft" size="sm" onClick={() => setEditorOpen(true)}>
+              <SlidersHorizontal size={14} /> {t('home.customize')}
+            </Button>
+            <Link to="/lists/new">
+              <Button size="sm">{t('dash.newList')}</Button>
+            </Link>
+          </div>
         }
       />
       <SearchField
@@ -122,13 +422,6 @@ export default function DashboardPage() {
         onChange={(e) => setQuery(e.target.value)}
         placeholder={t('dash.search')}
       />
-      <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Stat label={t('dash.lists')} value={lists.length} />
-        <Stat label={t('insights.open')} value={openCount} />
-        <Stat label={t('dash.unread')} value={notes.filter((n) => !n.read_at).length} />
-        <Stat label={t('dash.public')} value={lists.filter((l) => l.visibility === 'public').length} />
-      </div>
-
       {requests || invites ? (
         <div className="mt-6 flex flex-wrap gap-2 text-sm">
           {requests ? (
@@ -147,96 +440,32 @@ export default function DashboardPage() {
         </div>
       ) : null}
 
-      <section className="mt-8">
-        <div className="flex items-center justify-between gap-3">
-          <h2 className="font-serif text-2xl">{t('dash.feed')}</h2>
-          <Link to="/feed" className="text-sm text-accent hover:underline">
-            {t('feed.seeAll')}
-          </Link>
-        </div>
-        <div className="mt-3">
-          <FriendFeed
-            compact
-            events={feed}
-            empty={friendCount === 0 ? 'nofriends' : feed.length ? 'none' : 'quiet'}
-          />
-        </div>
-      </section>
-
-      {visibleFollowing.length ? (
-        <section className="mt-8">
-          <h2 className="font-serif text-2xl">{t('dash.following')}</h2>
-          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-            {visibleFollowing.slice(0, 6).map((list) => (
-              <ListCard
-                key={list.id}
-                list={list}
-                badge={t('list.following')}
-                favorite
-                onFav={() => setFavIds(readFavorites())}
-              />
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      {favorites.length ? (
-        <section className="mt-8">
-          <h2 className="font-serif text-2xl">{t('dash.pinned')}</h2>
-          <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-            {favorites.map((list) => (
-              <ListCard
-                key={list.id}
-                list={list}
-                badge={list.owner_id !== user?.id ? t('dash.shared') : t(`visibility.${list.visibility}`)}
-                favorite
-                onFav={() => setFavIds(readFavorites())}
-              />
-            ))}
-          </ul>
-        </section>
-      ) : null}
-
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <DateBlock title={t('insights.overdue')} rows={overdue} empty={t('insights.noOverdue')} />
-        <DateBlock title={t('dash.upcoming')} rows={upcoming} empty={t('dash.noUpcoming')} />
-      </div>
-
-      <h2 className="mt-8 font-serif text-2xl">{t('dash.recent')}</h2>
-      {visibleLists.length ? (
-        <ul className="mt-3 grid gap-3 sm:grid-cols-2">
-          {visibleLists.slice(0, 8).map((list) => (
-            <ListCard
-              key={list.id}
-              list={list}
-              badge={list.owner_id !== user?.id ? t('dash.shared') : t(`visibility.${list.visibility}`)}
-              favorite
-              onFav={() => setFavIds(readFavorites())}
-            />
-          ))}
-        </ul>
+      {visibleBlocks.length ? (
+        panels
       ) : (
-        <div className="mt-4">
+        <div className="mt-8">
           <EmptyState
-            icon="✨"
-            title={debounced ? t('dash.noSearch') : t('lists.emptyTitle')}
-            text={debounced ? t('dash.noSearchText') : t('dash.startCinema')}
-            action={!debounced ? { label: t('dash.newList'), onClick: () => navigate('/lists/new') } : undefined}
+            title={t('home.noPanels')}
+            action={{ label: t('home.customize'), onClick: () => setEditorOpen(true) }}
           />
         </div>
       )}
 
-      <div className="mt-10 flex items-center justify-between">
-        <h2 className="font-serif text-2xl">{t('dash.events')}</h2>
-        <Link to="/notifications" className="text-sm text-accent hover:underline">
-          {t('dash.openNotes')}
-        </Link>
-      </div>
-      <div className="mt-3">
-        <NotificationsFeed rows={notes} />
-      </div>
+      <HomeLayoutEditor
+        open={editorOpen}
+        layout={layout}
+        lists={catalog}
+        onChange={saveLayout}
+        onClose={() => setEditorOpen(false)}
+      />
     </div>
   )
+}
+
+async function loadListPayload(id: string): Promise<{ rows: ItemRow[]; ratings: ItemRating[] }> {
+  const rows = await fetchItems(id).catch(() => [] as ItemRow[])
+  const ratings = rows.length ? await fetchRatings(rows.map((row) => row.id)).catch(() => [] as ItemRating[]) : []
+  return { rows, ratings }
 }
 
 function DateBlock({
@@ -256,7 +485,7 @@ function DateBlock({
           {rows.map((row) => (
             <li key={`${row.list.id}-${row.item.id}`}>
               <Link
-                to={`/lists/${row.list.id}`}
+                to={`/lists/${row.list.id}?item=${row.item.id}`}
                 className="flex items-center justify-between gap-3 rounded-xl px-2 py-1.5 text-sm transition-colors hover:bg-ink/5"
               >
                 <span className="min-w-0 truncate">

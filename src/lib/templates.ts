@@ -1,5 +1,6 @@
 import { uid } from './cn'
 import { msg } from './i18n'
+import { ratingBandRules, selectValueRules } from './highlight'
 import type {
   AutomationAction,
   FieldDef,
@@ -119,6 +120,7 @@ export const TEMPLATES: TemplateSpec[] = [
         config: { dateFieldId: 'watched_at', valueFieldId: 'ratings', aggregation: 'avg' },
       },
     ],
+    settings: { highlightRules: ratingBandRules('ratings') },
   },
   {
     key: 'movies_watchlist',
@@ -137,6 +139,13 @@ export const TEMPLATES: TemplateSpec[] = [
       groupFieldId: 'priority',
     },
     view: { mode: 'cards', imageFieldId: 'poster', groupFieldId: 'priority' },
+    settings: {
+      highlightRules: selectValueRules('priority', [
+        { value: 'now', color: 'red' },
+        { value: 'soon', color: 'yellow' },
+        { value: 'someday', color: 'gray' },
+      ]),
+    },
   },
   {
     key: 'movies_dropped',
@@ -181,6 +190,7 @@ export const TEMPLATES: TemplateSpec[] = [
         config: { dateFieldId: 'finished_at', valueFieldId: 'ratings', aggregation: 'avg' },
       },
     ],
+    settings: { highlightRules: ratingBandRules('ratings') },
   },
   {
     key: 'games_backlog',
@@ -295,6 +305,7 @@ export const TEMPLATES: TemplateSpec[] = [
       groupFieldId: 'status',
     },
     view: { mode: 'board', groupFieldId: 'status' },
+    settings: { highlightRules: ratingBandRules('ratings') },
   },
   {
     key: 'catalog_items',
@@ -340,6 +351,7 @@ export const TEMPLATES: TemplateSpec[] = [
         config: { dateFieldId: 'happened_at', valueFieldId: 'score', aggregation: 'avg' },
       },
     ],
+    settings: { highlightRules: ratingBandRules('score') },
   },
 ]
 
@@ -524,7 +536,7 @@ export function newField(type: FieldType = 'text'): FieldDef {
     key: id.slice(0, 8),
     name: msg('schema.newField'),
     type,
-    config: type === 'rating' || type === 'multi_rating' ? { ratingMax: 10, min: 1, max: 10 } : {},
+    config: type === 'rating' || type === 'multi_rating' || type === 'community_rating' ? { ratingMax: 10, min: 1, max: 10 } : {},
   }
 }
 
@@ -598,6 +610,16 @@ export function applyPackSettings(
     ]
     settings.onUncheck = settings.onUncheck ?? [{ type: 'restore_snapshot' }]
     byKey[move.fromKey] = settings
+  }
+
+  const packIds = pack.lists.map((spec) => created[spec.key]).filter(Boolean)
+  for (const spec of pack.lists) {
+    const listId = created[spec.key]
+    if (!listId) continue
+    const settings = byKey[spec.key] ?? {}
+    const siblings = packIds.filter((id) => id !== listId)
+    settings.relatedListIds = [...new Set([...(settings.relatedListIds ?? []), ...siblings])]
+    byKey[spec.key] = settings
   }
 
   return pack.lists

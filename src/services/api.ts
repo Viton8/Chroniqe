@@ -30,8 +30,33 @@ import { assertSafeFile, fileMime } from '../lib/validation'
 import { uid } from '../lib/cn'
 import { msg } from '../lib/i18n'
 
+const LIST_SELECT = '*'
+
 function throwIf(error: { message: string } | null): void {
   if (error) throw new Error(error.message)
+}
+
+async function hydrateLists(rows: ListRow[]): Promise<ListRow[]> {
+  const ids = [
+    ...new Set(
+      rows.flatMap((row) => [row.owner_id, row.updated_by].filter((id): id is string => Boolean(id))),
+    ),
+  ]
+  if (!ids.length) return rows
+  const { data } = await supabase.from('profiles').select('*').in('id', ids)
+  if (!data?.length) return rows
+  const map = new Map((data as Profile[]).map((profile) => [profile.id, profile]))
+  return rows.map((row) => ({
+    ...row,
+    owner: map.get(row.owner_id) ?? row.owner,
+    updater: row.updated_by ? (map.get(row.updated_by) ?? row.updater ?? null) : null,
+  }))
+}
+
+async function hydrateList(row: ListRow | null): Promise<ListRow | null> {
+  if (!row) return null
+  const [next] = await hydrateLists([row])
+  return next
 }
 
 export async function fetchProfile(userId: string): Promise<Profile | null> {
@@ -57,12 +82,12 @@ export async function fetchProfileByUsername(username: string): Promise<Profile 
 export async function fetchPublicListsByOwner(ownerId: string): Promise<ListRow[]> {
   const { data, error } = await supabase
     .from('lists')
-    .select('*, owner:profiles!owner_id(*)')
+    .select(LIST_SELECT)
     .eq('owner_id', ownerId)
     .eq('visibility', 'public')
     .order('updated_at', { ascending: false })
   throwIf(error)
-  return (data ?? []) as ListRow[]
+  return hydrateLists((data ?? []) as ListRow[])
 }
 
 export async function updateProfile(
@@ -106,11 +131,11 @@ export async function listPermissions(listId: string): Promise<ListPermissions> 
 export async function fetchMyLists(userId: string): Promise<ListRow[]> {
   const { data, error } = await supabase
     .from('lists')
-    .select('*')
+    .select(LIST_SELECT)
     .eq('owner_id', userId)
     .order('updated_at', { ascending: false })
   throwIf(error)
-  return (data ?? []) as ListRow[]
+  return hydrateLists((data ?? []) as ListRow[])
 }
 
 export async function fetchSharedLists(userId: string): Promise<ListRow[]> {
@@ -123,33 +148,43 @@ export async function fetchSharedLists(userId: string): Promise<ListRow[]> {
   if (!ids.length) return []
   const { data, error } = await supabase
     .from('lists')
-    .select('*')
+    .select(LIST_SELECT)
     .in('id', ids)
     .neq('owner_id', userId)
     .order('updated_at', { ascending: false })
   throwIf(error)
-  return (data ?? []) as ListRow[]
+  return hydrateLists((data ?? []) as ListRow[])
 }
 
 export async function fetchPublicLists(): Promise<ListRow[]> {
   const { data, error } = await supabase
     .from('lists')
-    .select('*, owner:profiles!owner_id(*)')
+    .select(LIST_SELECT)
     .eq('visibility', 'public')
     .order('updated_at', { ascending: false })
     .limit(80)
   throwIf(error)
-  return (data ?? []) as ListRow[]
+  return hydrateLists((data ?? []) as ListRow[])
 }
 
 export async function fetchList(id: string): Promise<ListRow | null> {
   const { data, error } = await supabase
     .from('lists')
-    .select('*, owner:profiles!owner_id(*)')
+    .select(LIST_SELECT)
     .eq('id', id)
     .maybeSingle()
   throwIf(error)
-  return data as ListRow | null
+  return hydrateList((data as ListRow | null) ?? null)
+}
+
+export async function fetchListsByIds(ids: string[]): Promise<ListRow[]> {
+  const unique = [...new Set(ids.filter(Boolean))]
+  if (!unique.length) return []
+  const { data, error } = await supabase.from('lists').select(LIST_SELECT).in('id', unique)
+  throwIf(error)
+  const rows = await hydrateLists((data ?? []) as ListRow[])
+  const order = new Map(unique.map((id, index) => [id, index]))
+  return rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
 }
 
 export async function createList(input: {
@@ -164,9 +199,9 @@ export async function createList(input: {
   visibility?: Visibility
   edit_mode?: EditMode
 }): Promise<ListRow> {
-  const { data, error } = await supabase.from('lists').insert(input).select('*').single()
+  const { data, error } = await supabase.from('lists').insert(input).select(LIST_SELECT).single()
   throwIf(error)
-  return data as ListRow
+  return (await hydrateList(data as ListRow)) as ListRow
 }
 
 export async function updateList(
@@ -186,9 +221,33 @@ export async function updateList(
     >
   >,
 ): Promise<ListRow> {
-  const { data, error } = await supabase.from('lists').update(patch).eq('id', id).select('*').single()
+  const { data, error } = await supabase.from('lists').update(patch).eq('id', id).select(LIST_SELECT).single()
   throwIf(error)
-  return data as ListRow
+  return (await hydrateList(data as ListRow)) as ListRow
+}
+
+/** Keep relatedListIds mirrored on the other lists when the owner edits links. */
+export async function syncRelatedListLinks(listId: string, nextIds: string[], prevIds: string[]): Promise<void> {
+  const next = [...new Set(nextIds.filter((id) => id && id !== listId))]
+  const prev = [...new Set(prevIds.filter((id) => id && id !== listId))]
+  const removed = prev.filter((id) => !next.includes(id))
+  const targets = [...new Set([...next, ...removed])]
+  if (!targets.length) return
+  const rows = await fetchListsByIds(targets)
+  await Promise.all(
+    rows.map(async (row) => {
+      const current = row.settings?.relatedListIds ?? []
+      let ids = current
+      if (next.includes(row.id) && !current.includes(listId)) ids = [...current, listId]
+      if (removed.includes(row.id)) ids = ids.filter((id) => id !== listId)
+      if (ids.length === current.length && ids.every((id) => current.includes(id))) return
+      try {
+        await updateList(row.id, { settings: { ...row.settings, relatedListIds: ids } })
+      } catch {
+        /* no permission or list gone */
+      }
+    }),
+  )
 }
 
 export async function deleteList(id: string): Promise<void> {
@@ -376,7 +435,23 @@ export async function upsertRating(input: {
   user_id: string
   value: number
 }): Promise<void> {
-  const { error } = await supabase.from('item_ratings').upsert(input)
+  const { error } = await supabase.from('item_ratings').upsert(input, {
+    onConflict: 'item_id,field_id,user_id',
+  })
+  throwIf(error)
+}
+
+export async function deleteRating(input: {
+  item_id: string
+  field_id: string
+  user_id: string
+}): Promise<void> {
+  const { error } = await supabase
+    .from('item_ratings')
+    .delete()
+    .eq('item_id', input.item_id)
+    .eq('field_id', input.field_id)
+    .eq('user_id', input.user_id)
   throwIf(error)
 }
 
@@ -584,6 +659,74 @@ export async function fetchProposals(listId: string): Promise<ChangeProposal[]> 
   return (data ?? []) as ChangeProposal[]
 }
 
+export async function updateProposal(id: string, payload: Record<string, unknown>): Promise<void> {
+  const { error } = await supabase.from('change_proposals').update({ payload }).eq('id', id)
+  throwIf(error)
+}
+
+export async function deleteProposal(id: string): Promise<void> {
+  const { error } = await supabase.from('change_proposals').delete().eq('id', id)
+  throwIf(error)
+}
+
+export async function saveProposal(input: {
+  list_id: string
+  item_id?: string | null
+  user_id: string
+  action: ChangeProposal['action']
+  payload: Record<string, unknown>
+  proposalId?: string
+}): Promise<'created' | 'updated'> {
+  if (input.proposalId) {
+    await updateProposal(input.proposalId, input.payload)
+    return 'updated'
+  }
+
+  if (input.item_id && (input.action === 'check' || input.action === 'uncheck')) {
+    const opposite = input.action === 'check' ? 'uncheck' : 'check'
+    await supabase
+      .from('change_proposals')
+      .delete()
+      .eq('list_id', input.list_id)
+      .eq('user_id', input.user_id)
+      .eq('item_id', input.item_id)
+      .eq('action', opposite)
+      .eq('status', 'pending')
+  }
+
+  if (input.action !== 'create') {
+    let existingQuery = supabase
+      .from('change_proposals')
+      .select('id')
+      .eq('list_id', input.list_id)
+      .eq('user_id', input.user_id)
+      .eq('action', input.action)
+      .eq('status', 'pending')
+      .order('created_at', { ascending: false })
+      .limit(1)
+    existingQuery = input.item_id
+      ? existingQuery.eq('item_id', input.item_id)
+      : existingQuery.is('item_id', null)
+    const { data: existing, error: existingError } = await existingQuery
+    throwIf(existingError)
+    const found = existing?.[0]
+    if (found) {
+      await updateProposal(found.id, input.payload)
+      return 'updated'
+    }
+  }
+
+  const { error } = await supabase.from('change_proposals').insert({
+    list_id: input.list_id,
+    item_id: input.item_id ?? null,
+    user_id: input.user_id,
+    action: input.action,
+    payload: input.payload,
+  })
+  throwIf(error)
+  return 'created'
+}
+
 export async function createProposal(input: {
   list_id: string
   item_id?: string | null
@@ -591,8 +734,7 @@ export async function createProposal(input: {
   action: ChangeProposal['action']
   payload: Record<string, unknown>
 }): Promise<void> {
-  const { error } = await supabase.from('change_proposals').insert(input)
-  throwIf(error)
+  await saveProposal(input)
 }
 
 export async function reviewProposal(
@@ -627,9 +769,9 @@ export async function fetchSubscribedLists(userId: string): Promise<ListRow[]> {
   throwIf(error)
   const ids = [...new Set((data ?? []).map((row) => String(row.list_id)))]
   if (!ids.length) return []
-  const { data: lists, error: listError } = await supabase.from('lists').select('*').in('id', ids)
+  const { data: lists, error: listError } = await supabase.from('lists').select(LIST_SELECT).in('id', ids)
   throwIf(listError)
-  return (lists ?? []) as ListRow[]
+  return hydrateLists((lists ?? []) as ListRow[])
 }
 
 export async function setSubscribed(
@@ -896,12 +1038,12 @@ function throwAdmin(error: { message: string } | null): void {
 export async function fetchAdminPublicLists(): Promise<ListRow[]> {
   const { data, error } = await supabase
     .from('lists')
-    .select('*, owner:profiles!owner_id(*)')
+    .select(LIST_SELECT)
     .eq('visibility', 'public')
     .order('updated_at', { ascending: false })
     .limit(200)
   throwIf(error)
-  return (data ?? []) as ListRow[]
+  return hydrateLists((data ?? []) as ListRow[])
 }
 
 export async function fetchAdminProfiles(query = ''): Promise<Profile[]> {

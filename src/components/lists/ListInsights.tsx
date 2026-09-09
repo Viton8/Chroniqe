@@ -1,4 +1,4 @@
-import type { ItemRow, ListSchema } from '../../types/domain'
+import type { ItemRating, ItemRow, ListSchema, ListSettings } from '../../types/domain'
 import { buildInsights } from '../../lib/insights'
 import { formatDate, titleFromValues } from '../../lib/cn'
 import { usePrefs } from '../../context/PrefsContext'
@@ -8,15 +8,17 @@ export default function ListInsights({
   schema,
   items,
   ratings,
+  settings,
   onOpen,
 }: {
   schema: ListSchema
   items: ItemRow[]
-  ratings: import('../../types/domain').ItemRating[]
+  ratings: ItemRating[]
+  settings?: ListSettings | null
   onOpen: (item: ItemRow) => void
 }) {
   const { t } = usePrefs()
-  const data = buildInsights(schema, items, ratings)
+  const data = buildInsights(schema, items, ratings, settings)
   if (!data.total) {
     return <EmptyState icon="📊" title={t('insights.none')} text={t('insights.noneText')} />
   }

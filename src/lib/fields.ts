@@ -1,7 +1,7 @@
 import { FIELD_TYPES, type FieldDef, type FieldType, type SublistField } from '../types/domain'
 
 export const NESTED_FIELD_TYPES = FIELD_TYPES.filter(
-  (type): type is FieldType => type !== 'sublist' && type !== 'multi_rating',
+  (type): type is FieldType => type !== 'sublist' && type !== 'multi_rating' && type !== 'community_rating',
 )
 
 export function subfieldAsDef(field: SublistField): FieldDef {

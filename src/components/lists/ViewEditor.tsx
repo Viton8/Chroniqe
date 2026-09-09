@@ -1,8 +1,16 @@
 import { useState } from 'react'
-import { ChevronDown, Plus, Trash2 } from 'lucide-react'
-import type { FieldViewRole, ListSchema, NamedView, ViewKind } from '../../types/domain'
+import { ChevronDown, Eye, EyeOff, Plus, Trash2 } from 'lucide-react'
+import type { FieldViewRole, HighlightRule, ItemRating, ItemRow, ListSchema, NamedView, ViewKind } from '../../types/domain'
 import { CARD_LAYOUTS, TABLE_DENSITIES, VIEW_KINDS } from '../../types/domain'
-import { applyFieldRole, createNamedView, fallbackRole, rolesForKind } from '../../lib/views'
+import {
+  applyFieldRole,
+  createNamedView,
+  fallbackRole,
+  readViewPreviewPref,
+  rolesForKind,
+  samplePreviewItems,
+  writeViewPreviewPref,
+} from '../../lib/views'
 import { usePrefs } from '../../context/PrefsContext'
 import { FieldWrap, Input } from '../ui/Input'
 import Button from '../ui/Button'
@@ -10,6 +18,7 @@ import Hint from '../ui/Hint'
 import { cn } from '../../lib/cn'
 import { displaysForField, fieldBounds, isNumericField } from '../../lib/display'
 import { formulaExample } from '../../lib/formula'
+import ListViews from './ListViews'
 
 export function ViewsManager({
   schema,
@@ -17,16 +26,30 @@ export function ViewsManager({
   allowedKinds,
   activeViewId,
   onChange,
+  previewItems,
+  previewRatings,
+  enableCheck,
+  highlightRules,
 }: {
   schema: ListSchema
   views: NamedView[]
   allowedKinds: ViewKind[]
   activeViewId: string
   onChange: (next: { views: NamedView[]; allowedKinds: ViewKind[]; activeViewId: string }) => void
+  previewItems?: ItemRow[]
+  previewRatings?: ItemRating[]
+  enableCheck?: boolean
+  highlightRules?: HighlightRule[]
 }) {
   const { t } = usePrefs()
   const kinds = allowedKinds.length ? allowedKinds : [...VIEW_KINDS]
   const [openIds, setOpenIds] = useState<string[]>(() => [activeViewId].filter(Boolean))
+  const [preview, setPreview] = useState(readViewPreviewPref)
+
+  const togglePreview = (on: boolean) => {
+    setPreview(on)
+    writeViewPreviewPref(on)
+  }
 
   const toggleOpen = (id: string) => {
     setOpenIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
@@ -43,6 +66,9 @@ export function ViewsManager({
   return (
     <div className="space-y-5">
       <Hint title={t('viewEditor.hint')} example={t('viewEditor.hintEx')} />
+      <div className="flex justify-end">
+        <PreviewToggle on={preview} onToggle={togglePreview} />
+      </div>
       <div>
         <p className="mb-2 text-sm font-medium">{t('viewEditor.allowed')}</p>
         <div className="flex flex-wrap gap-3">
@@ -123,6 +149,12 @@ export function ViewsManager({
                     view={view}
                     allowedKinds={kinds}
                     onChange={(next) => patchView(view.id, next)}
+                    previewItems={previewItems}
+                    previewRatings={previewRatings}
+                    enableCheck={enableCheck}
+                    highlightRules={highlightRules}
+                    preview={preview}
+                    showPreviewToggle={false}
                   />
                 </div>
               ) : null}
@@ -153,18 +185,39 @@ export default function ViewEditor({
   view,
   allowedKinds,
   onChange,
+  previewItems,
+  previewRatings,
+  enableCheck,
+  preview: previewProp,
+  showPreviewToggle = true,
+  highlightRules,
 }: {
   schema: ListSchema
   view: NamedView
   allowedKinds: ViewKind[]
   onChange: (view: NamedView) => void
+  previewItems?: ItemRow[]
+  previewRatings?: ItemRating[]
+  enableCheck?: boolean
+  preview?: boolean
+  showPreviewToggle?: boolean
+  highlightRules?: HighlightRule[]
 }) {
   const { t } = usePrefs()
   const kinds = allowedKinds.length ? allowedKinds : [...VIEW_KINDS]
   const roles = rolesForKind(view.kind)
-  const groupFields = schema.fields.filter((f) => f.type === 'select')
+  const groupFields = schema.fields.filter((f) =>
+    ['select', 'multiselect', 'tags', 'boolean', 'checkbox'].includes(f.type),
+  )
   const dateFields = schema.fields.filter((f) => f.type === 'date' || f.type === 'datetime')
   const coverFields = schema.fields
+  const [previewState, setPreviewState] = useState(readViewPreviewPref)
+  const preview = previewProp ?? previewState
+
+  const togglePreview = (on: boolean) => {
+    setPreviewState(on)
+    writeViewPreviewPref(on)
+  }
 
   const setKind = (kind: ViewKind) => {
     onChange(
@@ -196,6 +249,13 @@ export default function ViewEditor({
 
   return (
     <div className="space-y-3">
+      {showPreviewToggle ? (
+        <div className="flex justify-end">
+          <PreviewToggle on={preview} onToggle={togglePreview} />
+        </div>
+      ) : null}
+      <div className={cn(preview && 'grid gap-6 lg:grid-cols-2 lg:items-start')}>
+        <div className="space-y-3">
       <div className="grid gap-3 sm:grid-cols-2">
         <FieldWrap label={t('viewEditor.name')}>
           <Input value={view.name} maxLength={40} onChange={(e) => onChange({ ...view, name: e.target.value })} />
@@ -256,7 +316,7 @@ export default function ViewEditor({
       ) : null}
 
       {view.kind === 'board' ? (
-        <FieldWrap label={t('viewEditor.groupField')}>
+        <FieldWrap label={t('viewEditor.groupField')} hint={t('viewEditor.groupFieldHint')}>
           <select
             className="w-full rounded-xl border border-line bg-paper px-3 py-2 text-sm"
             value={view.groupFieldId ?? ''}
@@ -400,6 +460,74 @@ export default function ViewEditor({
             )
           })}
         </div>
+      </div>
+        </div>
+        {preview ? (
+          <ViewPreviewPane
+            schema={schema}
+            view={view}
+            items={previewItems}
+            ratings={previewRatings}
+            enableCheck={enableCheck}
+            highlightRules={highlightRules}
+          />
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+function PreviewToggle({ on, onToggle }: { on: boolean; onToggle: (next: boolean) => void }) {
+  const { t } = usePrefs()
+  return (
+    <button
+      type="button"
+      className={cn(
+        'inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs',
+        on ? 'bg-ink text-paper' : 'bg-ink/5 text-muted',
+      )}
+      onClick={() => onToggle(!on)}
+    >
+      {on ? <Eye size={14} /> : <EyeOff size={14} />}
+      {on ? t('viewEditor.previewOn') : t('viewEditor.previewOff')}
+    </button>
+  )
+}
+
+function ViewPreviewPane({
+  schema,
+  view,
+  items,
+  ratings,
+  enableCheck,
+  highlightRules,
+}: {
+  schema: ListSchema
+  view: NamedView
+  items?: ItemRow[]
+  ratings?: ItemRating[]
+  enableCheck?: boolean
+  highlightRules?: HighlightRule[]
+}) {
+  const { t } = usePrefs()
+  const live = items?.length ? items.slice(0, 6) : []
+  const rows = live.length ? live : samplePreviewItems(schema)
+  const sampled = !live.length
+  return (
+    <div className="min-w-0">
+      <p className="mb-2 text-sm font-medium">{t('viewEditor.preview')}</p>
+      {sampled ? <p className="mb-2 text-xs text-muted">{t('viewEditor.previewEmpty')}</p> : null}
+      <div className="pointer-events-none max-h-[28rem] overflow-auto rounded-2xl border border-line bg-bg p-3">
+        <ListViews
+          schema={schema}
+          items={rows}
+          ratings={ratings ?? []}
+          view={view}
+          enableCheck={enableCheck}
+          highlightRules={highlightRules}
+          onOpen={() => undefined}
+          preview
+        />
       </div>
     </div>
   )

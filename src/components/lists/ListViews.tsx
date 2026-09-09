@@ -1,9 +1,10 @@
-import type { DragEvent, ReactNode } from 'react'
+import type { CSSProperties, DragEvent, ReactNode } from 'react'
 import { CalendarDays, Check, Columns3, LayoutGrid, Plus, Table2, Waypoints } from 'lucide-react'
 import CalendarMonth from './CalendarMonth'
 import type {
   FieldDef,
   FieldViewStyle,
+  HighlightRule,
   ItemComment,
   ItemRating,
   ItemRow,
@@ -14,6 +15,7 @@ import { collectedTags } from '../../lib/filters'
 import { fileMeta, hasCoverVisual, isImageFile } from '../../lib/files'
 import { fieldsWithRole, resolveViewSlots, styleForField } from '../../lib/views'
 import { cn, formatDate, titleFromValues } from '../../lib/cn'
+import { itemHighlightBind, resolveItemHighlight } from '../../lib/highlight'
 import { usePrefs } from '../../context/PrefsContext'
 import FileThumb from './FileThumb'
 import CoverSlot from './CoverSlot'
@@ -85,6 +87,8 @@ export default function ListViews({
   onMoveDate,
   onMoveGroup,
   onCreateInGroup,
+  preview,
+  highlightRules,
 }: {
   schema: ListSchema
   items: ItemRow[]
@@ -109,6 +113,8 @@ export default function ListViews({
   onMoveDate?: (item: ItemRow, iso: string) => void
   onMoveGroup?: (item: ItemRow, value: string) => void
   onCreateInGroup?: (value: string) => void
+  preview?: boolean
+  highlightRules?: HighlightRule[]
 }) {
   const { t } = usePrefs()
   const slots = resolveViewSlots(schema, view)
@@ -117,20 +123,25 @@ export default function ListViews({
   const coverId = slots.coverFieldId
   const groupId = view.groupFieldId ?? schema.groupFieldId
   const dateId = view.dateFieldId ?? schema.dateFieldId
+  const hlOf = (item: ItemRow) =>
+    itemHighlightBind(resolveItemHighlight(item, highlightRules, schema, ratings))
 
-  const notesOf = (item: ItemRow, variant: 'plain' | 'overlay' = 'plain') => (
-    <ItemNotesMarker
-      item={item}
-      notes={notesByItem[item.id] ?? []}
-      userId={userId}
-      canAdd={canAddNote}
-      canManage={canManageNotes}
-      variant={variant}
-      onCreated={onNoteCreated ?? (() => undefined)}
-      onUpdated={onNoteUpdated ?? (() => undefined)}
-      onDeleted={onNoteDeleted ?? (() => undefined)}
-    />
-  )
+  const notesOf = (item: ItemRow, variant: 'plain' | 'overlay' = 'plain') => {
+    if (preview) return null
+    return (
+      <ItemNotesMarker
+        item={item}
+        notes={notesByItem[item.id] ?? []}
+        userId={userId}
+        canAdd={canAddNote}
+        canManage={canManageNotes}
+        variant={variant}
+        onCreated={onNoteCreated ?? (() => undefined)}
+        onUpdated={onNoteUpdated ?? (() => undefined)}
+        onDeleted={onNoteDeleted ?? (() => undefined)}
+      />
+    )
+  }
 
   const renderField = (item: ItemRow, style: FieldViewStyle) => {
     const field = schema.fields.find((f) => f.id === style.fieldId)
@@ -190,9 +201,10 @@ export default function ListViews({
                   highlighted={highlightedId === item.id}
                   onToggleSelect={onToggleSelect}
                   draggable={Boolean(canEdit && onMoveGroup)}
+                  hl={hlOf(item)}
                 />
               ))}
-            {canEdit && onCreateInGroup ? (
+            {canEdit && onCreateInGroup && !preview ? (
               <button
                 type="button"
                 className="flex w-full items-center justify-center gap-1 rounded-xl px-2 py-1.5 text-xs text-muted hover:bg-ink/5 hover:text-ink"
@@ -228,6 +240,7 @@ export default function ListViews({
                 highlighted={highlightedId === item.id}
                 onToggleSelect={onToggleSelect}
                 draggable={Boolean(canEdit && onMoveGroup)}
+                hl={hlOf(item)}
               />
             ))}
           </BoardColumn>
@@ -251,9 +264,21 @@ export default function ListViews({
         {sorted.map((item) => (
           <li
             key={item.id}
-            className={cn('group relative mb-5 ml-4', highlightedId === item.id && 'rounded-xl bg-accent-soft/60 p-2')}
+            className={cn(
+              'group relative mb-5 ml-4',
+              highlightedId === item.id && 'rounded-xl bg-accent-soft/60 p-2',
+              hlOf(item).className,
+            )}
+            style={hlOf(item).style}
+            data-hl={hlOf(item)['data-hl']}
           >
-            <span className="absolute -left-[1.375rem] top-1.5 h-3 w-3 rounded-full bg-accent" />
+            <span
+              className={cn(
+                'absolute -left-[1.375rem] top-1.5 h-3 w-3 rounded-full',
+                hlOf(item).className ? '' : 'bg-accent',
+              )}
+              style={hlOf(item).className ? { background: 'var(--hl)' } : undefined}
+            />
             <p className="text-xs text-muted">{formatDate(String(item.values[dateId] ?? ''))}</p>
             <div className="mt-1 flex items-start gap-2">
               {coverId && hasCoverVisual(item.values[coverId]) ? (
@@ -306,6 +331,7 @@ export default function ListViews({
         selectMode={selectMode}
         canEdit={canEdit}
         onOpen={onOpen}
+        highlightOf={(item) => resolveItemHighlight(item, highlightRules, schema, ratings)}
         onToggleSelect={onToggleSelect}
         onCreateOnDate={onCreateOnDate}
         onMoveDate={onMoveDate}
@@ -340,6 +366,7 @@ export default function ListViews({
             selected={selectedIds?.has(item.id)}
             highlighted={highlightedId === item.id}
             onToggleSelect={onToggleSelect}
+            hl={hlOf(item)}
           />
         ))}
       </div>
@@ -365,18 +392,24 @@ export default function ListViews({
                 {f.name}
               </th>
             ))}
-            <th className={cn('w-16', pad)} />
+            {preview ? null : <th className={cn('w-16', pad)} />}
           </tr>
         </thead>
         <tbody>
-          {items.map((item) => (
+          {items.map((item) => {
+            const hl = hlOf(item)
+            return (
             <tr
               key={item.id}
               className={cn(
-                'group cursor-pointer border-b border-line/70 last:border-0 hover:bg-ink/[0.04]',
+                'group cursor-pointer border-b border-line/70 last:border-0',
+                !hl.className && 'hover:bg-ink/[0.04]',
                 highlightedId === item.id && 'bg-accent-soft/70',
                 selectedIds?.has(item.id) && 'bg-accent-soft/40',
+                hl.className,
               )}
+              style={hl.style}
+              data-hl={hl['data-hl']}
               onClick={() => onOpen(item)}
             >
               {selectMode && onToggleSelect ? (
@@ -401,12 +434,15 @@ export default function ListViews({
                   />
                 </td>
               ))}
-              <td className={cn('relative w-16', pad)} onClick={(e) => e.stopPropagation()}>
-                <div className="h-7 w-7" aria-hidden />
-                {notesOf(item)}
-              </td>
+              {preview ? null : (
+                <td className={cn('relative w-16', pad)} onClick={(e) => e.stopPropagation()}>
+                  <div className="h-7 w-7" aria-hidden />
+                  {notesOf(item)}
+                </td>
+              )}
             </tr>
-          ))}
+            )
+          })}
         </tbody>
       </table>
     </div>
@@ -518,6 +554,7 @@ function ConfiguredCard({
   highlighted,
   onToggleSelect,
   draggable,
+  hl,
 }: {
   item: ItemRow
   schema: ListSchema
@@ -534,6 +571,7 @@ function ConfiguredCard({
   highlighted?: boolean
   onToggleSelect?: (item: ItemRow) => void
   draggable?: boolean
+  hl?: { className?: string; style?: CSSProperties; 'data-hl'?: string }
 }) {
   const layout = view.cardLayout ?? 'grid'
   const cover = coverId ? item.values[coverId] : undefined
@@ -562,6 +600,9 @@ function ConfiguredCard({
     ) : null
 
   const ring = cn(highlighted && 'ring-2 ring-accent', selected && 'ring-1 ring-accent')
+  const hlClass = hl?.className
+  const hlStyle = hl?.style
+  const hlName = hl?.['data-hl']
 
   const dragProps = draggable
     ? {
@@ -577,7 +618,9 @@ function ConfiguredCard({
     return (
       <article
         {...dragProps}
-        className={cn('group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift', ring)}
+        className={cn('group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-line bg-paper px-3 py-2.5 shadow-lift', ring, hlClass)}
+        style={hlStyle}
+        data-hl={hlName}
       >
         {selectMode && onToggleSelect ? (
           <SelectBox selected={Boolean(selected)} onChange={() => onToggleSelect(item)} />
@@ -602,7 +645,7 @@ function ConfiguredCard({
 
   if (layout === 'media') {
     return (
-      <article className={cn('group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift', ring)}>
+      <article className={cn('group relative overflow-hidden rounded-2xl border border-line bg-paper text-left shadow-lift', ring, hlClass)} style={hlStyle} data-hl={hlName}>
         {selectMode && onToggleSelect ? (
           <div className="absolute left-2 top-2 z-10">
             <SelectBox selected={Boolean(selected)} onChange={() => onToggleSelect(item)} />
@@ -626,7 +669,7 @@ function ConfiguredCard({
   }
 
   return (
-    <article className={cn('group relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift', ring)}>
+    <article className={cn('group relative overflow-hidden rounded-2xl border border-line bg-paper shadow-lift', ring, hlClass)} style={hlStyle} data-hl={hlName}>
       <div className="absolute right-2 top-2 z-10 w-[min(70%,16rem)]">{notes}</div>
       {hasCover ? coverNode('aspect-[16/10] w-full') : null}
       <div className={hasCover ? 'p-3' : 'p-3 pr-12'}>

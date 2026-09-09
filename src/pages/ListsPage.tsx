@@ -3,24 +3,34 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePrefs } from '../context/PrefsContext'
 import { fetchMyLists, fetchSharedLists, countItems } from '../services/api'
-import type { ListRow } from '../types/domain'
+import type { ListRow, Visibility } from '../types/domain'
 import Button from '../components/ui/Button'
 import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import { SearchField } from '../components/ui/Input'
 import PageHeader from '../components/ui/PageHeader'
 import ListCard from '../components/lists/ListCard'
+import ListCatalogBar from '../components/lists/ListCatalogBar'
 import { readFavorites } from '../lib/favorites'
 import { matchesQuery } from '../lib/search'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
+import {
+  filterLists,
+  sortLists,
+  type ListPeopleFilter,
+  type ListSortKey,
+} from '../lib/listCatalog'
 
 export default function ListsPage() {
   const { user } = useAuth()
-  const { t } = usePrefs()
+  const { t, locale } = usePrefs()
   const navigate = useNavigate()
   const [mine, setMine] = useState<ListRow[]>([])
   const [shared, setShared] = useState<ListRow[]>([])
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [q, setQ] = useState('')
+  const [sort, setSort] = useState<ListSortKey>('updated')
+  const [visibility, setVisibility] = useState<Visibility | 'all'>('all')
+  const [people, setPeople] = useState<ListPeopleFilter>('all')
   const [loading, setLoading] = useState(true)
   const [favIds, setFavIds] = useState(() => readFavorites())
   const debounced = useDebouncedValue(q)
@@ -39,15 +49,22 @@ export default function ListsPage() {
   }, [user])
 
   const favorites = useMemo(() => new Set(favIds), [favIds])
-  const filter = (rows: ListRow[]) =>
-    rows.filter((l) => matchesQuery(debounced, l.title, l.description, l.icon))
+  const catalog = (rows: ListRow[]) =>
+    sortLists(
+      filterLists(
+        rows.filter((l) => matchesQuery(debounced, l.title, l.description, l.icon)),
+        { visibility, people },
+      ),
+      sort,
+      locale,
+    )
   const pinned = useMemo(
     () => [...mine, ...shared].filter((list) => favorites.has(list.id)),
     [mine, shared, favorites],
   )
-  const filteredPinned = filter(pinned)
-  const filteredMine = filter(mine)
-  const filteredShared = filter(shared)
+  const filteredPinned = catalog(pinned)
+  const filteredMine = catalog(mine)
+  const filteredShared = catalog(shared)
   const any = mine.length + shared.length > 0
   const anyVisible = filteredPinned.length + filteredMine.length + filteredShared.length > 0
 
@@ -65,6 +82,18 @@ export default function ListsPage() {
         }
       />
       <SearchField className="mt-4" placeholder={t('lists.find')} value={q} onChange={(e) => setQ(e.target.value)} />
+      {any ? (
+        <ListCatalogBar
+          sort={sort}
+          onSort={setSort}
+          visibility={visibility}
+          onVisibility={setVisibility}
+          people={people}
+          onPeople={setPeople}
+          showVisibility
+          showPeople
+        />
+      ) : null}
       {anyVisible ? (
         <>
           <Section

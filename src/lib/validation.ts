@@ -1,3 +1,4 @@
+import { usesItemRatings } from './ratings'
 import { msg } from './i18n'
 import type { FieldDef, ItemRow, ListSchema } from '../types/domain'
 
@@ -12,7 +13,7 @@ export function validateField(
   const cfg = field.config ?? {}
   const empty = isEmptyValue(value)
 
-  if (field.required && empty) {
+  if (field.required && empty && !usesItemRatings(field)) {
     return msg('fields.required', { name: field.name })
   }
   if (empty) return null

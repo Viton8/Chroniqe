@@ -8,10 +8,12 @@ import EmptyState, { Spinner } from '../components/ui/EmptyState'
 import { SearchField } from '../components/ui/Input'
 import PageHeader from '../components/ui/PageHeader'
 import ListCard from '../components/lists/ListCard'
+import ListCatalogBar from '../components/lists/ListCatalogBar'
 import ForkListButton from '../components/lists/ForkListButton'
 import { matchesQuery } from '../lib/search'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 import { useToast } from '../context/ToastContext'
+import { filterLists, sortLists, type ListPeopleFilter, type ListSortKey } from '../lib/listCatalog'
 
 const TOPICS = ['views', 'charts', 'collab', 'flow', 'ratings'] as const
 type Topic = (typeof TOPICS)[number]
@@ -58,11 +60,13 @@ function ListGrid({
 }
 
 export default function ExplorePage() {
-  const { t } = usePrefs()
+  const { t, locale } = usePrefs()
   const { user } = useAuth()
   const { toast } = useToast()
   const [rows, setRows] = useState<ListRow[]>([])
   const [q, setQ] = useState('')
+  const [sort, setSort] = useState<ListSortKey>('updated')
+  const [people, setPeople] = useState<ListPeopleFilter>('all')
   const [topic, setTopic] = useState<Topic | 'all'>('all')
   const [loading, setLoading] = useState(true)
   const debounced = useDebouncedValue(q)
@@ -76,10 +80,17 @@ export default function ExplorePage() {
 
   const filtered = useMemo(
     () =>
-      rows.filter((l) =>
-        matchesQuery(debounced, l.title, l.description, l.icon, l.owner?.username, l.owner?.display_name),
+      sortLists(
+        filterLists(
+          rows.filter((l) =>
+            matchesQuery(debounced, l.title, l.description, l.icon, l.owner?.username, l.owner?.display_name),
+          ),
+          { people },
+        ),
+        sort,
+        locale,
       ),
-    [rows, debounced],
+    [rows, debounced, people, sort, locale],
   )
 
   const featured = useMemo(() => {
@@ -105,6 +116,7 @@ export default function ExplorePage() {
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
+      <ListCatalogBar sort={sort} onSort={setSort} people={people} onPeople={setPeople} showPeople />
       {featured.length || topic !== 'all' ? (
         <div className="mt-4 flex flex-wrap gap-2">
           <button
@@ -145,7 +157,7 @@ export default function ExplorePage() {
         <div className="mt-6">
           <EmptyState
             icon="🧭"
-            title={debounced || topic !== 'all' ? t('explore.noSearch') : t('explore.empty')}
+            title={debounced || topic !== 'all' || people !== 'all' ? t('explore.noSearch') : t('explore.empty')}
             text={debounced ? t('lists.noSearchText') : undefined}
           />
         </div>

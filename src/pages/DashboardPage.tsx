@@ -57,7 +57,7 @@ export default function DashboardPage() {
   const [friendCount, setFriendCount] = useState(0)
   const [favIds, setFavIds] = useState(() => readFavorites())
   const [query, setQuery] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loadedUserId, setLoadedUserId] = useState<string | null>(null)
   const [editorOpen, setEditorOpen] = useState(false)
   const [layout, setLayout] = useState<HomeLayout>(() => readHomeLayout())
   const [itemsByList, setItemsByList] = useState<Record<string, ItemRow[]>>({})
@@ -72,11 +72,12 @@ export default function DashboardPage() {
 
   useEffect(() => subscribeHomeLayout(() => setLayout(readHomeLayout())), [])
 
+  const loading = !user || loadedUserId !== user.id
+
   useEffect(() => {
     if (!user) return
     let cancelled = false
     fetchedItems.current = new Set()
-    setLoading(true)
     void (async () => {
       const [owned, sharedRows, inbox, friends, listInvites, subscribed, friendEvents] = await Promise.all([
         fetchMyLists(user.id),
@@ -137,7 +138,7 @@ export default function DashboardPage() {
       setOverdue(late.slice(0, 6))
       setOpenCount(open)
     })().finally(() => {
-      if (!cancelled) setLoading(false)
+      if (!cancelled) setLoadedUserId(user.id)
     })
     return () => {
       cancelled = true

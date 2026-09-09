@@ -105,9 +105,20 @@ function splitBlocks(section) {
   }))
 }
 
-function lastFieldId(body, index) {
+function lastFId(body, index) {
   const matches = [...body.slice(0, index).matchAll(/\bf\('([^']+)'/g)]
   return matches.at(-1)?.[1]
+}
+
+function lastFieldId(body, index) {
+  const matches = [...body.slice(0, index).matchAll(/\b(f|sf)\('([^']+)'/g)]
+  const last = matches.at(-1)
+  if (!last) return
+  if (last[1] === 'sf') {
+    const parent = lastFId(body, last.index)
+    return parent ? `${parent}.${last[2]}` : last[2]
+  }
+  return last[2]
 }
 
 function extractTemplateI18nKeys(source) {
@@ -125,7 +136,7 @@ function extractTemplateI18nKeys(source) {
       keys.push(`${prefix}.field.${match[1]}`)
     }
     for (const match of block.body.matchAll(/\bsf\('([^']+)'/g)) {
-      const parent = lastFieldId(block.body, match.index)
+      const parent = lastFId(block.body, match.index)
       if (parent) keys.push(`${prefix}.sub.${parent}.${match[1]}`)
     }
 

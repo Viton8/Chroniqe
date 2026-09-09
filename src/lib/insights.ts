@@ -1,5 +1,6 @@
 import { usesItemRatings } from './ratings'
 import { itemDateIso, itemScore } from './filters'
+import { isPeakSpanSublist } from './fields'
 import { todayIso } from './cn'
 import { itemLeavesAgenda, resolveAgenda } from './agenda'
 import type { FieldDef, ItemRating, ItemRow, ListSchema, ListSettings } from '../types/domain'
@@ -45,7 +46,8 @@ export function buildInsights(
   const checked = items.filter((item) => item.is_checked).length
   const ratingField =
     schema.fields.find((field) => usesItemRatings(field)) ??
-    schema.fields.find((field) => field.type === 'rating')
+    schema.fields.find((field) => field.type === 'rating') ??
+    schema.fields.find((field) => isPeakSpanSublist(field))
   const groupField =
     schema.fields.find((field) => field.id === schema.groupFieldId) ??
     schema.fields.find((field) => field.type === 'select')
@@ -56,7 +58,7 @@ export function buildInsights(
   let ratingCount = 0
   if (ratingField) {
     for (const item of items) {
-      const score = itemScore(item, ratingField.id, ratings)
+      const score = itemScore(item, ratingField.id, ratings, ratingField)
       if (score != null) {
         ratingSum += score
         ratingCount += 1
@@ -102,8 +104,12 @@ export function buildInsights(
     checked,
     open: items.length - checked,
     completion: items.length ? Math.round((checked / items.length) * 100) : 0,
-    addedThisWeek: items.filter((item) => new Date(item.created_at).getTime() >= weekAgo).length,
-    addedThisMonth: items.filter((item) => new Date(item.created_at).getTime() >= monthAgo).length,
+    addedThisWeek: items.filter(
+      (item) => new Date(item.created_at).getTime() >= weekAgo,
+    ).length,
+    addedThisMonth: items.filter(
+      (item) => new Date(item.created_at).getTime() >= monthAgo,
+    ).length,
     avgRating: ratingCount ? ratingSum / ratingCount : null,
     ratingCount,
     ratingField,

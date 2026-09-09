@@ -729,7 +729,15 @@
       "title_cover": "Назва й обкладинка",
       "media": "Картка з обкладинкою"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Згорнутий підсумок",
+    "sublistSummaryModes": {
+      "rows": "Кількість рядків або єдиний рядок",
+      "peak_span": "Пік і проміжок часу"
+    },
+    "sublistPeakField": "Поле піку",
+    "sublistStartField": "Поле початку",
+    "sublistEndField": "Поле кінця"
   },
   "fieldTypes": {
     "text": "Текст",
@@ -795,7 +803,12 @@
     "pickUser": "Оберіть людину",
     "noRelated": "Спочатку оберіть пов’язаний список у схемі",
     "openLinkedItem": "Відкрити пов’язаний запис",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Рядок {n}",
+    "sublistRows": "{n} записів",
+    "sublistPeak": "пік {value}",
+    "sublistPeakSpan": "пік {value} · {span}",
+    "sublistExpand": "Показати вкладені рядки"
   },
   "typeHint": {
     "text": "За потреби обмежте довжину.",
@@ -1156,6 +1169,341 @@
       "transfer": {
         "games_backlog__games_done": "Пройдено"
       }
+    },
+    "headache_diary": {
+      "title": "Щоденник головного болю",
+      "description": "Напади зі шкалою болю в часі, симптомами, ліками, навантаженням і зв’язком із тиском.",
+      "hint": "Інтенсивність — вкладений список: згорнутий показує пік і початок–кінець, розкритий — кожен проміжок. Набір зв’яже щоденник із тиском.",
+      "example": "Пік 8 · 08:20–14:45; аура і нудота; ібупрофен 400 мг о 08:40, ефект о 09:10.",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — не болить",
+            "1": "1 — ледь помітно",
+            "2": "2 — слабка",
+            "3": "3 — помітна",
+            "4": "4 — помірна",
+            "5": "5 — заважає",
+            "6": "6 — сильна",
+            "7": "7 — дуже сильна",
+            "8": "8 — тяжка",
+            "9": "9 — нестерпна",
+            "10": "10 — максимум"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "Болю немає.",
+            "1": "Відчувається, лише якщо прислухатися.",
+            "2": "Легкий біль, можна не звертати уваги.",
+            "3": "Біль є, але майже не заважає.",
+            "4": "Відволікає, але працювати ще можна.",
+            "5": "Важко ігнорувати, концентрація падає.",
+            "6": "Важко думати і працювати.",
+            "7": "Звичайні дії даються важко.",
+            "8": "Майже ні про що інше не думається.",
+            "9": "Майже нічого не можна робити.",
+            "10": "Найгірший біль, який можна уявити."
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
+    },
+    "blood_pressure": {
+      "title": "Тиск",
+      "description": "Вимірювання з пульсом, фото, положенням, кофеїном, сном, стресом і посиланням на напад болю.",
+      "hint": "Систолічний, діастолічний і пульс ідуть на графіки. Прив’яжіть вимірювання до запису щоденника.",
+      "example": "8 вер 08:15, 148/92, пульс 78, сидячи, трохи кави, зв’язок із ранковою мігренню.",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
+    },
+    "pack_health": {
+      "title": "Головний біль і тиск",
+      "description": "Два пов’язані списки: щоденник нападів і журнал тиску. Зв’язки в обидва боки.",
+      "hint": "Створюються обидва списки. До нападу можна прикріпити кілька вимірювань, з вимірювання відкрити напад.",
+      "example": "Ранкова мігрень ← два вимірювання (вранішнє високе, після таблетки нижче)."
     }
   },
   "filters": {

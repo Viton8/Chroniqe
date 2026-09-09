@@ -24,7 +24,9 @@ export default function PublicUserPage() {
   const [lists, setLists] = useState<ListRow[]>([])
   const [sort, setSort] = useState<ListSortKey>('updated')
   const [friends, setFriends] = useState<Friendship[]>([])
-  const [loading, setLoading] = useState(true)
+  const loadKey = `${username ?? ''}:${user?.id ?? ''}`
+  const [loadedFor, setLoadedFor] = useState<string | null>(null)
+  const loading = loadedFor !== loadKey
 
   const reloadFriends = async () => {
     if (!user) return
@@ -34,22 +36,29 @@ export default function PublicUserPage() {
   useEffect(() => {
     if (!username) return
     let cancelled = false
-    setLoading(true)
-    setProfile(null)
-    setLists([])
     void (async () => {
-      const row = await fetchProfileByUsername(username)
-      if (cancelled) return
-      setProfile(row)
-      if (row) setLists(await fetchPublicListsByOwner(row.id))
-      if (user) setFriends(await fetchFriendships(user.id).catch(() => []))
-    })().finally(() => {
-      if (!cancelled) setLoading(false)
-    })
+      try {
+        const row = await fetchProfileByUsername(username)
+        if (cancelled) return
+        const nextLists = row ? await fetchPublicListsByOwner(row.id) : []
+        if (cancelled) return
+        const nextFriends = user ? await fetchFriendships(user.id).catch(() => []) : []
+        if (cancelled) return
+        setProfile(row)
+        setLists(nextLists)
+        setFriends(nextFriends)
+      } catch {
+        if (cancelled) return
+        setProfile(null)
+        setLists([])
+      } finally {
+        if (!cancelled) setLoadedFor(loadKey)
+      }
+    })()
     return () => {
       cancelled = true
     }
-  }, [username, user])
+  }, [username, user, loadKey])
 
   const sortedLists = useMemo(() => sortLists(lists, sort, locale), [lists, sort, locale])
 

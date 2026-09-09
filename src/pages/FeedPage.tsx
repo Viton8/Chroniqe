@@ -14,6 +14,16 @@ import { cn } from '../lib/cn'
 
 const FILTERS: FeedFilter[] = ['all', 'added', 'checked', 'moved']
 
+async function loadFriendFeed(userId: string) {
+  const [feed, friendCount] = await Promise.all([
+    fetchFriendFeed(80),
+    fetchFriendships(userId).then(
+      (rows) => rows.filter((row) => row.status === 'accepted').length,
+    ),
+  ])
+  return { feed, friendCount }
+}
+
 export default function FeedPage() {
   const { user } = useAuth()
   const { t } = usePrefs()
@@ -25,20 +35,26 @@ export default function FeedPage() {
 
   const reload = useCallback(async () => {
     if (!user) return
-    const [feed, friends] = await Promise.all([
-      fetchFriendFeed(80),
-      fetchFriendships(user.id).then((rows) => rows.filter((row) => row.status === 'accepted').length),
-    ])
-    setEvents(feed)
-    setFriendCount(friends)
+    const next = await loadFriendFeed(user.id)
+    setEvents(next.feed)
+    setFriendCount(next.friendCount)
   }, [user])
 
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    void reload()
+    void loadFriendFeed(user.id)
+      .then((next) => {
+        if (cancelled) return
+        setEvents(next.feed)
+        setFriendCount(next.friendCount)
+      })
       .catch((error) => {
-        if (!cancelled) toast(error instanceof Error ? error.message : t('common.error'), 'err')
+        if (!cancelled)
+          toast(
+            error instanceof Error ? error.message : t('common.error'),
+            'err',
+          )
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -46,15 +62,19 @@ export default function FeedPage() {
     return () => {
       cancelled = true
     }
-  }, [reload, t, toast, user])
+  }, [t, toast, user])
 
   useEffect(() => {
     if (!user) return
     const channel = supabase
       .channel(`friend-feed-${user.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'activity_events' }, () => {
-        void reload().catch(() => undefined)
-      })
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'activity_events' },
+        () => {
+          void reload().catch(() => undefined)
+        },
+      )
       .subscribe()
     return () => {
       void supabase.removeChannel(channel)
@@ -92,7 +112,9 @@ export default function FeedPage() {
             onClick={() => setFilter(key)}
             className={cn(
               'rounded-full px-3 py-1 text-sm transition-colors',
-              filter === key ? 'bg-ink text-paper' : 'bg-ink/5 text-muted hover:bg-ink/10',
+              filter === key
+                ? 'bg-ink text-paper'
+                : 'bg-ink/5 hover:bg-ink/10 text-muted',
             )}
           >
             {t(`feed.filter.${key}`)}

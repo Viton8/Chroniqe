@@ -729,7 +729,15 @@
       "title_cover": "Titolo e copertina",
       "media": "Scheda con copertina"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "Riepilogo compresso",
+    "sublistSummaryModes": {
+      "rows": "Numero di righe, o l’unica riga",
+      "peak_span": "Picco e intervallo di tempo"
+    },
+    "sublistPeakField": "Campo del picco",
+    "sublistStartField": "Campo di inizio",
+    "sublistEndField": "Campo di fine"
   },
   "fieldTypes": {
     "text": "Testo",
@@ -795,7 +803,12 @@
     "pickUser": "Scegli una persona",
     "noRelated": "Scegli prima una lista collegata nello schema",
     "openLinkedItem": "Apri l’elemento collegato",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "Riga {n}",
+    "sublistRows": "{n} voci",
+    "sublistPeak": "picco {value}",
+    "sublistPeakSpan": "picco {value} · {span}",
+    "sublistExpand": "Mostra le righe nidificate"
   },
   "typeHint": {
     "text": "Limita la lunghezza se serve.",
@@ -1156,6 +1169,341 @@
       "transfer": {
         "games_backlog__games_done": "Finito"
       }
+    },
+    "headache_diary": {
+      "title": "Diario del mal di testa",
+      "description": "Attacchi con intensità nel tempo, sintomi, farmaci, sforzo e collegamento alla pressione.",
+      "hint": "L’intensità è una sotto-lista: chiusa mostra picco e inizio–fine. Il pacchetto Salute la collega alla pressione.",
+      "example": "Picco 8 · 08:20–14:45; aura e nausea; ibuprofene 400 mg alle 08:40, effetto alle 09:10.",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — non fa male",
+            "1": "1 — appena percettibile",
+            "2": "2 — lieve",
+            "3": "3 — percettibile",
+            "4": "4 — moderato",
+            "5": "5 — dà fastidio",
+            "6": "6 — forte",
+            "7": "7 — molto forte",
+            "8": "8 — intenso",
+            "9": "9 — insopportabile",
+            "10": "10 — massimo"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "Nessun dolore.",
+            "1": "Solo se ci fai attenzione.",
+            "2": "Facile da ignorare.",
+            "3": "C’è, ma quasi non disturba.",
+            "4": "Distrae, ma si può continuare.",
+            "5": "Difficile da ignorare; cala la concentrazione.",
+            "6": "Difficile pensare e lavorare.",
+            "7": "Le azioni normali sono difficili.",
+            "8": "Quasi nient’altro passa.",
+            "9": "Quasi impossibile fare qualsiasi cosa.",
+            "10": "Il peggior dolore immaginabile."
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
+    },
+    "blood_pressure": {
+      "title": "Pressione",
+      "description": "Misurazioni con polso, foto, postura, caffeina, sonno, stress e collegamento a un attacco.",
+      "hint": "Sistolica, diastolica e polso alimentano i grafici. Collega una misurazione a una riga del diario.",
+      "example": "8 set 08:15, 148/92, polso 78, seduto, un po’ di caffè, collegato all’emicrania del mattino.",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
+    },
+    "pack_health": {
+      "title": "Mal di testa e pressione",
+      "description": "Due elenchi collegati: diario degli attacchi e registro della pressione. Relazioni in entrambe le direzioni.",
+      "hint": "Crea entrambi gli elenchi. A un attacco si possono attaccare più misurazioni.",
+      "example": "Emicrania del mattino ← due misurazioni (alta al mattino, più bassa dopo la compressa)."
     }
   },
   "filters": {

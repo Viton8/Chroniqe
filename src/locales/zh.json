@@ -729,7 +729,15 @@
       "title_cover": "标题与封面",
       "media": "封面卡片"
     },
-    "nestedLead": "Each nested-list row has its own fields and constraints."
+    "nestedLead": "Each nested-list row has its own fields and constraints.",
+    "sublistSummary": "折叠摘要",
+    "sublistSummaryModes": {
+      "rows": "行数，或唯一一行",
+      "peak_span": "峰值与起止时间"
+    },
+    "sublistPeakField": "峰值字段",
+    "sublistStartField": "开始时间字段",
+    "sublistEndField": "结束时间字段"
   },
   "fieldTypes": {
     "text": "文本",
@@ -795,7 +803,12 @@
     "pickUser": "选择用户",
     "noRelated": "请先在架构中选择关联列表",
     "openLinkedItem": "打开关联条目",
-    "nestedRow": "Row {n}: {error}"
+    "nestedRow": "Row {n}: {error}",
+    "sublistRow": "第 {n} 行",
+    "sublistRows": "{n} 条",
+    "sublistPeak": "峰值 {value}",
+    "sublistPeakSpan": "峰值 {value} · {span}",
+    "sublistExpand": "展开嵌套行"
   },
   "typeHint": {
     "text": "需要时可以限制长度。",
@@ -1156,6 +1169,341 @@
       "transfer": {
         "games_backlog__games_done": "已通关"
       }
+    },
+    "headache_diary": {
+      "title": "头痛日记",
+      "description": "发作记录：疼痛随时间变化、症状、用药、运动，并可关联血压。",
+      "hint": "强度是嵌套列表：折叠显示峰值与起止，展开显示每个时段。健康套装会连上血压。",
+      "example": "峰值 8 · 08:20–14:45；先兆与恶心；08:40 布洛芬 400 mg，09:10 起效。",
+      "field": {
+        "title": "Episode",
+        "kind": "Type",
+        "started_at": "Start",
+        "ended_at": "End",
+        "ongoing": "Still going",
+        "intensity": "Intensity",
+        "laterality": "Side",
+        "location": "Place",
+        "character": "Character",
+        "symptoms": "Symptoms",
+        "started_asleep": "Started in sleep",
+        "ended_asleep": "Ended in sleep",
+        "impact": "Impact on the day",
+        "meds": "Medication",
+        "activity": "Activity",
+        "triggers": "Possible causes",
+        "helped": "What helped",
+        "bp_readings": "Blood pressure",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "intensity": "Each row is a moment or span at that pain level. Collapsed, the list shows the peak and the attack bounds.",
+        "symptoms": "Mark several: vision, sound, nausea and the rest in one column.",
+        "meds": "When you took it, the drug and dose, when you felt the effect.",
+        "activity": "Several episodes: time, type, intensity and how pain responded.",
+        "bp_readings": "Attach blood-pressure readings before, during or after the attack."
+      },
+      "sub": {
+        "intensity": {
+          "at": "From",
+          "until": "Until",
+          "level": "Level",
+          "note": "Note"
+        },
+        "meds": {
+          "taken_at": "Taken",
+          "name": "Drug",
+          "dose": "Dose",
+          "felt_at": "Felt effect",
+          "effect": "Effect",
+          "note": "Note"
+        },
+        "activity": {
+          "at": "When",
+          "kind": "Type",
+          "intensity": "Intensity",
+          "effect": "Effect on pain",
+          "note": "Note"
+        }
+      },
+      "opt": {
+        "kind": {
+          "migraine": "Migraine",
+          "tension": "Tension",
+          "cluster": "Cluster",
+          "mixed": "Mixed",
+          "unknown": "Unclear",
+          "other": "Other"
+        },
+        "laterality": {
+          "left": "Left",
+          "right": "Right",
+          "both": "Both sides",
+          "shifting": "Shifts"
+        },
+        "location": {
+          "forehead": "Forehead",
+          "left_temple": "Left temple",
+          "right_temple": "Right temple",
+          "crown": "Crown",
+          "occiput": "Back of the head",
+          "neck": "Neck",
+          "left_eye": "Left eye",
+          "right_eye": "Right eye",
+          "face": "Face",
+          "whole": "Whole head"
+        },
+        "character": {
+          "throbbing": "Throbbing",
+          "pressing": "Pressing",
+          "tight": "Tight",
+          "stabbing": "Stabbing",
+          "burning": "Burning",
+          "dull": "Dull",
+          "exploding": "Bursting"
+        },
+        "symptoms": {
+          "visual": "Visual changes / aura",
+          "photophobia": "Light hurts",
+          "phonophobia": "Sound hurts",
+          "osmophobia": "Smells bother",
+          "nausea": "Nausea",
+          "vomiting": "Vomiting",
+          "dizziness": "Dizziness",
+          "neck": "Stiff neck",
+          "tearing": "Tearing",
+          "nasal": "Stuffy nose",
+          "speech": "Hard to speak",
+          "numbness": "Numbness",
+          "confusion": "Confusion",
+          "yawning": "Yawning",
+          "tinnitus": "Tinnitus",
+          "other": "Other"
+        },
+        "impact": {
+          "none": "Did not get in the way",
+          "slowed": "Slowed me down",
+          "stopped": "Had to lie down"
+        },
+        "triggers": {
+          "sleep_loss": "Too little sleep",
+          "oversleep": "Overslept",
+          "stress": "Stress",
+          "weather": "Weather / pressure",
+          "screens": "Screens",
+          "skipped_meal": "Skipped a meal",
+          "alcohol": "Alcohol",
+          "caffeine": "Caffeine / withdrawal",
+          "hormones": "Hormones / cycle",
+          "neck": "Neck / posture",
+          "smell": "Smell",
+          "light": "Bright light",
+          "dehydration": "Too little water",
+          "heat": "Heat",
+          "travel": "Travel",
+          "food": "Food",
+          "exercise": "Exercise"
+        },
+        "helped": {
+          "dark": "Darkness",
+          "sleep": "Sleep",
+          "water": "Water",
+          "caffeine": "Caffeine",
+          "painkiller": "Painkiller",
+          "cold": "Cold",
+          "walk": "A walk",
+          "air": "Fresh air",
+          "massage": "Massage / neck",
+          "rest": "Rest",
+          "time": "It passed on its own"
+        },
+        "intensity": {
+          "level": {
+            "0": "0 — 不痛",
+            "1": "1 — 几乎感觉不到",
+            "2": "2 — 轻微",
+            "3": "3 — 能察觉",
+            "4": "4 — 中等",
+            "5": "5 — 妨碍",
+            "6": "6 — 较强",
+            "7": "7 — 很强",
+            "8": "8 — 剧烈",
+            "9": "9 — 难以忍受",
+            "10": "10 — 最痛"
+          }
+        },
+        "meds": {
+          "effect": {
+            "none": "No help",
+            "partial": "A little better",
+            "good": "Clearly better",
+            "gone": "Pain gone",
+            "worse": "Worse"
+          }
+        },
+        "activity": {
+          "kind": {
+            "walk": "Walk",
+            "run": "Run",
+            "gym": "Strength",
+            "yoga": "Yoga / stretch",
+            "cycle": "Bike",
+            "chores": "Chores",
+            "other": "Other"
+          },
+          "intensity": {
+            "light": "Light",
+            "moderate": "Moderate",
+            "vigorous": "Hard"
+          },
+          "effect": {
+            "better_during": "Easier during",
+            "worse_during": "Worse during",
+            "better_after": "Easier after",
+            "worse_after": "Worse after",
+            "none": "No effect",
+            "mixed": "Mixed"
+          }
+        }
+      },
+      "optDesc": {
+        "intensity": {
+          "level": {
+            "0": "没有疼痛。",
+            "1": "只有特意去注意时才感觉到。",
+            "2": "可以忽略。",
+            "3": "有痛感，但几乎不影响做事。",
+            "4": "会分心，但还能继续工作。",
+            "5": "很难忽略，注意力下降。",
+            "6": "难以思考和工作。",
+            "7": "日常动作都变难。",
+            "8": "几乎顾不上别的。",
+            "9": "几乎什么都做不了。",
+            "10": "能想象到的最痛。"
+          }
+        }
+      },
+      "ph": {
+        "title": "Morning migraine",
+        "intensity": {
+          "note": "got worse at work"
+        },
+        "meds": {
+          "name": "Ibuprofen",
+          "dose": "400 mg"
+        },
+        "activity": {
+          "note": "easier on the walk, hit again at home"
+        }
+      },
+      "chart": {
+        "timeline": "Attacks by day",
+        "peak": "Peak pain over time",
+        "kinds": "Attack types",
+        "kpi": "Average peak"
+      }
+    },
+    "blood_pressure": {
+      "title": "血压",
+      "description": "带时间的读数：脉搏、照片、体位、咖啡因、睡眠、压力，以及头痛关联。",
+      "hint": "收缩压、舒张压和脉搏用于图表。把读数链到日记行，可看发作前后的血压。",
+      "example": "9月8日 08:15，148/92，脉搏 78，坐姿，少量咖啡，关联晨间偏头痛。",
+      "field": {
+        "title": "Entry",
+        "measured_at": "Date and time",
+        "systolic": "Systolic",
+        "diastolic": "Diastolic",
+        "pulse": "Pulse",
+        "irregular": "Irregular pulse",
+        "photo": "Photo of the reading",
+        "comment": "Comment",
+        "position": "Posture",
+        "arm": "Arm",
+        "mins_exercise": "Minutes after exercise",
+        "mins_meal": "Minutes after a meal",
+        "caffeine": "Caffeine",
+        "nicotine": "Nicotine",
+        "sleep_hours": "Sleep, hours",
+        "sleep_quality": "Sleep",
+        "stress": "Stress",
+        "wellbeing": "How you feel",
+        "headache_now": "Headache now",
+        "headache": "Attack",
+        "category": "Reading",
+        "notes": "Notes"
+      },
+      "fieldDesc": {
+        "mins_exercise": "Leave empty if there was no exercise. 0 means right after.",
+        "mins_meal": "Leave empty if you have not eaten recently.",
+        "headache": "Link the reading to a headache-diary row.",
+        "category": "A guide from the numbers: normal, elevated, high, crisis."
+      },
+      "opt": {
+        "position": {
+          "sitting": "Sitting",
+          "lying": "Lying",
+          "standing": "Standing"
+        },
+        "arm": {
+          "left": "Left",
+          "right": "Right"
+        },
+        "caffeine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "nicotine": {
+          "none": "None",
+          "little": "A little",
+          "moderate": "Moderate",
+          "a_lot": "A lot"
+        },
+        "sleep_quality": {
+          "poor": "Poor",
+          "fair": "Fair",
+          "good": "Good",
+          "excellent": "Excellent"
+        },
+        "stress": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "high": "High"
+        },
+        "headache_now": {
+          "none": "None",
+          "mild": "Mild",
+          "moderate": "Moderate",
+          "severe": "Severe"
+        },
+        "category": {
+          "low": "Low",
+          "normal": "Normal",
+          "elevated": "Elevated",
+          "high": "High",
+          "crisis": "Crisis"
+        }
+      },
+      "ph": {
+        "title": "Morning at home",
+        "systolic": "120",
+        "diastolic": "80"
+      },
+      "chart": {
+        "systolic": "Systolic",
+        "pulse": "Pulse",
+        "daily": "Pressure by day",
+        "categories": "Readings",
+        "kpi": "Average pressure"
+      }
+    },
+    "pack_health": {
+      "title": "头痛与血压",
+      "description": "两个互相关联的列表：头痛日记和血压记录。关系双向。",
+      "hint": "会创建两个列表。一次发作可挂多条血压；从血压可打开发作。",
+      "example": "晨间偏头痛 ← 两条读数（早晨偏高，服药后下降）。"
     }
   },
   "filters": {

@@ -18,7 +18,12 @@ type TranslateFn = (key: string) => string
 export interface TemplateChartSpec {
   key: string
   chart_type: 'timeline' | 'stem' | 'bar' | 'pie' | 'kpi' | 'line'
-  config: { dateFieldId?: string; valueFieldId?: string; aggregation?: 'count' | 'avg' | 'sum' }
+  config: {
+    dateFieldId?: string
+    valueFieldId?: string
+    groupFieldId?: string
+    aggregation?: 'count' | 'avg' | 'sum'
+  }
 }
 
 export interface TemplateSpec {
@@ -75,7 +80,317 @@ const playPriority = {
   options: optsColored(['now', '#be123c'], ['soon', '#b45309'], ['someday', '#6e6578']),
 }
 
+const painLevels = {
+  options: optsColored(
+    ['0', '#6e6578'],
+    ['1', '#0f766e'],
+    ['2', '#0f766e'],
+    ['3', '#0f766e'],
+    ['4', '#b45309'],
+    ['5', '#b45309'],
+    ['6', '#b45309'],
+    ['7', '#c2410c'],
+    ['8', '#c2410c'],
+    ['9', '#be123c'],
+    ['10', '#9f1239'],
+  ),
+}
+
+const headacheKind = {
+  options: optsColored(
+    ['migraine', '#be123c'],
+    ['tension', '#b45309'],
+    ['cluster', '#7c3aed'],
+    ['mixed', '#2563eb'],
+    ['unknown', '#6e6578'],
+    ['other', '#6e6578'],
+  ),
+}
+
+const laterality = { options: opts('left', 'right', 'both', 'shifting') }
+const location = {
+  options: opts(
+    'forehead',
+    'left_temple',
+    'right_temple',
+    'crown',
+    'occiput',
+    'neck',
+    'left_eye',
+    'right_eye',
+    'face',
+    'whole',
+  ),
+}
+const character = {
+  options: opts('throbbing', 'pressing', 'tight', 'stabbing', 'burning', 'dull', 'exploding'),
+}
+const symptoms = {
+  options: opts(
+    'visual',
+    'photophobia',
+    'phonophobia',
+    'osmophobia',
+    'nausea',
+    'vomiting',
+    'dizziness',
+    'neck',
+    'tearing',
+    'nasal',
+    'speech',
+    'numbness',
+    'confusion',
+    'yawning',
+    'tinnitus',
+    'other',
+  ),
+}
+const impact = {
+  options: optsColored(['none', '#0f766e'], ['slowed', '#b45309'], ['stopped', '#be123c']),
+}
+const triggers = {
+  options: opts(
+    'sleep_loss',
+    'oversleep',
+    'stress',
+    'weather',
+    'screens',
+    'skipped_meal',
+    'alcohol',
+    'caffeine',
+    'hormones',
+    'neck',
+    'smell',
+    'light',
+    'dehydration',
+    'heat',
+    'travel',
+    'food',
+    'exercise',
+  ),
+}
+const helped = {
+  options: opts(
+    'dark',
+    'sleep',
+    'water',
+    'caffeine',
+    'painkiller',
+    'cold',
+    'walk',
+    'air',
+    'massage',
+    'rest',
+    'time',
+  ),
+}
+const medEffect = {
+  options: optsColored(
+    ['none', '#6e6578'],
+    ['partial', '#b45309'],
+    ['good', '#0f766e'],
+    ['gone', '#0f766e'],
+    ['worse', '#be123c'],
+  ),
+}
+const activityKind = { options: opts('walk', 'run', 'gym', 'yoga', 'cycle', 'chores', 'other') }
+const activityIntensity = {
+  options: optsColored(['light', '#0f766e'], ['moderate', '#b45309'], ['vigorous', '#be123c']),
+}
+const activityEffect = {
+  options: opts('better_during', 'worse_during', 'better_after', 'worse_after', 'none', 'mixed'),
+}
+
 export const TEMPLATES: TemplateSpec[] = [
+  {
+    key: 'headache_diary',
+    icon: '🤕',
+    schema: {
+      fields: [
+        f('title', 'text', { required: true, config: { maxLength: 160, placeholder: 'x' } }),
+        f('kind', 'select', { config: headacheKind }),
+        f('started_at', 'datetime', { required: true }),
+        f('ended_at', 'datetime'),
+        f('ongoing', 'boolean'),
+        f('intensity', 'sublist', {
+          config: {
+            sublistSummary: {
+              mode: 'peak_span',
+              valueFieldId: 'level',
+              startFieldId: 'at',
+              endFieldId: 'until',
+            },
+            subfields: [
+              sf('at', 'datetime', { required: true }),
+              sf('until', 'datetime'),
+              sf('level', 'select', { required: true, config: painLevels }),
+              sf('note', 'text', { config: { maxLength: 200, placeholder: 'x' } }),
+            ],
+          },
+        }),
+        f('laterality', 'select', { config: laterality }),
+        f('location', 'multiselect', { config: location }),
+        f('character', 'multiselect', { config: character }),
+        f('symptoms', 'multiselect', { config: symptoms }),
+        f('started_asleep', 'boolean'),
+        f('ended_asleep', 'boolean'),
+        f('impact', 'select', { config: impact }),
+        f('meds', 'sublist', {
+          config: {
+            subfields: [
+              sf('taken_at', 'datetime', { required: true }),
+              sf('name', 'text', { required: true, config: { maxLength: 80, placeholder: 'x' } }),
+              sf('dose', 'text', { config: { maxLength: 40, placeholder: 'x' } }),
+              sf('felt_at', 'datetime'),
+              sf('effect', 'select', { config: medEffect }),
+              sf('note', 'text', { config: { maxLength: 160 } }),
+            ],
+          },
+        }),
+        f('activity', 'sublist', {
+          config: {
+            subfields: [
+              sf('at', 'datetime'),
+              sf('kind', 'select', { config: activityKind }),
+              sf('intensity', 'select', { config: activityIntensity }),
+              sf('effect', 'select', { config: activityEffect }),
+              sf('note', 'text', { config: { maxLength: 200, placeholder: 'x' } }),
+            ],
+          },
+        }),
+        f('triggers', 'multiselect', { config: triggers }),
+        f('helped', 'multiselect', { config: helped }),
+        f('bp_readings', 'relation', { config: { allowMultiple: true, relationDisplay: 'title' } }),
+        f('notes', 'textarea', { config: { maxLength: 2000 } }),
+      ],
+      titleFieldId: 'title',
+      dateFieldId: 'started_at',
+      groupFieldId: 'kind',
+    },
+    view: { mode: 'table', dateFieldId: 'started_at', groupFieldId: 'kind' },
+    charts: [
+      { key: 'timeline', chart_type: 'timeline', config: { dateFieldId: 'started_at', aggregation: 'count' } },
+      {
+        key: 'peak',
+        chart_type: 'stem',
+        config: { dateFieldId: 'started_at', valueFieldId: 'intensity', aggregation: 'avg' },
+      },
+      { key: 'kinds', chart_type: 'pie', config: { groupFieldId: 'kind' } },
+      { key: 'kpi', chart_type: 'kpi', config: { valueFieldId: 'intensity', aggregation: 'avg' } },
+    ],
+  },
+  {
+    key: 'blood_pressure',
+    icon: '❤️',
+    schema: {
+      fields: [
+        f('title', 'text', { required: true, config: { maxLength: 160, placeholder: 'x' } }),
+        f('measured_at', 'datetime', { required: true }),
+        f('systolic', 'integer', { required: true, config: { min: 70, max: 260, placeholder: 'x' } }),
+        f('diastolic', 'integer', { required: true, config: { min: 40, max: 160, placeholder: 'x' } }),
+        f('pulse', 'integer', { config: { min: 30, max: 220 } }),
+        f('irregular', 'boolean'),
+        f('photo', 'image', { config: { maxSizeMb: 2, accept: ['image/jpeg', 'image/png', 'image/webp'] } }),
+        f('comment', 'text', { config: { maxLength: 200 } }),
+        f('position', 'select', {
+          config: {
+            defaultValue: 'sitting',
+            options: opts('sitting', 'lying', 'standing'),
+          },
+        }),
+        f('arm', 'select', { config: { options: opts('left', 'right') } }),
+        f('mins_exercise', 'integer', { config: { min: 0, max: 300 } }),
+        f('mins_meal', 'integer', { config: { min: 0, max: 300 } }),
+        f('caffeine', 'select', {
+          config: {
+            defaultValue: 'none',
+            options: optsColored(
+              ['none', '#0f766e'],
+              ['little', '#6e6578'],
+              ['moderate', '#b45309'],
+              ['a_lot', '#be123c'],
+            ),
+          },
+        }),
+        f('nicotine', 'select', {
+          config: {
+            defaultValue: 'none',
+            options: optsColored(
+              ['none', '#0f766e'],
+              ['little', '#6e6578'],
+              ['moderate', '#b45309'],
+              ['a_lot', '#be123c'],
+            ),
+          },
+        }),
+        f('sleep_hours', 'number', { config: { min: 0, max: 16 } }),
+        f('sleep_quality', 'select', {
+          config: {
+            options: optsColored(
+              ['poor', '#be123c'],
+              ['fair', '#b45309'],
+              ['good', '#0f766e'],
+              ['excellent', '#0f766e'],
+            ),
+          },
+        }),
+        f('stress', 'select', {
+          config: {
+            options: optsColored(
+              ['none', '#0f766e'],
+              ['mild', '#6e6578'],
+              ['moderate', '#b45309'],
+              ['high', '#be123c'],
+            ),
+          },
+        }),
+        f('wellbeing', 'rating', { config: { ratingMax: 10, min: 1, max: 10 } }),
+        f('headache_now', 'select', {
+          config: {
+            options: optsColored(
+              ['none', '#0f766e'],
+              ['mild', '#b45309'],
+              ['moderate', '#c2410c'],
+              ['severe', '#be123c'],
+            ),
+          },
+        }),
+        f('headache', 'relation', { config: { allowMultiple: true, relationDisplay: 'title' } }),
+        f('category', 'select', {
+          config: {
+            options: optsColored(
+              ['low', '#2563eb'],
+              ['normal', '#0f766e'],
+              ['elevated', '#b45309'],
+              ['high', '#be123c'],
+              ['crisis', '#9f1239'],
+            ),
+          },
+        }),
+        f('notes', 'textarea', { config: { maxLength: 1500 } }),
+      ],
+      titleFieldId: 'title',
+      dateFieldId: 'measured_at',
+      imageFieldId: 'photo',
+      groupFieldId: 'category',
+    },
+    view: { mode: 'table', dateFieldId: 'measured_at', groupFieldId: 'category' },
+    charts: [
+      {
+        key: 'systolic',
+        chart_type: 'line',
+        config: { dateFieldId: 'measured_at', valueFieldId: 'systolic', aggregation: 'avg' },
+      },
+      { key: 'pulse', chart_type: 'line', config: { dateFieldId: 'measured_at', valueFieldId: 'pulse', aggregation: 'avg' } },
+      {
+        key: 'daily',
+        chart_type: 'bar',
+        config: { dateFieldId: 'measured_at', valueFieldId: 'systolic', aggregation: 'avg' },
+      },
+      { key: 'categories', chart_type: 'pie', config: { groupFieldId: 'category' } },
+      { key: 'kpi', chart_type: 'kpi', config: { valueFieldId: 'systolic', aggregation: 'avg' } },
+    ],
+  },
   {
     key: 'blank',
     icon: '✨',
@@ -357,6 +672,18 @@ export const TEMPLATES: TemplateSpec[] = [
 
 export const TEMPLATE_PACKS: TemplatePack[] = [
   {
+    key: 'health',
+    icon: '🩺',
+    lists: [
+      TEMPLATES.find((t) => t.key === 'headache_diary')!,
+      TEMPLATES.find((t) => t.key === 'blood_pressure')!,
+    ],
+    relations: [
+      { fromKey: 'headache_diary', fieldId: 'bp_readings', toKey: 'blood_pressure' },
+      { fromKey: 'blood_pressure', fieldId: 'headache', toKey: 'headache_diary' },
+    ],
+  },
+  {
     key: 'catalog_log',
     icon: '📖',
     lists: [
@@ -440,15 +767,31 @@ function localizeField(templateKey: string, field: FieldDef, t: TranslateFn, par
   const nameKey = parentId
     ? `tpl.${templateKey}.sub.${parentId}.${field.id}`
     : `tpl.${templateKey}.field.${field.id}`
+  const descKey = parentId
+    ? `tpl.${templateKey}.fieldDesc.${parentId}.${field.id}`
+    : `tpl.${templateKey}.fieldDesc.${field.id}`
+  const desc = t(descKey)
   const config = field.config ? { ...field.config } : undefined
   if (config?.options) {
-    config.options = config.options.map((opt) => ({
-      ...opt,
-      label: t(`tpl.${templateKey}.opt.${field.id}.${opt.value}`),
-    }))
+    config.options = config.options.map((opt) => {
+      const labelKey = parentId
+        ? `tpl.${templateKey}.opt.${parentId}.${field.id}.${opt.value}`
+        : `tpl.${templateKey}.opt.${field.id}.${opt.value}`
+      const optDescKey = parentId
+        ? `tpl.${templateKey}.optDesc.${parentId}.${field.id}.${opt.value}`
+        : `tpl.${templateKey}.optDesc.${field.id}.${opt.value}`
+      const optDesc = t(optDescKey)
+      return {
+        ...opt,
+        label: t(labelKey),
+        description: optDesc !== optDescKey ? optDesc : opt.description,
+      }
+    })
   }
   if (config && Object.prototype.hasOwnProperty.call(config, 'placeholder')) {
-    config.placeholder = t(`tpl.${templateKey}.ph.${field.id}`)
+    config.placeholder = t(
+      parentId ? `tpl.${templateKey}.ph.${parentId}.${field.id}` : `tpl.${templateKey}.ph.${field.id}`,
+    )
   }
   if (config?.subfields) {
     config.subfields = config.subfields.map((sub) => {
@@ -463,7 +806,12 @@ function localizeField(templateKey: string, field: FieldDef, t: TranslateFn, par
       }
     })
   }
-  return { ...field, name: t(nameKey), config }
+  return {
+    ...field,
+    name: t(nameKey),
+    description: desc !== descKey ? desc : field.description,
+    config,
+  }
 }
 
 export function localizeSchema(templateKey: string, schema: ListSchema, t: TranslateFn = msg): ListSchema {

@@ -9,7 +9,8 @@ export function uid(): string {
 }
 
 const CIVIL_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/
-const WALL_DATETIME_RE = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/
+const WALL_DATETIME_RE =
+  /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.\d+)?)?$/
 
 export function hasTimeZoneOffset(raw: string): boolean {
   if (/Z$/i.test(raw)) return true
@@ -79,7 +80,8 @@ export function asDatetimeInputValue(value: unknown): string {
   if (value == null || value === '') return ''
   const raw = String(value).trim()
   if (!raw) return ''
-  if (!hasTimeZoneOffset(raw) && WALL_DATETIME_RE.test(raw)) return raw.slice(0, 16)
+  if (!hasTimeZoneOffset(raw) && WALL_DATETIME_RE.test(raw))
+    return raw.slice(0, 16)
   if (!hasTimeZoneOffset(raw) && CIVIL_DATE_RE.test(raw)) return `${raw}T00:00`
   const parsed = parseWallOrInstant(raw)
   return parsed ? nowLocalIso(parsed) : raw.slice(0, 16)
@@ -110,6 +112,30 @@ export function formatDateTime(value: string | null | undefined): string {
   return d.toLocaleString(dateLocale(), opts)
 }
 
+export function formatClock(value: string | null | undefined): string {
+  if (!value) return '—'
+  const d = parseWallOrInstant(value)
+  if (!d) return value
+  return d.toLocaleTimeString(dateLocale(), {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+export function formatTimeSpan(
+  start?: string | null,
+  end?: string | null,
+): string {
+  if (!start && !end) return ''
+  if (start && end) {
+    if (civilDateFromValue(start) === civilDateFromValue(end)) {
+      return `${formatClock(start)}–${formatClock(end)}`
+    }
+    return `${formatDateTime(start)} – ${formatDateTime(end)}`
+  }
+  return formatDateTime(start || end)
+}
+
 export function formatRelativeTime(value: string | null | undefined): string {
   if (!value) return '—'
   const d = parseWallOrInstant(value)
@@ -124,10 +150,25 @@ export function formatRelativeTime(value: string | null | undefined): string {
   return formatDateTime(value)
 }
 
+function looksLikeDateTime(value: string): boolean {
+  return (
+    CIVIL_DATE_RE.test(value) ||
+    WALL_DATETIME_RE.test(value) ||
+    hasTimeZoneOffset(value)
+  )
+}
+
 function valueLabel(value: unknown): string {
   if (value == null || value === '') return ''
-  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
-  if (Array.isArray(value)) return value.map(valueLabel).filter(Boolean).join(', ')
+  if (typeof value === 'string') {
+    if (CIVIL_DATE_RE.test(value)) return formatDate(value)
+    if (looksLikeDateTime(value)) return formatDateTime(value)
+    return value
+  }
+  if (typeof value === 'number' || typeof value === 'boolean')
+    return String(value)
+  if (Array.isArray(value))
+    return value.map(valueLabel).filter(Boolean).join(', ')
   if (typeof value === 'object') {
     const row = value as { title?: unknown; name?: unknown; username?: unknown }
     if (row.title) return String(row.title)
@@ -141,10 +182,16 @@ export function titleFromValues(
   values: Record<string, unknown>,
   titleFieldId?: string | string[],
 ): string {
-  const ids = Array.isArray(titleFieldId) ? titleFieldId : titleFieldId ? [titleFieldId] : []
+  const ids = Array.isArray(titleFieldId)
+    ? titleFieldId
+    : titleFieldId
+      ? [titleFieldId]
+      : []
   const parts = ids.map((id) => valueLabel(values[id])).filter(Boolean)
   if (parts.length) return parts.join(' · ')
-  const first = Object.values(values).map(valueLabel).find((v) => v.trim().length > 0)
+  const first = Object.values(values)
+    .map(valueLabel)
+    .find((v) => v.trim().length > 0)
   return first || msg('fields.untitled')
 }
 
@@ -154,5 +201,8 @@ export function clamp(n: number, min: number, max: number): number {
 
 export function isApplePlatform(): boolean {
   if (typeof navigator === 'undefined') return false
-  return /Mac|iPhone|iPad|iPod/.test(navigator.platform) || /Mac OS X/.test(navigator.userAgent)
+  return (
+    /Mac|iPhone|iPad|iPod/.test(navigator.platform) ||
+    /Mac OS X/.test(navigator.userAgent)
+  )
 }

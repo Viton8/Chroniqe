@@ -1,9 +1,20 @@
 import { usesItemRatings } from '../../lib/ratings'
 import { Star } from 'lucide-react'
-import type { FieldDef, FieldViewStyle, ItemRating, ListSchema } from '../../types/domain'
-import { displayStyledValue, fieldBounds, formatNumberBody, resolveNumericValue } from '../../lib/display'
+import type {
+  FieldDef,
+  FieldViewStyle,
+  ItemRating,
+  ListSchema,
+} from '../../types/domain'
+import {
+  displayStyledValue,
+  fieldBounds,
+  formatNumberBody,
+  resolveNumericValue,
+} from '../../lib/display'
 import { cn } from '../../lib/cn'
 import RelationValue from './RelationValue'
+import SublistValue from './SublistValue'
 
 export default function StyledValue({
   field,
@@ -27,7 +38,26 @@ export default function StyledValue({
   if (field.type === 'relation') {
     return <RelationValue field={field} value={value} className={className} size="sm" />
   }
-  const numeric = resolveNumericValue(field, value, style, ratings, itemId, values, schema)
+  if (field.type === 'sublist') {
+    return (
+      <SublistValue
+        field={field}
+        value={value}
+        ratings={ratings}
+        itemId={itemId}
+        className={className}
+      />
+    )
+  }
+  const numeric = resolveNumericValue(
+    field,
+    value,
+    style,
+    ratings,
+    itemId,
+    values,
+    schema,
+  )
   if (numeric != null && style?.numberDisplay === 'stars') {
     const { max } = fieldBounds(field)
     const count =
@@ -54,14 +84,20 @@ function StarScore({ value, max }: { value: number; max: number }) {
   const visual = max > 10 ? 5 : Math.max(1, max)
   const scaled = max > 0 ? (value / max) * visual : 0
   return (
-    <span className="inline-flex items-center gap-px" title={`${formatNumberBody(value)}/${max}`}>
+    <span
+      className="inline-flex items-center gap-px"
+      title={`${formatNumberBody(value)}/${max}`}
+    >
       {Array.from({ length: visual }, (_, i) => {
         const fill = Math.min(1, Math.max(0, scaled - i))
         return (
           <span key={i} className="relative inline-block h-3.5 w-3.5">
             <Star size={14} className="text-line" />
             {fill > 0 ? (
-              <span className="absolute inset-0 overflow-hidden" style={{ width: `${fill * 100}%` }}>
+              <span
+                className="absolute inset-0 overflow-hidden"
+                style={{ width: `${fill * 100}%` }}
+              >
                 <Star size={14} className="fill-amber-400 text-amber-400" />
               </span>
             ) : null}

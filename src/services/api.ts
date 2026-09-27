@@ -918,13 +918,10 @@ export async function sendFriendRequest(fromId: string, toId: string): Promise<v
 }
 
 export async function respondFriend(id: string, accept: boolean): Promise<void> {
-  const { error } = await supabase
-    .from('friendships')
-    .update({
-      status: accept ? 'accepted' : 'declined',
-      responded_at: new Date().toISOString(),
-    })
-    .eq('id', id)
+  const { error } = await supabase.rpc('respond_friend', {
+    p_id: id,
+    p_accept: accept,
+  })
   throwIf(error)
 }
 

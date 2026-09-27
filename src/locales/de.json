@@ -97,7 +97,7 @@
     "featEditor": "Stärkerer Feld-Editor",
     "featEditorText": "Reihenfolge, Duplikate, Standardwerte, Eindeutigkeit und Hinweise für jedes Feld.",
     "featShare": "Per Link teilen",
-    "featShareText": "Der Eigentümer wählt, was der Link erlaubt: ansehen, Änderungen vorschlagen oder bearbeiten. Öffentliche Listen bleiben im Entdecken, Nur-Link-Listen nicht.",
+    "featShareText": "Der Eigentümer wählt, was der Link erlaubt: ansehen, Änderungen vorschlagen oder bearbeiten. Öffentliche Listen bleiben im Entdecken; Nur-Link-Listen nicht, und brauchen die geheime URL.",
     "featCommand": "Überall hinspringen",
     "featCommandText": "⌘K öffnet eine Befehlspalette — Listen, Einträge und Aktionen wie in Linear oder Notion.",
     "featFlow": "Automationen zum Bearbeiten",
@@ -1646,7 +1646,7 @@
     "title": "Liste teilen",
     "lead": "Wähle, was Personen mit dem Link tun dürfen, oder lade jemanden namentlich ein.",
     "anyone": "Wer den Link hat",
-    "anyoneHint": "Eine Nur-Link-Liste erscheint nicht unter Entdecken. Eine öffentliche bleibt öffentlich und nutzt denselben Zugriff.",
+    "anyoneHint": "Eine Nur-Link-Liste taucht nirgendwo in Listen auf. Nur wer den geheimen Link hat, kann sie öffnen. Eine öffentliche bleibt öffentlich und nutzt denselben Zugriff.",
     "access": {
       "off": "Kein offener Link",
       "view": "Nur ansehen",

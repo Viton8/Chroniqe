@@ -97,7 +97,7 @@
     "featEditor": "Mocniejszy edytor pól",
     "featEditorText": "Kolejność, duplikaty, wartości domyślne, unikalność i podpowiedzi dla każdego pola.",
     "featShare": "Udostępnianie linkiem",
-    "featShareText": "Właściciel wybiera, co pozwala link: oglądać, proponować zmiany albo edytować. Listy publiczne zostają w Explore, te tylko z linkiem — nie.",
+    "featShareText": "Właściciel wybiera, co pozwala link: oglądać, proponować zmiany albo edytować. Listy publiczne zostają w Explore; te tylko z linkiem nie, i potrzebują tajnego URL.",
     "featCommand": "Skok gdziekolwiek",
     "featCommandText": "⌘K otwiera paletę poleceń — listy, wpisy i akcje jak w Linear czy Notion.",
     "featFlow": "Automatyzacje do edycji",
@@ -1646,7 +1646,7 @@
     "title": "Udostępnij listę",
     "lead": "Wybierz, co mogą zrobić osoby z linkiem, albo zaproś kogoś po nazwie.",
     "anyone": "Kto ma link",
-    "anyoneHint": "Lista tylko z linkiem nie pojawia się w Explore. Publiczna zostaje publiczna i też używa tego dostępu.",
+    "anyoneHint": "Lista tylko z linkiem nie jest nigdzie wypisywana. Otworzą ją wyłącznie osoby z tajnym linkiem. Publiczna zostaje publiczna i też używa tego dostępu.",
     "access": {
       "off": "Bez otwartego linku",
       "view": "Tylko podgląd",

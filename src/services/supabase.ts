@@ -9,10 +9,30 @@ if (!supabaseUrl || !supabaseAnonKey) {
   )
 }
 
+let listShareToken: string | null = null
+
+export function setListShareToken(token: string | null): void {
+  const next = token?.trim() ?? ''
+  listShareToken = next || null
+}
+
+export function getListShareToken(): string | null {
+  return listShareToken
+}
+
 export const supabase = createClient(supabaseUrl ?? '', supabaseAnonKey ?? '', {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
+  },
+  global: {
+    fetch: (input: RequestInfo | URL, init?: RequestInit) => {
+      const headers = new Headers(
+        init?.headers ?? (input instanceof Request ? input.headers : undefined),
+      )
+      if (listShareToken) headers.set('x-list-share-token', listShareToken)
+      return fetch(input, { ...init, headers })
+    },
   },
 })

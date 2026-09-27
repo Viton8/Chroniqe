@@ -24,8 +24,9 @@ Lists store a JSON **schema** (fields + constraints), **view_config**, and **set
 | `notifications` | In-app events |
 | `files` | Upload metadata + scan status |
 
-Visibility: `private` · `invite` · `friends` · `public`.  
-Edit mode: `owner` · `selected` · `friends` · `proposals`.
+Visibility: `private` · `invite` · `friends` · `public` · `link`.  
+Edit mode: `owner` · `selected` · `friends` · `proposals`.  
+`link` stays off Explore. Read access needs the unguessable `share_token` (share URL query `s`), a membership, or the owner — not the list id alone. `settings.linkAccess` applies to link lists only after that token/grant check.
 
 `move_item` copies a row to another list with an optional field map.
 

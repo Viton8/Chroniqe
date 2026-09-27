@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, setListShareToken } from './supabase'
 import type {
   ActivityEvent,
   AppNotification,
@@ -144,7 +144,17 @@ export async function fetchSharedLists(userId: string): Promise<ListRow[]> {
     .select('list_id')
     .eq('user_id', userId)
   throwIf(memberError)
-  const ids = [...new Set((memberRows ?? []).map((r) => r.list_id as string))]
+  const { data: grantRows, error: grantError } = await supabase
+    .from('list_link_grants')
+    .select('list_id')
+    .eq('user_id', userId)
+  throwIf(grantError)
+  const ids = [
+    ...new Set([
+      ...(memberRows ?? []).map((r) => r.list_id as string),
+      ...(grantRows ?? []).map((r) => r.list_id as string),
+    ]),
+  ]
   if (!ids.length) return []
   const { data, error } = await supabase
     .from('lists')
@@ -175,6 +185,28 @@ export async function fetchList(id: string): Promise<ListRow | null> {
     .maybeSingle()
   throwIf(error)
   return hydrateList((data as ListRow | null) ?? null)
+}
+
+export async function openListShare(token: string): Promise<string> {
+  const { data, error } = await supabase.rpc('open_list_share', { p_token: token })
+  throwIf(error)
+  return data as string
+}
+
+export async function fetchListWithShareAccess(
+  id: string,
+  shareToken?: string | null,
+): Promise<ListRow | null> {
+  const token = shareToken?.trim() || null
+  setListShareToken(token)
+  if (token) {
+    try {
+      await openListShare(token)
+    } catch {
+      /* closed, rotated, or not a link list — fetchList still applies RLS */
+    }
+  }
+  return fetchList(id)
 }
 
 export async function fetchListsByIds(ids: string[]): Promise<ListRow[]> {

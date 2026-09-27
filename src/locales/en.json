@@ -97,7 +97,7 @@
     "featEditor": "Stronger field editor",
     "featEditorText": "Reorder, duplicate, defaults, unique values and hints for every field.",
     "featShare": "Share by link",
-    "featShareText": "The owner chooses what the link allows: view, propose changes, or edit. Public lists stay on Explore; link-only lists stay off it.",
+    "featShareText": "The owner chooses what the link allows: view, propose changes, or edit. Public lists stay on Explore; link-only lists stay off it and need the secret URL.",
     "featCommand": "Jump anywhere",
     "featCommandText": "⌘K opens a command palette — lists, items and actions, like Linear or Notion.",
     "featFlow": "Automations you can edit",
@@ -1646,7 +1646,7 @@
     "title": "Share list",
     "lead": "Choose what people with the link can do, or invite someone by name.",
     "anyone": "Anyone with the link",
-    "anyoneHint": "A link-only list is not shown on Explore. A public list stays public and also uses this access.",
+    "anyoneHint": "A link-only list is not listed anywhere. Only people who have the secret link can open it. A public list stays public and also uses this access.",
     "access": {
       "off": "No open link",
       "view": "View only",

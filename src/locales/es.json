@@ -97,7 +97,7 @@
     "featEditor": "Editor de campos más potente",
     "featEditorText": "Orden, duplicados, valores por defecto, unicidad y pistas para cada campo.",
     "featShare": "Compartir con enlace",
-    "featShareText": "El dueño elige qué permite el enlace: ver, proponer cambios o editar. Las listas públicas siguen en Explorar; las solo-enlace, no.",
+    "featShareText": "El dueño elige qué permite el enlace: ver, proponer cambios o editar. Las listas públicas siguen en Explorar; las solo-enlace no aparecen y necesitan la URL secreta.",
     "featCommand": "Saltar a cualquier sitio",
     "featCommandText": "⌘K abre una paleta de comandos — listas, ítems y acciones, como Linear o Notion.",
     "featFlow": "Automatizaciones editables",
@@ -1646,7 +1646,7 @@
     "title": "Compartir lista",
     "lead": "Elige qué pueden hacer las personas con el enlace, o invita a alguien por nombre.",
     "anyone": "Quien tenga el enlace",
-    "anyoneHint": "Una lista solo con enlace no aparece en Explorar. Una pública sigue pública y también usa este acceso.",
+    "anyoneHint": "Una lista solo con enlace no aparece en ningún listado. Solo quien tenga el enlace secreto puede abrirla. Una pública sigue pública y también usa este acceso.",
     "access": {
       "off": "Sin enlace abierto",
       "view": "Solo ver",

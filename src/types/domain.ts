@@ -317,6 +317,7 @@ export interface ListRow {
   settings: ListSettings
   visibility: Visibility
   edit_mode: EditMode
+  share_token?: string | null
   created_at: string
   updated_at: string
   updated_by?: string | null

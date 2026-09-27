@@ -63,14 +63,12 @@ AS $$
 BEGIN
   IF p_token IS NULL THEN
     PERFORM set_config('request.headers', '', true);
-    PERFORM set_config('request.header.x-list-share-token', '', true);
   ELSE
     PERFORM set_config(
       'request.headers',
       json_build_object('x-list-share-token', p_token)::text,
       true
     );
-    PERFORM set_config('request.header.x-list-share-token', p_token::text, true);
   END IF;
 END;
 $$;

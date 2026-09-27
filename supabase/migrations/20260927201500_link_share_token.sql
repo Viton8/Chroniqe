@@ -61,10 +61,6 @@ BEGIN
     END;
   END IF;
 
-  IF raw IS NULL THEN
-    raw := nullif(current_setting('request.header.x-list-share-token', true), '');
-  END IF;
-
   IF raw IS NULL OR raw = '' THEN
     RETURN NULL;
   END IF;

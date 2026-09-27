@@ -1221,6 +1221,8 @@ function ItemModal({
   )
   const [activeProposalId, setActiveProposalId] = useState<string | undefined>(draftProposal?.id)
   const [errors, setErrors] = useState<string[]>([])
+  const [transferring, setTransferring] = useState(false)
+  const transferringRef = useRef(false)
   const valuesBaseline = useRef(item?.values)
 
   useEffect(() => {
@@ -1409,8 +1411,12 @@ function ItemModal({
               key={a.id}
               variant="soft"
               size="sm"
+              disabled={transferring}
+              aria-busy={transferring}
               onClick={async () => {
-                if (!userId) return
+                if (!userId || transferringRef.current) return
+                transferringRef.current = true
+                setTransferring(true)
                 try {
                   const target = await fetchList(a.targetListId)
                   await transferItem({
@@ -1424,6 +1430,9 @@ function ItemModal({
                   await onSaved()
                 } catch (error) {
                   toast(error instanceof Error ? error.message : t('common.error'), 'err')
+                } finally {
+                  transferringRef.current = false
+                  setTransferring(false)
                 }
               }}
             >

@@ -126,7 +126,27 @@ export async function applyFieldEquals(input: {
   return current
 }
 
+const inFlightTransfers = new Map<string, Promise<string>>()
+
 export async function transferItem(input: {
+  item: ItemRow
+  action: TransferAction
+  userId: string
+  fields: FieldDef[]
+  targetFields?: FieldDef[]
+  automations: ListAutomation[]
+}): Promise<string> {
+  const key = `${input.item.id}:${input.action.id}`
+  const existing = inFlightTransfers.get(key)
+  if (existing) return existing
+  const request = runTransfer(input).finally(() => {
+    inFlightTransfers.delete(key)
+  })
+  inFlightTransfers.set(key, request)
+  return request
+}
+
+async function runTransfer(input: {
   item: ItemRow
   action: TransferAction
   userId: string

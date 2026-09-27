@@ -403,20 +403,45 @@ export async function deleteItem(id: string): Promise<void> {
   throwIf(error)
 }
 
+const inFlightMoves = new Map<string, Promise<string>>()
+
+function moveItemKey(input: {
+  itemId: string
+  targetListId: string
+  fieldMap?: Record<string, string>
+  deleteSource?: boolean
+}): string {
+  return JSON.stringify({
+    itemId: input.itemId,
+    targetListId: input.targetListId,
+    fieldMap: input.fieldMap ?? {},
+    deleteSource: input.deleteSource ?? true,
+  })
+}
+
 export async function moveItem(input: {
   itemId: string
   targetListId: string
   fieldMap?: Record<string, string>
   deleteSource?: boolean
 }): Promise<string> {
-  const { data, error } = await supabase.rpc('move_item', {
-    p_item_id: input.itemId,
-    p_target_list_id: input.targetListId,
-    p_field_map: input.fieldMap ?? {},
-    p_delete_source: input.deleteSource ?? true,
+  const key = moveItemKey(input)
+  const existing = inFlightMoves.get(key)
+  if (existing) return existing
+  const request = (async () => {
+    const { data, error } = await supabase.rpc('move_item', {
+      p_item_id: input.itemId,
+      p_target_list_id: input.targetListId,
+      p_field_map: input.fieldMap ?? {},
+      p_delete_source: input.deleteSource ?? true,
+    })
+    throwIf(error)
+    return data as string
+  })().finally(() => {
+    inFlightMoves.delete(key)
   })
-  throwIf(error)
-  return data as string
+  inFlightMoves.set(key, request)
+  return request
 }
 
 export async function fetchRatings(itemIds: string[]): Promise<ItemRating[]> {

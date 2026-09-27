@@ -908,11 +908,11 @@ export async function fetchFriendships(userId: string): Promise<Friendship[]> {
   return (data ?? []) as Friendship[]
 }
 
-export async function sendFriendRequest(fromId: string, toId: string): Promise<void> {
-  const { error } = await supabase.from('friendships').insert({
-    requester_id: fromId,
-    addressee_id: toId,
-    status: 'pending',
+export async function sendFriendRequest(_fromId: string, toId: string): Promise<void> {
+  // Replace a declined pair by delete+insert inside request_friend. A plain
+  // insert hits friendships_pair_key because decline leaves the row in place.
+  const { error } = await supabase.rpc('request_friend', {
+    p_addressee_id: toId,
   })
   throwIf(error)
 }

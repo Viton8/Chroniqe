@@ -1,5 +1,5 @@
-import { nowIso, nowLocalIso, todayIso } from './cn'
-import { fetchItem, moveItem, updateItem } from '../services/api'
+import { nowLocalIso, todayIso } from './cn'
+import { fetchItem, moveItem, toggleItemChecked, updateItem } from '../services/api'
 import type {
   AutomationAction,
   FieldDef,
@@ -181,30 +181,41 @@ export async function toggleChecked(input: {
   next: boolean
   fields?: FieldDef[]
 }): Promise<ItemRow> {
-  const snapshot = input.next ? input.item.values : input.item.check_snapshot
-  let current = await updateItem(input.item.id, {
-    is_checked: input.next,
-    checked_at: input.next ? nowIso() : null,
-    check_snapshot: input.next ? input.item.values : input.item.check_snapshot,
-    updated_by: input.userId,
+  return toggleItemChecked({
+    itemId: input.item.id,
+    checked: input.next,
+    nowDate: todayIso(),
+    nowDatetime: nowLocalIso(),
   })
+}
 
-  const fromSettings = input.next ? (input.settings.onCheck ?? []) : (input.settings.onUncheck ?? [])
-  if (fromSettings.length) {
-    current = await applyActions(
-      { ...current, check_snapshot: snapshot as Record<string, unknown> },
-      fromSettings,
-      input.userId,
-      input.fields,
-    )
+/** Drop or replace the source row after a check, including when it moved lists. */
+export function itemsAfterCheckToggle(
+  prev: ItemRow[],
+  sourceId: string,
+  updated: ItemRow,
+  listId: string,
+): { items: ItemRow[]; removedSource: boolean } {
+  if (updated.list_id !== listId) {
+    return { items: prev.filter((row) => row.id !== sourceId), removedSource: true }
   }
-
-  const autos = matchingAutomations(
-    input.automations,
-    input.next ? 'checked' : 'unchecked',
-  )
-  for (const auto of autos) {
-    current = await applyActions(current, auto.actions, input.userId, input.fields)
+  let replaced = false
+  const mapped = prev.map((row) => {
+    if (row.id === sourceId || row.id === updated.id) {
+      replaced = true
+      return updated
+    }
+    return row
+  })
+  if (!replaced) return { items: [...prev, updated], removedSource: false }
+  if (sourceId === updated.id) return { items: mapped, removedSource: false }
+  const seen = new Set<string>()
+  return {
+    items: mapped.filter((row) => {
+      if (seen.has(row.id)) return false
+      seen.add(row.id)
+      return true
+    }),
+    removedSource: true,
   }
-  return current
 }

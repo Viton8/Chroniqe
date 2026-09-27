@@ -97,7 +97,7 @@ import FieldInput from '../components/fields/FieldInput'
 import ChartView from '../components/charts/ChartView'
 import { emptyValues, itemMatchesQuery, validateItem } from '../lib/validation'
 import { downloadText, itemsToCsv, itemsToJson, mapCsvToItems, parseCsv, parseImportJson } from '../lib/export'
-import { applyFieldEquals, toggleChecked, transferItem } from '../lib/automations'
+import { applyFieldEquals, itemsAfterCheckToggle, toggleChecked, transferItem } from '../lib/automations'
 import { asDatetimeInputValue, formatDateTime, titleFromValues } from '../lib/cn'
 import { effectiveAgendaConfig } from '../lib/agenda'
 import { useCommand } from '../context/CommandContext'
@@ -144,6 +144,8 @@ function ListWorkspace({ id }: { id: string }) {
 
   const [list, setList] = useState<ListRow | null>(null)
   const [items, setItems] = useState<ItemRow[]>([])
+  const itemsEpochRef = useRef(0)
+  const hiddenItemIdsRef = useRef(new Set<string>())
   const [itemNotes, setItemNotes] = useState<ItemComment[]>([])
   const [ratings, setRatings] = useState<ItemRating[]>([])
   const [perms, setPerms] = useState<ListPermissions | null>(null)
@@ -181,8 +183,21 @@ function ListWorkspace({ id }: { id: string }) {
   const moreRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
 
+  const applyFetchedItems = (its: ItemRow[]) => {
+    const hidden = hiddenItemIdsRef.current
+    if (hidden.size) {
+      for (const hid of [...hidden]) {
+        if (!its.some((row) => row.id === hid)) hidden.delete(hid)
+      }
+    }
+    const visible = hidden.size ? its.filter((row) => !hidden.has(row.id)) : its
+    setItems(visible)
+    return visible
+  }
+
   const reload = async (openFromUrl = false) => {
     if (!id) return
+    const epoch = itemsEpochRef.current
     const row = await fetchList(id)
     setList(row)
     if (!row) return
@@ -193,19 +208,22 @@ function ListWorkspace({ id }: { id: string }) {
       fetchAutomations(id),
       fetchActivity(id),
     ])
-    setItems(its)
     setPerms(p)
     setCharts(ch)
     setAutomations(au)
     setActivity(act)
+    if (epoch === itemsEpochRef.current) {
+      applyFetchedItems(its)
+    }
+    const visible = its.filter((item) => !hiddenItemIdsRef.current.has(item.id))
     if (openFromUrl) {
       const want = searchParams.get('item')
       if (want) {
-        const match = its.find((item) => item.id === want)
+        const match = visible.find((item) => item.id === want)
         if (match) setOpenItem(match)
       }
     }
-    const ids = its.map((i) => i.id)
+    const ids = visible.map((i) => i.id)
     setRatings(await fetchRatings(ids))
     setItemNotes(await fetchCommentsForItems(ids))
     if (p.owner) {
@@ -241,9 +259,11 @@ function ListWorkspace({ id }: { id: string }) {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'items', filter: `list_id=eq.${id}` },
         () => {
+          const epoch = itemsEpochRef.current
           void fetchItems(id).then(async (its) => {
-            setItems(its)
-            const ids = its.map((i) => i.id)
+            if (epoch !== itemsEpochRef.current) return
+            const visible = applyFetchedItems(its)
+            const ids = visible.map((i) => i.id)
             setItemNotes(await fetchCommentsForItems(ids))
             setRatings(await fetchRatings(ids))
           })
@@ -507,7 +527,21 @@ function ListWorkspace({ id }: { id: string }) {
       next,
       fields: list.schema.fields,
     })
-    setItems((prev) => prev.map((i) => (i.id === updated.id ? updated : i)))
+    const removedSource = updated.list_id !== list.id || updated.id !== item.id
+    if (removedSource) {
+      itemsEpochRef.current += 1
+      hiddenItemIdsRef.current.add(item.id)
+      setSelected((prev) => {
+        if (!prev.has(item.id)) return prev
+        const nextSelected = new Set(prev)
+        nextSelected.delete(item.id)
+        return nextSelected
+      })
+      if (openItemId === item.id) {
+        setOpenItemId(updated.list_id === list.id ? updated.id : null)
+      }
+    }
+    setItems((prev) => itemsAfterCheckToggle(prev, item.id, updated, list.id).items)
   }
 
   const dateFieldId = view.dateFieldId ?? schema.dateFieldId

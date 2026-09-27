@@ -419,6 +419,24 @@ export async function moveItem(input: {
   return data as string
 }
 
+export async function toggleItemChecked(input: {
+  itemId: string
+  checked: boolean
+  nowDate?: string | null
+  nowDatetime?: string | null
+}): Promise<ItemRow> {
+  const { data, error } = await supabase.rpc('toggle_item_checked', {
+    p_item_id: input.itemId,
+    p_checked: input.checked,
+    p_now_date: input.nowDate ?? null,
+    p_now_datetime: input.nowDatetime ?? null,
+  })
+  throwIf(error)
+  const row = Array.isArray(data) ? data[0] : data
+  if (!row) throw new Error('toggle_item_checked returned no row')
+  return row as ItemRow
+}
+
 export async function fetchRatings(itemIds: string[]): Promise<ItemRating[]> {
   if (!itemIds.length) return []
   const { data, error } = await supabase

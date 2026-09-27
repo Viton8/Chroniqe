@@ -1666,6 +1666,8 @@
     "invited": "Einladung gesendet",
     "copyInvite": "Einladungslink mit Rolle kopieren",
     "pending": "Offene Einladungen",
+    "revoke": "Widerrufen",
+    "revoked": "Einladung widerrufen",
     "openLink": "Offener Einladungslink",
     "joinMissing": "Einladung nicht gefunden",
     "joinMissingText": "Der Link ist ungültig oder die Einladung wurde zurückgezogen.",

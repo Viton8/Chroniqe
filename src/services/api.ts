@@ -649,6 +649,11 @@ export async function respondInvite(
   throwIf(error)
 }
 
+export async function revokeInvite(id: string): Promise<void> {
+  const { error } = await supabase.from('list_invites').delete().eq('id', id)
+  throwIf(error)
+}
+
 export async function fetchProposals(listId: string): Promise<ChangeProposal[]> {
   const { data, error } = await supabase
     .from('change_proposals')

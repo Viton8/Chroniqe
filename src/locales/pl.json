@@ -1666,6 +1666,8 @@
     "invited": "Zaproszenie wysłane",
     "copyInvite": "Kopiuj zaproszenie z rolą",
     "pending": "Oczekujące zaproszenia",
+    "revoke": "Unieważnij",
+    "revoked": "Zaproszenie unieważnione",
     "openLink": "Otwarty link-zaproszenie",
     "joinMissing": "Nie znaleziono zaproszenia",
     "joinMissingText": "Link jest nieprawidłowy albo zaproszenie zostało wycofane.",

@@ -1666,6 +1666,8 @@
     "invited": "邀请已发送",
     "copyInvite": "复制带角色的邀请链接",
     "pending": "待处理邀请",
+    "revoke": "撤销",
+    "revoked": "邀请已撤销",
     "openLink": "开放邀请链接",
     "joinMissing": "找不到邀请",
     "joinMissingText": "链接无效或邀请已被撤回。",

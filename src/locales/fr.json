@@ -1666,6 +1666,8 @@
     "invited": "Invitation envoyée",
     "copyInvite": "Copier une invitation avec un rôle",
     "pending": "Invitations en attente",
+    "revoke": "Révoquer",
+    "revoked": "Invitation révoquée",
     "openLink": "Lien d’invitation ouvert",
     "joinMissing": "Invitation introuvable",
     "joinMissingText": "Le lien est invalide ou l’invitation a été retirée.",

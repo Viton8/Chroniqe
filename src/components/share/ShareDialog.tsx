@@ -8,6 +8,7 @@ import { useToast } from '../../context/ToastContext'
 import {
   createInvite,
   fetchListInvites,
+  revokeInvite,
   searchProfiles,
   updateList,
 } from '../../services/api'
@@ -84,6 +85,15 @@ export default function ShareDialog({
   const copy = async (url: string) => {
     await navigator.clipboard.writeText(url)
     toast(t('common.copied'))
+  }
+
+  const revoke = (id: string) => {
+    void revokeInvite(id)
+      .then(() => {
+        setInvites((prev) => prev.filter((row) => row.id !== id))
+        toast(t('share.revoked'))
+      })
+      .catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
   }
 
   return (
@@ -209,9 +219,14 @@ export default function ShareDialog({
                   profile={invite.invitee}
                   meta={t(`settingsModal.${invite.role}`)}
                   action={
-                    <Button size="sm" variant="ghost" onClick={() => void copy(joinShareUrl(invite.token))}>
-                      {t('common.share')}
-                    </Button>
+                    <>
+                      <Button size="sm" variant="ghost" onClick={() => void copy(joinShareUrl(invite.token))}>
+                        {t('common.share')}
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => revoke(invite.id)}>
+                        {t('share.revoke')}
+                      </Button>
+                    </>
                   }
                 />
               ) : (
@@ -223,9 +238,14 @@ export default function ShareDialog({
                     {t('share.openLink')}
                     <span className="ml-2 text-xs text-muted">{t(`settingsModal.${invite.role}`)}</span>
                   </span>
-                  <Button size="sm" variant="ghost" onClick={() => void copy(joinShareUrl(invite.token))}>
-                    {t('common.share')}
-                  </Button>
+                  <span className="flex shrink-0 gap-1">
+                    <Button size="sm" variant="ghost" onClick={() => void copy(joinShareUrl(invite.token))}>
+                      {t('common.share')}
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => revoke(invite.id)}>
+                      {t('share.revoke')}
+                    </Button>
+                  </span>
                 </li>
               ),
             )}

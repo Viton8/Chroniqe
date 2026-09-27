@@ -398,8 +398,19 @@ export async function updateItem(
   return data as ItemRow
 }
 
+export async function deleteItems(ids: string[]): Promise<void> {
+  if (!ids.length) return
+  const { error } = await supabase.rpc('delete_items', { p_item_ids: ids })
+  throwIf(error)
+}
+
 export async function deleteItem(id: string): Promise<void> {
-  const { error } = await supabase.from('items').delete().eq('id', id)
+  await deleteItems([id])
+}
+
+export async function restoreItems(ids: string[]): Promise<void> {
+  if (!ids.length) return
+  const { error } = await supabase.rpc('restore_items', { p_item_ids: ids })
   throwIf(error)
 }
 

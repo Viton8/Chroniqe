@@ -28,6 +28,7 @@ import {
   deleteProposal,
   deleteChart,
   deleteItem,
+  deleteItems,
   deleteList,
   duplicateList,
   fetchActivity,
@@ -42,6 +43,7 @@ import {
   isSubscribed,
   listPermissions,
   removeMember,
+  restoreItems,
   reviewProposal,
   saveProposal,
   searchProfiles,
@@ -519,21 +521,8 @@ function ListWorkspace({ id }: { id: string }) {
     setCreating(true)
   }
 
-  const restoreItems = async (rows: ItemRow[]) => {
-    if (!user) return
-    await Promise.all(
-      rows.map((row, index) =>
-        createItem({
-          list_id: list.id,
-          values: { ...row.values },
-          position: row.position || Date.now() / 1000 + index * 0.001,
-          created_by: user.id,
-          is_checked: row.is_checked,
-          checked_at: row.checked_at,
-          check_snapshot: row.check_snapshot,
-        }),
-      ),
-    )
+  const undoDeleted = async (ids: string[]) => {
+    await restoreItems(ids)
     await reload()
   }
 
@@ -850,15 +839,15 @@ function ListWorkspace({ id }: { id: string }) {
                 }}
                 onDelete={async () => {
                   if (!window.confirm(t('bulk.deleteConfirm', { n: selected.size }))) return
-                  const snapshot = items.filter((item) => selected.has(item.id))
+                  const ids = items.filter((item) => selected.has(item.id)).map((item) => item.id)
                   try {
-                    await Promise.all(snapshot.map((item) => deleteItem(item.id)))
+                    await deleteItems(ids)
                     setSelected(new Set())
                     await reload()
                     toast(t('list.deleted'), 'ok', {
                       label: t('common.undo'),
                       onClick: () => {
-                        void restoreItems(snapshot).catch((error) =>
+                        void undoDeleted(ids).catch((error) =>
                           toast(error instanceof Error ? error.message : t('common.error'), 'err'),
                         )
                       },
@@ -1439,22 +1428,13 @@ function ItemModal({
             <Button
               variant="danger"
               onClick={async () => {
-                const snapshot = { ...item, values }
-                await deleteItem(item.id)
+                const itemId = item.id
+                await deleteItem(itemId)
                 await onSaved()
                 toast(t('list.deleted'), 'ok', {
                   label: t('common.undo'),
                   onClick: () => {
-                    if (!userId) return
-                    void createItem({
-                      list_id: list.id,
-                      values: snapshot.values,
-                      position: snapshot.position,
-                      created_by: userId,
-                      is_checked: snapshot.is_checked,
-                      checked_at: snapshot.checked_at,
-                      check_snapshot: snapshot.check_snapshot,
-                    })
+                    void restoreItems([itemId])
                       .then(() => onSaved())
                       .catch((error) => toast(error instanceof Error ? error.message : t('common.error'), 'err'))
                   },

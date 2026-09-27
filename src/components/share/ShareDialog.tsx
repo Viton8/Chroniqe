@@ -12,7 +12,7 @@ import {
   updateList,
 } from '../../services/api'
 import type { LinkAccess, ListInvite, ListRow, MemberRole, Profile } from '../../types/domain'
-import { applyLinkAccess, joinShareUrl, listLinkAccess, listShareUrl, roleForLinkAccess } from '../../lib/share'
+import { applyLinkAccess, joinShareUrl, listLinkAccess, listOpenUrl, roleForLinkAccess } from '../../lib/share'
 import { useDebouncedValue } from '../../hooks/useDebouncedValue'
 import { cn } from '../../lib/cn'
 import PersonRow from '../people/PersonRow'
@@ -118,7 +118,7 @@ export default function ShareDialog({
             )
           })}
         </div>
-        <Button variant="soft" onClick={() => void copy(listShareUrl(list.id))}>
+        <Button variant="soft" onClick={() => void copy(listOpenUrl(list))}>
           <Link2 size={14} /> {t('share.copyList')}
         </Button>
         {access === 'off' ? <p className="text-xs text-muted">{t('share.copyOffHint')}</p> : null}

@@ -97,7 +97,7 @@
     "featEditor": "Éditeur de champs plus fort",
     "featEditorText": "Ordre, doublons, valeurs par défaut, unicité et aides pour chaque champ.",
     "featShare": "Partager par lien",
-    "featShareText": "Le propriétaire choisit ce que le lien autorise : voir, proposer des changements ou modifier. Les listes publiques restent dans Explorer ; celles uniquement par lien, non.",
+    "featShareText": "Le propriétaire choisit ce que le lien autorise : voir, proposer des changements ou modifier. Les listes publiques restent dans Explorer ; celles uniquement par lien restent hors de vue et exigent l’URL secrète.",
     "featCommand": "Aller n’importe où",
     "featCommandText": "⌘K ouvre une palette de commandes — listes, fiches et actions, comme Linear ou Notion.",
     "featFlow": "Automatisations éditables",
@@ -1646,7 +1646,7 @@
     "title": "Partager la liste",
     "lead": "Choisissez ce que les personnes avec le lien peuvent faire, ou invitez quelqu’un par nom.",
     "anyone": "Ceux qui ont le lien",
-    "anyoneHint": "Une liste uniquement par lien n’apparaît pas dans Explorer. Une liste publique reste publique et utilise aussi cet accès.",
+    "anyoneHint": "Une liste uniquement par lien n’apparaît nulle part. Seules les personnes qui ont le lien secret peuvent l’ouvrir. Une liste publique reste publique et utilise aussi cet accès.",
     "access": {
       "off": "Pas de lien ouvert",
       "view": "Lecture seule",

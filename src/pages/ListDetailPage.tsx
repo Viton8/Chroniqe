@@ -36,6 +36,7 @@ import {
   fetchCommentsForItems,
   fetchItems,
   fetchList,
+  fetchListWithShareAccess,
   fetchMembers,
   fetchProposals,
   fetchRatings,
@@ -51,7 +52,7 @@ import {
   updateMemberRole,
   syncRelatedListLinks,
 } from '../services/api'
-import { supabase } from '../services/supabase'
+import { supabase, setListShareToken } from '../services/supabase'
 import type {
   ActivityEvent,
   ChangeProposal,
@@ -120,7 +121,15 @@ import ActivityFeed from '../components/lists/ActivityFeed'
 import FlowEditor from '../components/lists/FlowEditor'
 import { ItemNotesPanel } from '../components/lists/ItemNotes'
 import { readWorkspace, writeWorkspace } from '../lib/workspace'
-import { applyLinkAccess, joinShareUrl, listAcceptsProposals, listLinkAccess, listShareUrl } from '../lib/share'
+import {
+  applyLinkAccess,
+  joinShareUrl,
+  listAcceptsProposals,
+  listLinkAccess,
+  listOpenUrl,
+  resolveListShareToken,
+  writeStoredShareToken,
+} from '../lib/share'
 import ShareDialog from '../components/share/ShareDialog'
 import { useDebouncedValue } from '../hooks/useDebouncedValue'
 
@@ -139,6 +148,7 @@ function ListWorkspace({ id }: { id: string }) {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const shareParam = searchParams.get('s')
   const { open: paletteOpen, setWorkspace } = useCommand()
   const storedWorkspace = readWorkspace(id)
 
@@ -183,7 +193,9 @@ function ListWorkspace({ id }: { id: string }) {
 
   const reload = async (openFromUrl = false) => {
     if (!id) return
-    const row = await fetchList(id)
+    const shareToken = resolveListShareToken(id, shareParam)
+    const row = await fetchListWithShareAccess(id, shareToken)
+    if (!row && shareToken) writeStoredShareToken(id, null)
     setList(row)
     if (!row) return
     const [its, p, ch, au, act] = await Promise.all([
@@ -231,8 +243,12 @@ function ListWorkspace({ id }: { id: string }) {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, user?.id])
+  }, [id, user?.id, shareParam])
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  useEffect(() => {
+    return () => setListShareToken(null)
+  }, [id])
 
   useEffect(() => {
     const channel = supabase
@@ -596,7 +612,13 @@ function ListWorkspace({ id }: { id: string }) {
           ) : null}
           {!user && listAcceptsProposals(list) ? (
             <p className="mt-3 max-w-xl text-sm text-muted">
-              <Link to="/login" state={{ from: `/lists/${list.id}` }} className="text-accent underline">
+              <Link
+                to="/login"
+                state={{
+                  from: `/lists/${list.id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`,
+                }}
+                className="text-accent underline"
+              >
                 {t('nav.login')}
               </Link>
               {' — '}
@@ -664,7 +686,7 @@ function ListWorkspace({ id }: { id: string }) {
                     setShareOpen(true)
                     return
                   }
-                  void navigator.clipboard.writeText(listShareUrl(list.id)).then(() => toast(t('common.copied')))
+                  void navigator.clipboard.writeText(listOpenUrl(list)).then(() => toast(t('common.copied')))
                 }}
               >
                 <Link2 size={14} /> {t('common.share')}
@@ -2050,7 +2072,7 @@ function SharePanel({
       </FieldWrap>
       <div className="flex flex-wrap gap-2">
         <Button onClick={onSave}>{t('settingsModal.saveAccess')}</Button>
-        <Button variant="soft" onClick={() => void copy(listShareUrl(list.id))}>
+        <Button variant="soft" onClick={() => void copy(listOpenUrl(list))}>
           <Link2 size={14} /> {t('share.copyList')}
         </Button>
       </div>
